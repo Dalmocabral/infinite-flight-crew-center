@@ -1,17 +1,18 @@
 import { Flight, Person, Public, Schedule } from "@mui/icons-material"; // Ícones do Material-UI
 import {
-  AppBar,
-  Box,
-  Button,
-  Grid,
-  Toolbar,
-  Typography
+    AppBar,
+    Box,
+    Button,
+    Grid,
+    Toolbar,
+    Typography
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance"; // Importando AxiosInstance
 import FlightStats from "../components/FlightStats"; // Importando o componente
-import "./Home.css"; // Importando o CSS
+
+import styles from "./Home.module.css";
 
 const Home = () => {
   const [stats, setStats] = useState({ total_flights: 0, total_hours: 0, total_pilots: 0, total_airports: 0 });
@@ -55,8 +56,8 @@ const Home = () => {
            plane.isBlue = (idx === randomIndex);
            // Update DOM class directly
            if (planeElementsRef.current[idx]) {
-               if (plane.isBlue) planeElementsRef.current[idx].classList.add('blue');
-               else planeElementsRef.current[idx].classList.remove('blue');
+               if (plane.isBlue) planeElementsRef.current[idx].classList.add(styles.blue);
+               else planeElementsRef.current[idx].classList.remove(styles.blue);
            }
        });
     }, 4000);
@@ -114,7 +115,7 @@ const Home = () => {
   };
 
   return (
-    <Box className="home">
+    <Box className={styles.home}>
       {/* Navbar com Material-UI */}
       <AppBar position="fixed" sx={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
         <Toolbar>
@@ -134,9 +135,9 @@ const Home = () => {
       </AppBar>
 
       {/* Vídeo de fundo */}
-      <main className="hero-section">
-        <div className="container" style={{ zIndex: 2, position: 'relative' }}>
-            <div className="hero-content" style={{ color: 'white', maxWidth: '600px' }}>
+      <main className={styles['hero-section']}>
+        <div className={styles.container} style={{ zIndex: 2, position: 'relative' }}>
+            <div className={styles['hero-content']} style={{ color: 'white', maxWidth: '600px' }}>
               <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700, textTransform: "uppercase", fontSize: { xs: '2.5rem', md: '3.5rem'}, lineHeight: 1.1, mb: 3 }}>
                 Infinite World Tour
               </Typography>
@@ -180,7 +181,7 @@ const Home = () => {
               </Box>
 
               {/* Estatísticas */}
-              <Grid container spacing={4} className="stats-section">
+              <Grid container spacing={4} className={styles['stats-section']}>
                 <Grid item>
                   <FlightStats
                     label="Total Flights"
@@ -212,21 +213,21 @@ const Home = () => {
               </Grid>
             </div> 
 
-            <div className="hero-visual">
-                <div className="radar-wrapper">
-                    <div className="radar">
-                        <div className="circle circle-1"></div>
-                        <div className="circle circle-2"></div>
-                        <div className="circle circle-3"></div>
-                        <div className="circle circle-4"></div>
-                        <div className="circle circle-5"></div>
-                        <div className="center-point"></div>
-                        <div className="sweep"></div>
+            <div className={styles['hero-visual']}>
+                <div className={styles['radar-wrapper']}>
+                    <div className={styles.radar}>
+                        <div className={`${styles.circle} ${styles['circle-1']}`}></div>
+                        <div className={`${styles.circle} ${styles['circle-2']}`}></div>
+                        <div className={`${styles.circle} ${styles['circle-3']}`}></div>
+                        <div className={`${styles.circle} ${styles['circle-4']}`}></div>
+                        <div className={`${styles.circle} ${styles['circle-5']}`}></div>
+                        <div className={styles['center-point']}></div>
+                        <div className={styles.sweep}></div>
                         <div id="planes-container">
                           {[...Array(12)].map((_, i) => (
                               <div 
                                 key={i} 
-                                className="plane" 
+                                className={styles.plane} 
                                 ref={el => planeElementsRef.current[i] = el}
                               >
                                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -239,7 +240,7 @@ const Home = () => {
                 </div>                
             </div>
         </div>
-        <div className="city-skyline"></div>
+        <div className={styles['city-skyline']}></div>
     </main>
 
     </Box>

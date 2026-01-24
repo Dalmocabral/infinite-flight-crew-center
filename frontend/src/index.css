@@ -1,4 +1,19 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; 
+  --bg-color: #2c2e3e;
+  --radar-line-color: rgba(255, 255, 255, 0.1);
+  --sweep-color: rgba(255, 255, 255, 0.15);
+  --center-dot-color: #ff4b4b;
+  --plane-white: #ffffff;
+  --accent-green: #28a745;
+}
+
+body, html { 
+  margin: 0; 
+  padding: 0; 
+  width: 100%; 
+  min-height: 100vh; 
+  background-color: var(--bg-color); 
+  font-family: 'Open Sans', sans-serif; 
+  color: white; 
 }
 
