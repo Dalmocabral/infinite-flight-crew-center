@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://crew-center-djnago-react.onrender.com/sitemap.xml
