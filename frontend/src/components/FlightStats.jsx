@@ -1,11 +1,12 @@
-import React from "react";
 import CountUp from "react-countup";
 import "./FlightStats.css"; // Arquivo de estilos
 
 const FlightStats = ({ label, value, icon }) => {
   return (
     <div className="counter-container">
-      {icon && <i className={`counter-icon ${icon}`}></i>}
+      <div className="counter-icon">
+        {icon}
+      </div>
       <p className="counter-label">{label}</p>
       <h2 className="counter-value">
         <CountUp 

@@ -1,136 +1,40 @@
-/* Estilos gerais */
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: 'Open Sans', sans-serif; /* Fonte padrão para textos */
+:root {
+    --bg-color: #2c2e3e;
+    --radar-line-color: rgba(255, 255, 255, 0.1);
+    --sweep-color: rgba(255, 255, 255, 0.15);
+    --center-dot-color: #ff4b4b;
+    --plane-white: #ffffff;
+    --accent-green: #28a745;
 }
-
-.home {
-  position: relative;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Navbar */
-.navbar {
-  position: fixed; /* Fixo no topo */
-  top: 0;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.5); /* Fundo semi-transparente */
-  z-index: 2;
-  padding: 10px 0;
-}
-
-.navbar ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap; /* Permite que os itens quebrem para a próxima linha em telas pequenas */
-}
-
-.navbar ul li {
-  margin: 0 15px;
-}
-
-.navbar ul li a {
-  color: white;
-  text-decoration: none;
-  font-size: 1.1rem;
-  font-family: 'Poppins', sans-serif; /* Fonte moderna para o navbar */
-  transition: color 0.3s; /* Transição suave para a cor */
-}
-
-.navbar ul li a:hover {
-  color: #ffcc00; /* Cor ao passar o mouse */
-}
-
-/* Vídeo como background */
-.video-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  overflow: hidden;
-}
-
-.video-background video {
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Informações do site */
-.content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: white;
-  z-index: 3;
-  max-width: 800px;
-  width: 90%;
-  padding: 20px;
-  box-sizing: border-box;
-}
-
-.content h1 {
-  font-size: clamp(2rem, 6vw, 4rem); /* Título responsivo */
-  font-family: 'Poppins', sans-serif; /* Fonte moderna para o título */
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.content p {
-  font-size: clamp(1rem, 3vw, 1.2rem); /* Texto responsivo */
-  line-height: 1.8;
-  margin-bottom: 30px;
-  font-family: 'Open Sans', sans-serif; /* Fonte legível para o texto */
-}
-
-/* Estatísticas e contador */
-.stats-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-
-/* Responsividade para telas menores */
-@media (max-width: 768px) {
-  .navbar ul li {
-    margin: 10px 15px; /* Mais espaço entre os itens */
-  }
-
-  .content {
-    top: 55%; /* Ajuste para evitar sobreposição com o navbar */
-  }
-
-  .content h1 {
-    font-size: 2.5rem; /* Tamanho menor para o título em telas pequenas */
-  }
-
-  .content p {
-    font-size: 1rem; /* Tamanho menor para o texto em telas pequenas */
-  }
-
-  .stats-section {
-    flex-direction: column; /* Alinhar os itens verticalmente */
-  }
-}
+* { box-sizing: border-box; }
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: var(--bg-color); font-family: sans-serif; color: white; overflow: hidden; }
+.navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; position: absolute; width: 100%; z-index: 100; }
+.logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; }
+.logo-icon { background-color: white; color: var(--bg-color); padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-size: 18px; }
+.nav-links { display: flex; align-items: center; gap: 20px; }
+.nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
+.btn-signup { background-color: var(--accent-green); color: white !important; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
+.status-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; margin-right: 5px; display: inline-block; }
+.hero-section { position: relative; height: 100vh; background: linear-gradient(to bottom, #2c2e3e 0%, #1a1c29 100%); display: flex; align-items: center; padding: 0 5%; }
+.container { display: flex; width: 100%; max-width: 1200px; margin: 0 auto; justify-content: space-between; align-items: center; z-index: 2; }
+.hero-content { flex: 1; }
+.hero-visual { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+.radar-wrapper { position: relative; width: 450px; height: 450px; }
+.radar { position: absolute; width: 100%; height: 100%; border-radius: 50%; }
+.circle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 1px solid var(--radar-line-color); border-radius: 50%; }
+.circle-1 { width: 20%; height: 20%; }
+.circle-2 { width: 40%; height: 40%; }
+.circle-3 { width: 60%; height: 60%; }
+.circle-4 { width: 80%; height: 80%; }
+.circle-5 { width: 100%; height: 100%; }
+.center-point { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background-color: var(--center-dot-color); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 12px var(--center-dot-color); z-index: 10; }
+.sweep { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: conic-gradient(from 0deg, var(--sweep-color) 0deg, rgba(255,255,255,0.05) 90deg, transparent 180deg); border-radius: 50%; pointer-events: none; z-index: 1; animation: sweep-animate 7s linear infinite; }
+@keyframes sweep-animate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.plane { position: absolute; width: 16px; height: 16px; fill: var(--plane-white); transform-origin: center; pointer-events: none; z-index: 5; transition: fill 1s ease, opacity 0.2s ease; }
+.plane.blue { fill: #4da6ff; filter: drop-shadow(0 0 6px #4da6ff); }
+.info-card { position: absolute; right: -20px; top: 50px; width: 120px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; font-size: 10px; backdrop-filter: blur(5px); z-index: 20; }
+.card-header { background: rgba(255, 255, 255, 0.1); padding: 5px; text-align: center; font-weight: bold; }
+.card-body { padding: 8px; }
+.card-body strong { color: white; display: block; margin-top: 8px; }
+.city-skyline { position: absolute; bottom: 0; left: 0; width: 100%; height: 780px; background-image: url('../assets/image/skyline.svg'); background-repeat: repeat-x; background-size: auto 100%; background-position: bottom; opacity: 0.1; z-index: 1; }
+.plane svg { width: 100%; height: 100%; }

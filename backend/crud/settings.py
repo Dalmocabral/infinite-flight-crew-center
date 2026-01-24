@@ -55,7 +55,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://render-deploy-world-tour.onrender.com'
+    'https://render-deploy-world-tour.onrender.com',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser'

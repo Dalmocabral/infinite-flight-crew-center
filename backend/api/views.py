@@ -333,6 +333,12 @@ class FlightStatsView(APIView):
     """
     def get(self, request):
         total_flights = PirepsFlight.objects.count()
+        total_pilots = CustomUser.objects.count()
+
+        # Calculate unique airports visited (departures + arrivals)
+        departures = set(PirepsFlight.objects.values_list('departure_airport', flat=True))
+        arrivals = set(PirepsFlight.objects.values_list('arrival_airport', flat=True))
+        total_airports = len(departures.union(arrivals))
 
         # Obtém o total de tempo de voo (timedelta)
         total_duration = PirepsFlight.objects.aggregate(total_duration=Sum("flight_duration"))["total_duration"]
@@ -342,7 +348,9 @@ class FlightStatsView(APIView):
 
         return Response({
             "total_flights": total_flights,
-            "total_hours": round(total_hours, 2)  # Agora round() funciona corretamente
+            "total_hours": round(total_hours, 2),
+            "total_pilots": total_pilots,
+            "total_airports": total_airports
         })
 
 class ValidateTokenView(APIView):
