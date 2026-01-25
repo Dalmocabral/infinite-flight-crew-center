@@ -113,49 +113,30 @@ class UserAward(models.Model):
         total_flights = self.award.flight_legs.count()
 
         # Coletar ICAOs permitidos e aeronaves permitidas
-        allowed_icaos = [icao.company_icao.upper() for icao in self.award.allowed_icao.all()]
-        allowed_aircrafts = [aircraft.aircraft for aircraft in self.award.allowed_aircrafts.all()]
-
-        print(f"ICAOs permitidos: {allowed_icaos}")
-        print(f"Aeronaves permitidas: {allowed_aircrafts}")
+        allowed_icaos = set(icao.company_icao.upper() for icao in self.award.allowed_icao.all())
+        allowed_aircrafts = set(aircraft.aircraft for aircraft in self.award.allowed_aircrafts.all())
 
         for required_flight in self.award.flight_legs.all():
             for user_flight in user_flights:
-                print(f"Verificando voo do usuário: {user_flight.flight_icao} ({user_flight.departure_airport} -> {user_flight.arrival_airport})")
-
                 # Verificar se os aeroportos batem
                 if required_flight.from_airport == user_flight.departure_airport and required_flight.to_airport == user_flight.arrival_airport:
-                    print(f"Voo entre aeroportos corretos: {required_flight.from_airport} -> {required_flight.to_airport}")
                     
                     # Verificar se precisa checar ICAO (caso haja ICAOs definidos)
                     icao_check = not allowed_icaos or user_flight.flight_icao.upper() in allowed_icaos
-                    if not allowed_icaos:
-                        print("Nenhum ICAO exigido para este prêmio, ignorando verificação de ICAO.")
-                    elif icao_check:
-                        print(f"ICAO {user_flight.flight_icao} corresponde a um ICAO permitido.")
 
                     # Verificar se precisa checar aeronaves (caso haja aeronaves definidas)
                     aircraft_check = not allowed_aircrafts or user_flight.aircraft in allowed_aircrafts
-                    if not allowed_aircrafts:
-                        print("Nenhuma aeronave exigida para este prêmio, ignorando verificação de aeronaves.")
-                    elif aircraft_check:
-                        print(f"Aeronave {user_flight.aircraft} corresponde a uma aeronave permitida.")
 
                     # Checar se todos os critérios (quando aplicáveis) estão corretos
                     if icao_check and aircraft_check:
-                        print(f"Voo {user_flight.flight_icao} corresponde a todos os critérios.")
                         completed_flights += 1
                         break  # Para de verificar outros voos, pois este já completou o trecho
-                    else:
-                        print(f"Voo {user_flight.flight_icao} não corresponde a todos os critérios.")
         
         # Calcular progresso
         if total_flights > 0:
             progress = (completed_flights / total_flights) * 100
         else:
             progress = 0
-
-        print(f"Progresso final: {progress}%")
         
         self.progress = progress
         if progress == 100 and not self.end_date:

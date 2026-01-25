@@ -1,19 +1,22 @@
 from django.shortcuts import render
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 from rest_framework import viewsets, status, permissions
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import *
-from django.contrib.auth import get_user_model, authenticate
-from knox.models import AuthToken
-from django.db.models import Sum, Count
 from rest_framework.decorators import action
 from rest_framework.viewsets import ViewSet
-from datetime import timedelta
-from django.http import HttpResponse
-from .utils import send_welcome_email
-from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+
+from django.contrib.auth import get_user_model, authenticate
 from django.db.models import Sum, Count
+from django.http import HttpResponse
+
+from knox.models import AuthToken
+from datetime import timedelta
+
+from .serializers import *
+from .models import *  # Explicitly import models if needed, though * is often discouraged.
+from .utils import send_welcome_email
 
 User = get_user_model()
 
@@ -160,15 +163,25 @@ class FlightLegViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
+        
+        # Pre-fetch relevant PIREPs for the logged-in user
+        # We fetch only the fields we need: dep, arr, and status
+        user_pireps = PirepsFlight.objects.filter(
+            pilot=request.user
+        ).values('departure_airport', 'arrival_airport', 'status')
+
+        # Create a lookup dictionary: (dep, arr) -> status
+        # Note: If there are multiple flights for the same route, this takes the last one found.
+        # Given the context, taking 'Approved' priority or latest would be better, but simple map is a start.
+        status_map = {
+            (p['departure_airport'], p['arrival_airport']): p['status']
+            for p in user_pireps
+        }
+
         for leg_data in response.data:
-            # Busca o PIREP associado à leg para o usuário logado
-            pirep = PirepsFlight.objects.filter(
-                departure_airport=leg_data['from_airport'],
-                arrival_airport=leg_data['to_airport'],
-                pilot=request.user  # Filtra PIREPs do usuário logado (usando o campo correto)
-            ).first()
-            # Adiciona o status do PIREP à resposta
-            leg_data['pirep_status'] = pirep.status if pirep else None
+            key = (leg_data['from_airport'], leg_data['to_airport'])
+            leg_data['pirep_status'] = status_map.get(key, None)
+            
         return response
 
 class AllowedAircraftViewSet(viewsets.ModelViewSet):
@@ -240,44 +253,48 @@ class UserMetricsViewSet(ViewSet):
             thirty_days_ago = timezone.now() - timedelta(days=30)
             approved_pireps_last_30_days = approved_pireps.filter(registration_date__gte=thirty_days_ago)
 
-            # Calcula as métricas
-            total_flights = approved_pireps.count()
-
-            # Soma os tempos de voo em segundos
-            total_flight_time_seconds = sum(
-                pirep.flight_duration.total_seconds() for pirep in approved_pireps if pirep.flight_duration
+            # --- Aggregation Metrics ---
+            metrics_all_time = approved_pireps.aggregate(
+                total_flights=Count('id'),
+                total_duration=Sum('flight_duration')
             )
-            total_flight_time_hours = total_flight_time_seconds / 3600  # Converte para horas
 
-            # Converte horas decimais para HH:MM
-            def decimal_to_hh_mm(decimal_hours):
-                hours = int(decimal_hours)
-                minutes = int((decimal_hours - hours) * 60)
+            metrics_30_days = approved_pireps_last_30_days.aggregate(
+                total_flights=Count('id'),
+                total_duration=Sum('flight_duration')
+            )
+
+            # --- Extract Values ---
+            total_flights = metrics_all_time['total_flights'] or 0
+            total_duration = metrics_all_time['total_duration'] or timedelta(0)
+
+            total_flights_last_30_days = metrics_30_days['total_flights'] or 0
+            total_duration_last_30_days = metrics_30_days['total_duration'] or timedelta(0)
+
+            # --- Helpers ---
+            def format_duration(duration):
+                total_seconds = int(duration.total_seconds())
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
                 return f"{hours}:{minutes:02d}"
 
-            total_flight_time_hh_mm = decimal_to_hh_mm(total_flight_time_hours)
-
-            total_flights_last_30_days = approved_pireps_last_30_days.count()
-
-            # Soma os tempos de voo dos últimos 30 dias em segundos
-            total_flight_time_last_30_days_seconds = sum(
-                pirep.flight_duration.total_seconds() for pirep in approved_pireps_last_30_days if pirep.flight_duration
-            )
-            total_flight_time_last_30_days_hours = total_flight_time_last_30_days_seconds / 3600  # Converte para horas
-
-            # Converte horas decimais para HH:MM
-            total_flight_time_last_30_days_hh_mm = decimal_to_hh_mm(total_flight_time_last_30_days_hours)
-
-            # Calcula as médias
-            average_flights_per_day = total_flights_last_30_days / 30 if total_flights_last_30_days > 0 else 0
-            average_flight_time_per_day = total_flight_time_last_30_days_hours / 30 if total_flight_time_last_30_days_hours > 0 else 0
+            # --- Calculations ---
+            total_flight_time_hh_mm = format_duration(total_duration)
+            total_flight_time_last_30_days_hh_mm = format_duration(total_duration_last_30_days)
+            
+            # Averages
+            # Note: The original code divided hours by 30. We keep this logic.
+            total_hours_last_30 = total_duration_last_30_days.total_seconds() / 3600
+            
+            average_flights_per_day = total_flights_last_30_days / 30
+            average_flight_time_per_day = total_hours_last_30 / 30
 
             # Retorna as métricas
             metrics = {
                 "total_flights": total_flights,
-                "total_flight_time": total_flight_time_hh_mm,  # Em formato HH:MM
+                "total_flight_time": total_flight_time_hh_mm,
                 "total_flights_last_30_days": total_flights_last_30_days,
-                "total_flight_time_last_30_days": total_flight_time_last_30_days_hh_mm,  # Em formato HH:MM
+                "total_flight_time_last_30_days": total_flight_time_last_30_days_hh_mm,
                 "average_flights_per_day": average_flights_per_day,
                 "average_flight_time_per_day": average_flight_time_per_day,
             }
