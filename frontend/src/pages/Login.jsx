@@ -1,32 +1,80 @@
-import React, { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { FlightTakeoff, Visibility, VisibilityOff } from '@mui/icons-material';
 import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  Container,
-  CssBaseline,
-  Link,
-  IconButton,
-  InputAdornment,
-  Snackbar,
-  Alert,
+    Alert,
+    Box,
+    Button,
+    Container,
+    CssBaseline,
+    IconButton,
+    InputAdornment,
+    Link,
+    Paper,
+    Snackbar,
+    TextField,
+    Typography,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import AxiosInstance from '../components/AxiosInstance'; // Import AxiosInstance
-import { useNavigate } from 'react-router-dom'; // For navigation
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import AxiosInstance from '../components/AxiosInstance';
 
-// Custom theme (optional)
+// Custom dark/aviation theme
 const theme = createTheme({
   palette: {
+    mode: 'dark',
     primary: {
-      main: '#1976d2', // Blue
+      main: '#4dabf5', // Light blue
     },
     secondary: {
-      main: '#dc004e', // Pink
+      main: '#f50057', // Pink/Red accent
+    },
+    background: {
+      default: '#0a1929', // Deep blue
+      paper: 'rgba(10, 25, 41, 0.7)', // Glass effect base
+    },
+  },
+  typography: {
+    fontFamily: '"Orbitron", "Roboto", "Helvetica", "Arial", sans-serif',
+    h5: {
+      fontWeight: 700,
+      letterSpacing: '0.1em',
+    },
+    button: {
+      fontWeight: 600,
+      letterSpacing: '0.05em',
+    },
+  },
+  components: {
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: '12px',
+            '& fieldset': {
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(255, 255, 255, 0.5)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#4dabf5',
+            },
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '25px',
+          padding: '10px 20px',
+          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+          boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+          color: 'white',
+        },
+      },
     },
   },
 });
@@ -57,25 +105,19 @@ const Login = () => {
         password: data.password,
       });
 
-      // Store the token in localStorage
       localStorage.setItem('token', response.data.token);
-      console.log(response);
 
-      // Show success message
-      setSnackbarMessage('Login successful! Redirecting to Dashboard...');
+      setSnackbarMessage('Login successful! Welcome aboard.');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
 
-      // Redirect to Dashboard after 2 seconds
       setTimeout(() => {
-        navigate('/app/dashboard'); // Redirect to Dashboard route
+        navigate('/app/dashboard');
       }, 2000);
     } catch (error) {
-      // Show error message
       setSnackbarMessage('Login failed. Please check your credentials.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
-
       console.error('Login failed:', error.response ? error.response.data : error.message);
     }
   };
@@ -89,114 +131,172 @@ const Login = () => {
       <CssBaseline />
       <Box
         sx={{
+          position: 'relative',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           minHeight: '100vh',
-          backgroundColor: '#f5f5f5',
+          overflow: 'hidden',
+          // Dynamic gradient background resembling a sky/runway at dusk
+          background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.1) 0%, transparent 60%)',
+            animation: 'pulse 10s infinite',
+          },
         }}
       >
-        <Container component="main" maxWidth="xs">
-          <Paper
-            elevation={3}
-            sx={{
-              padding: 4,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
+        <Container component="main" maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <Typography component="h1" variant="h5">
-              Login
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3, width: '100%' }}>
-              {/* Email Field */}
-              <Controller
-                name="email"
-                control={control}
-                rules={{
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Invalid email address',
-                  },
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    margin="normal"
-                    required
-                    fullWidth
-                    label="Email"
-                    autoComplete="email"
-                    autoFocus
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                  />
-                )}
-              />
-
-              {/* Password Field */}
-              <Controller
-                name="password"
-                control={control}
-                rules={{ required: 'Password is required' }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    margin="normal"
-                    required
-                    fullWidth
-                    label="Password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)}>
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
-              />
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+            <Paper
+              elevation={24}
+              sx={{
+                padding: 5,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                backdropFilter: 'blur(20px)',
+                backgroundColor: 'rgba(10, 25, 41, 0.65)',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1, rotate: 360 }}
+                transition={{ delay: 0.5, duration: 0.8, type: 'spring' }}
               >
-                Sign In
-              </Button>
+                <Box
+                  sx={{
+                    m: 1,
+                    bgcolor: 'transparent',
+                    color: 'primary.main',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <FlightTakeoff sx={{ fontSize: 60 }} />
+                </Box>
+              </motion.div>
 
-              {/* Links for Registration and Password Reset */}
-              <Box sx={{ textAlign: 'center' }}>
-                <Link href="/register" variant="body2" sx={{ display: 'block', mb: 1 }}>
-                  Don't have an account? Sign Up
-                </Link>
-                <Link href="/request/passworld_reset" variant="body2">
-                  Forgot your password? Reset it here
-                </Link>
+              <Typography component="h1" variant="h5" sx={{ mb: 1, color: '#fff', textShadow: '0 0 10px rgba(77, 171, 245, 0.5)' }}>
+                PILOT LOGIN
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 3, color: 'rgba(255,255,255,0.7)' }}>
+                Welcome back, Captain.
+              </Typography>
+
+              <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1, width: '100%' }}>
+                <Controller
+                  name="email"
+                  control={control}
+                  rules={{
+                    required: 'Email is required',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Invalid email address',
+                    },
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      margin="normal"
+                      required
+                      fullWidth
+                      label="Email Address"
+                      autoComplete="email"
+                      autoFocus
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                      variant="outlined"
+                      sx={{
+                        input: { color: '#fff' },
+                        label: { color: 'rgba(255,255,255,0.7)' },
+                      }}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="password"
+                  control={control}
+                  rules={{ required: 'Password is required' }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      margin="normal"
+                      required
+                      fullWidth
+                      label="Password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                      variant="outlined"
+                      sx={{
+                        input: { color: '#fff' },
+                        label: { color: 'rgba(255,255,255,0.7)' },
+                      }}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPassword(!showPassword)}
+                              sx={{ color: 'rgba(255,255,255,0.7)' }}
+                            >
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 4, mb: 2, height: '48px', fontSize: '1rem' }}
+                  >
+                    SIGN IN
+                  </Button>
+                </motion.div>
+
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Link href="/register" variant="body2" sx={{ display: 'block', mb: 1, color: '#4dabf5', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                    Request Clearance (Sign Up)
+                  </Link>
+                  <Link href="/request/passworld_reset" variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}>
+                    Lost Comms? (Reset Password)
+                  </Link>
+                </Box>
               </Box>
-            </Box>
-          </Paper>
+            </Paper>
+          </motion.div>
         </Container>
       </Box>
 
-      {/* Snackbar for Feedback */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%', borderRadius: '12px' }} variant="filled">
           {snackbarMessage}
         </Alert>
       </Snackbar>
