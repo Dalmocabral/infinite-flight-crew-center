@@ -3,6 +3,7 @@ import {
     AppBar,
     Box,
     Button,
+    Container,
     Grid,
     Toolbar,
     Typography
@@ -12,6 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance"; // Importando AxiosInstance
 import FlightStats from "../components/FlightStats"; // Importando o componente
 
+import { motion } from "framer-motion";
 import styles from "./Home.module.css";
 
 const Home = () => {
@@ -115,34 +117,59 @@ const Home = () => {
   };
 
   return (
-    <Box className={styles.home}>
-      {/* Navbar com Material-UI */}
-      <AppBar position="fixed" sx={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Infinite World Tour
-          </Typography>
-          <Button color="inherit" component={Link} to="/">
-            Home
-          </Button>
-          <Button color="inherit" component={Link} to="/register">
-            Sign Up
-          </Button>
-          <Button color="inherit" onClick={handleLoginClick}>
-            Login
-          </Button>
-        </Toolbar>
+    <Box className={styles.home} sx={{background: 'linear-gradient(to bottom, #0f2027, #203a43, #2c5364)'}}>
+      {/* Navbar com Material-UI - Glassmorphism */}
+      <AppBar 
+        position="fixed" 
+        sx={{ 
+          backgroundColor: "rgba(10, 25, 41, 0.7)", 
+          backdropFilter: "blur(10px)",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "none"
+        }}
+      >
+        <Container maxWidth="xl">
+            <Toolbar disableGutters>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontFamily: '"Orbitron", sans-serif', fontWeight: 700, color: '#4dabf5', letterSpacing: '2px' }}>
+                INFINITE WORLD TOUR
+            </Typography>
+            <Button color="inherit" component={Link} to="/" sx={{ mx: 1 }}>
+                Home
+            </Button>
+            <Button color="inherit" component={Link} to="/register" sx={{ mx: 1 }}>
+                Sign Up
+            </Button>
+            <Button 
+                variant="outlined" 
+                onClick={handleLoginClick} 
+                sx={{ 
+                    ml: 2, 
+                    borderColor: '#4dabf5', 
+                    color: '#4dabf5',
+                    "&:hover": { borderColor: '#fff', color: '#fff' }
+                }}
+            >
+                Login
+            </Button>
+            </Toolbar>
+        </Container>
       </AppBar>
 
-      {/* Vídeo de fundo */}
-      <main className={styles['hero-section']}>
+      {/* Main Content */}
+      <main className={styles['hero-section']} style={{ background: 'transparent' }}>
         <div className={styles.container} style={{ zIndex: 2, position: 'relative' }}>
-            <div className={styles['hero-content']} style={{ color: 'white', maxWidth: '600px' }}>
-              <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 700, textTransform: "uppercase", fontSize: { xs: '2.5rem', md: '3.5rem'}, lineHeight: 1.1, mb: 3 }}>
+            <motion.div 
+                className={styles['hero-content']} 
+                style={{ color: 'white', maxWidth: '600px' }}
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+            >
+              <Typography variant="h2" component="h1" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, textTransform: "uppercase", fontSize: { xs: '2.5rem', md: '4rem'}, lineHeight: 1.1, mb: 3, background: '-webkit-linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Infinite World Tour
               </Typography>
-              <Typography variant="h5" component="p" sx={{ lineHeight: 1.6, mb: 4, opacity: 0.9, fontSize: '1.1rem' }}>
-                Welcome to the Infinite World Tour System, your gateway to exploring the virtual world of aviation in the Infinite Flight simulator! Here, you will find a unique experience filled with exciting challenges, incredible rewards, and the opportunity to connect with a global community of virtual pilots. Get ready to take off on an epic journey where every flight counts and every achievement is celebrated!
+              <Typography variant="h5" component="p" sx={{ lineHeight: 1.6, mb: 4, opacity: 0.9, fontSize: '1.1rem', fontWeight: 300 }}>
+                Welcome to the Infinite World Tour System, your gateway to exploring the virtual world of aviation in the Infinite Flight simulator! Uncover challenges, earn rewards, and connect with a global community.
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 2, mb: 6 }}>
@@ -152,12 +179,10 @@ const Home = () => {
                   variant="contained" 
                   size="large"
                   sx={{ 
-                    bgcolor: '#2ecc71', 
                     fontSize: '1rem', 
                     fontWeight: 'bold', 
                     px: 4, 
                     py: 1.5,
-                    '&:hover': { bgcolor: '#27ae60' }
                   }}
                 >
                   Join Now
@@ -167,13 +192,10 @@ const Home = () => {
                   variant="outlined" 
                   size="large"
                   sx={{ 
-                    color: 'white', 
-                    borderColor: 'white', 
                     fontSize: '1rem', 
                     fontWeight: 'bold', 
                     px: 4, 
                     py: 1.5,
-                    '&:hover': { borderColor: '#2ecc71', color: '#2ecc71' }
                   }}
                 >
                   Login
@@ -186,34 +208,39 @@ const Home = () => {
                   <FlightStats
                     label="Total Flights"
                     value={stats.total_flights}
-                    icon={<Flight fontSize="large" />} 
+                    icon={<Flight fontSize="large" sx={{ color: '#4dabf5' }} />} 
                   />
                 </Grid>
                 <Grid item>
                   <FlightStats
                     label="Total Hours"
                     value={stats.total_hours}
-                    icon={<Schedule fontSize="large" />} 
+                    icon={<Schedule fontSize="large" sx={{ color: '#e91e63' }} />} 
                   />
                 </Grid>
                 <Grid item>
                   <FlightStats
                     label="Total Pilots"
                     value={stats.total_pilots}
-                    icon={<Person fontSize="large" />} 
+                    icon={<Person fontSize="large" sx={{ color: '#00e676' }} />} 
                   />
                 </Grid>
                 <Grid item>
                   <FlightStats
-                    label="Airports Visited"
+                    label="Airports"
                     value={stats.total_airports}
-                    icon={<Public fontSize="large" />} 
+                    icon={<Public fontSize="large" sx={{ color: '#ff9100' }} />} 
                   />
                 </Grid>
               </Grid>
-            </div> 
+            </motion.div> 
 
-            <div className={styles['hero-visual']}>
+            <motion.div 
+                className={styles['hero-visual']}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, delay: 0.2 }}
+            >
                 <div className={styles['radar-wrapper']}>
                     <div className={styles.radar}>
                         <div className={`${styles.circle} ${styles['circle-1']}`}></div>
@@ -238,7 +265,7 @@ const Home = () => {
                         </div>
                     </div>
                 </div>                
-            </div>
+            </motion.div>
         </div>
         <div className={styles['city-skyline']}></div>
     </main>

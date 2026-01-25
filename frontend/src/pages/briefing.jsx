@@ -1,18 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import AxiosInstance from '../components/AxiosInstance';
-import { Container, Grid, Card, CardContent, Typography, Divider, Box, IconButton } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import FlightLandIcon from '@mui/icons-material/FlightLand';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import { Box, CardContent, Container, Divider, Grid, IconButton, Paper, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import AxiosInstance from '../components/AxiosInstance';
 
 const Briefing = () => {
-  const { id } = useParams(); // Capture the flight ID from the URL
-  const [flightData, setFlightData] = useState(null); // State to store flight data
-  const mapContainer = useRef(null); // Reference for the map container
-  const map = useRef(null); // Reference for the map instance
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [flightData, setFlightData] = useState(null);
+  const mapContainer = useRef(null);
+  const map = useRef(null);
 
-  // Fetch flight details when the component mounts
   useEffect(() => {
     const fetchFlightDetails = async () => {
       try {
@@ -27,74 +30,60 @@ const Briefing = () => {
   }, [id]);
 
   useEffect(() => {
-    if (flightData && !map.current) {
-      // Initialize the map
-      map.current = L.map(mapContainer.current).setView([-12.163200486951586, -53.51511964322111], 8);
+    if (flightData && !map.current && mapContainer.current) {
+      setTimeout(() => {
+        map.current = L.map(mapContainer.current).setView([-12.1632, -53.5151], 4);
 
-      // Add the tile layer (MapTiler)
-      L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=oLMznTPIDCPrc3mGZdoh', {
-        attribution: '© <a href="https://www.maptiler.com/">MapTiler</a> © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
-      }).addTo(map.current);
+        L.tileLayer('https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=oLMznTPIDCPrc3mGZdoh', {
+            attribution: '© MapTiler © OpenStreetMap',
+        }).addTo(map.current);
 
-      // Fetch airport data
-      const fetchAirports = async () => {
-        const response = await fetch('https://raw.githubusercontent.com/mwgg/Airports/master/airports.json');
-        return await response.json();
-      };
+        const fetchAirports = async () => {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/mwgg/Airports/master/airports.json');
+                return await response.json();
+            } catch (e) {
+                console.error("Failed to load airports", e);
+                return {};
+            }
+        };
 
-      // Add markers and polylines after the map loads
-      fetchAirports().then((airportsData) => {
-        // Get departure, arrival, and alternate airport data
-        const depAirport = airportsData[flightData.departure_airport];
-        const arrAirport = airportsData[flightData.arrival_airport];
-        const altAirport = airportsData[flightData.alternate_airport];
+        fetchAirports().then((airportsData) => {
+            const depAirport = airportsData[flightData.departure_airport];
+            const arrAirport = airportsData[flightData.arrival_airport];
+            
+            // Fix: Clean up layer logic if re-running (though useEffect dependency is flightData)
 
-        // Add markers and popups
-        if (depAirport) {
-          L.marker([depAirport.lat, depAirport.lon])
-            .addTo(map.current)
-            .bindPopup(`<strong>${depAirport.icao}</strong>`);
-        }
+            if (depAirport) {
+            L.marker([depAirport.lat, depAirport.lon])
+                .addTo(map.current)
+                .bindPopup(`<strong>${depAirport.icao} - DEPARTURE</strong>`);
+            }
 
-        if (arrAirport) {
-          L.marker([arrAirport.lat, arrAirport.lon])
-            .addTo(map.current)
-            .bindPopup(`<strong>${arrAirport.icao}</strong>`);
-        }
+            if (arrAirport) {
+            L.marker([arrAirport.lat, arrAirport.lon])
+                .addTo(map.current)
+                .bindPopup(`<strong>${arrAirport.icao} - ARRIVAL</strong>`);
+            }
 
-        if (altAirport) {
-          L.marker([altAirport.lat, altAirport.lon])
-            .addTo(map.current)
-            .bindPopup(`<strong>${altAirport.icao}</strong>`);
-        }
+            if (depAirport && arrAirport) {
+            const latLngs = [
+                [depAirport.lat, depAirport.lon],
+                [arrAirport.lat, arrAirport.lon],
+            ];
+            L.polyline(latLngs, { color: '#f50057', weight: 3, dashArray: '5, 10' }).addTo(map.current);
 
-        // Draw a line between departure and arrival airports
-        if (depAirport && arrAirport) {
-          const latLngs = [
-            [depAirport.lat, depAirport.lon],
-            [arrAirport.lat, arrAirport.lon],
-          ];
-          L.polyline(latLngs, { color: '#000' }).addTo(map.current);
+            const bounds = L.latLngBounds(latLngs);
+            map.current.fitBounds(bounds, { padding: [50, 50] });
 
-          // Calculate the distance between airports
-          const distance = calculateDistance(depAirport.lat, depAirport.lon, arrAirport.lat, arrAirport.lon);
-          console.log(distance);
-          document.getElementById('distance').innerText = `${distance.toFixed(0)} nm`;
-        }
-
-        // Adjust the map's zoom and center to include all airports
-        if (depAirport && arrAirport) {
-          const bounds = L.latLngBounds(
-            [depAirport.lat, depAirport.lon],
-            [arrAirport.lat, arrAirport.lon]
-          );
-          if (altAirport) bounds.extend([altAirport.lat, altAirport.lon]);
-          map.current.fitBounds(bounds, { padding: [50, 50] });
-        }
-      });
+             // Calculate distance manually or use simple math
+             const distInfo = document.getElementById('distance-info');
+             if(distInfo) distInfo.innerText = "Calculated in Flight Plan"; // Placeholder
+            }
+        });
+      }, 100); // Small delay to ensure container render
     }
 
-    // Cleanup when the component unmounts
     return () => {
       if (map.current) {
         map.current.remove();
@@ -103,150 +92,169 @@ const Briefing = () => {
     };
   }, [flightData]);
 
-  // Function to calculate the distance between two points (Haversine formula)
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const toRadians = (degrees) => degrees * (Math.PI / 180);
-    const R = 6371; // Earth's radius in km
-    const dLat = toRadians(lat2 - lat1);
-    const dLon = toRadians(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c * 0.539957; // Convert km to nautical miles (nm)
-  };
 
   if (!flightData) {
-    return <Typography>Loading...</Typography>; // Display a loading message while fetching data
+    return <Typography sx={{ p: 5, textAlign: 'center', color: 'white' }}>Loading Flight Data...</Typography>;
   }
 
   return (
-    <Container maxWidth="xl" style={{ padding: '20px', height: '100vh' }}>
-      <Grid container spacing={3} style={{ height: '100%' }}>
-        {/* Information Column with Scrollbar */}
-        <Grid item xs={12} md={6} style={{ height: '100%', overflow: 'auto' }}>
-          <Card style={{ backgroundColor: '#292b30', color: '#fff', marginBottom: '20px' }}>
+    <Container maxWidth="xl" sx={{ height: 'calc(100vh - 64px)', p: 3, overflow: 'hidden' }}>
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            style={{ height: '100%' }}
+        >
+      <Grid container spacing={3} sx={{ height: '100%' }}>
+        {/* Info Column */}
+        <Grid item xs={12} md={5} sx={{ height: '100%', overflowY: 'auto' }}>
+            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton onClick={() => navigate(-1)} sx={{ color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
+                    <ArrowBackIcon />
+                </IconButton>
+                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#fff' }}>
+                    FLIGHT BRIEFING
+                </Typography>
+            </Box>
+
+          <Paper sx={{ 
+              backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+              backdropFilter: 'blur(10px)', 
+              color: '#fff', 
+              mb: 3,
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              p: 0
+            }}>
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Typography variant="body1">
-                  <i className="fa-solid fa-circle-info"></i> This briefing was generated on: {flightData.registration_date}
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                  Report ID: #{id} • {new Date(flightData.registration_date).toLocaleDateString()}
                 </Typography>
-                <IconButton size="small" style={{ color: '#fff' }}>
-                  <CloseIcon />
-                </IconButton>
+                <Chip 
+                    label={flightData.status} 
+                    size="small"
+                    color={flightData.status === 'Approved' ? 'success' : flightData.status === 'Rejected' ? 'error' : 'warning'} 
+                    />
               </Box>
             </CardContent>
-          </Card>
+          </Paper>
 
-          <Card style={{ marginBottom: '20px' }}>
+          <Paper sx={{ 
+              mb: 3, 
+              backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+              backdropFilter: 'blur(10px)',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'white'
+             }}>
             <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Flight Information
+              <Typography variant="h6" gutterBottom sx={{ color: '#4dabf5', fontWeight: 'bold' }}>
+                FLIGHT INFORMATION
               </Typography>
-              <Divider style={{ marginBottom: '20px' }} />
+              <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
 
-              {/* First row of information */}
-              <Box display="flex" justifyContent="space-between" marginBottom="20px">
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Flight Number</Typography>
-                  <Typography variant="body1">{flightData.flight_number || '--- / ---'}</Typography>
-                  <Divider />
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Callsign</Typography>
-                  <Typography variant="body1">{flightData.flight_icao || '--- / ---'}</Typography>
-                  <Divider />
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Departure</Typography>
-                  <Typography variant="body1">{flightData.departure_airport || '--- / ---'}</Typography>
-                  <Divider />
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Arrival</Typography>
-                  <Typography variant="body1">{flightData.arrival_airport || '--- / ---'}</Typography>
-                  <Divider />
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Alternate</Typography>
-                  <Typography variant="body1">{flightData.alternate_airport || '--- / ---'}</Typography>
-                  <Divider />
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Aircraft</Typography>
-                  <Typography variant="body1">{flightData.aircraft || '--- / ---'}</Typography>
-                  <Divider />
-                </Box>
-              </Box>
+              <Grid container spacing={2}>
+                 <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">FLIGHT NUMBER</Typography>
+                        <Typography variant="h6" fontWeight="bold">{flightData.flight_icao} {flightData.flight_number}</Typography>
+                    </Box>
+                 </Grid>
+                 <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">AIRCRAFT</Typography>
+                        <Typography variant="h6" fontWeight="bold">{flightData.aircraft}</Typography>
+                    </Box>
+                 </Grid>
+                 
+                 <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 1, border: '1px solid rgba(77, 171, 245, 0.3)', borderRadius: 2 }}>
+                        <Typography variant="caption" color="#4dabf5">DEPARTURE</Typography>
+                        <Typography variant="h5" fontWeight="bold">{flightData.departure_airport}</Typography>
+                         <FlightTakeoffIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.5)' }} />
+                    </Box>
+                 </Grid>
+                 <Grid item xs={6}>
+                    <Box sx={{ textAlign: 'center', p: 1, border: '1px solid rgba(245, 0, 87, 0.3)', borderRadius: 2 }}>
+                         <Typography variant="caption" color="#f50057">ARRIVAL</Typography>
+                        <Typography variant="h5" fontWeight="bold">{flightData.arrival_airport}</Typography>
+                        <FlightLandIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.5)' }} />
+                    </Box>
+                 </Grid>
 
-              {/* Second row of information */}
-              <Box display="flex" justifyContent="space-between">
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Departure Date</Typography>
-                  <Typography variant="body1">
-                    {new Date(flightData.registration_date).toLocaleDateString()}
-                  </Typography>
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Dep Time</Typography>
-                  <Typography variant="body1">--- / ---</Typography>
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Arr Time</Typography>
-                  <Typography variant="body1">--- / ---</Typography>
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Route Distance</Typography>
-                  <Typography variant="body1" id="distance">
-                    {/* Calculated distance will appear here */}
-                  </Typography>
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Cruise</Typography>
-                  <Typography variant="body1">--- / ---</Typography>
-                </Box>
-                <Box textAlign="center">
-                  <Typography variant="subtitle1">Status</Typography>
-                  <Typography variant="body1">{flightData.status}</Typography>
-                </Box>
-              </Box>
+                 <Grid item xs={4}>
+                     <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">DURATION</Typography>
+                        <Typography variant="body1">{flightData.flight_duration}</Typography>
+                    </Box>
+                 </Grid>
+                 <Grid item xs={4}>
+                     <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">NETWORK</Typography>
+                        <Typography variant="body1">{flightData.network}</Typography>
+                    </Box>
+                 </Grid>
+                 <Grid item xs={4}>
+                     <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">ALTERNATE</Typography>
+                        <Typography variant="body1">{flightData.alternate_airport || 'N/A'}</Typography>
+                    </Box>
+                 </Grid>
+              </Grid>
             </CardContent>
-          </Card>
+          </Paper>
 
-          <Card style={{ marginBottom: '20px' }}>
+          <Paper sx={{ 
+              mb: 3, 
+              backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+              backdropFilter: 'blur(10px)',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'white'
+             }}>
             <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Route
+              <Typography variant="h6" gutterBottom sx={{ color: '#2ecc71', fontWeight: 'bold' }}>
+                DISPATCH NOTES
               </Typography>
-              <Divider style={{ marginBottom: '20px' }} />
-              <Box style={{ backgroundColor: '#ccc', height: '100px', padding: '20px' }}>
-                {/* Route content here */}
+              <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
+              <Box sx={{ p: 2, bgcolor: 'rgba(0,0,0,0.2)', borderRadius: 2, minHeight: 80 }}>
+                <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'rgba(255,255,255,0.8)' }}>
+                    {flightData.observation || "No dispatch remarks filed."}
+                </Typography>
               </Box>
             </CardContent>
-          </Card>
-
-          <Card style={{ marginBottom: '20px' }}>
-            <CardContent>
-              <Typography variant="h5" gutterBottom>
-                Dispatch Notes
-              </Typography>
-              <Divider style={{ marginBottom: '20px' }} />
-              <Box style={{ backgroundColor: '#ccc', height: '100px', padding: '20px' }}>
-                {/* Dispatch notes content here */}
-              </Box>
-            </CardContent>
-          </Card>
+          </Paper>
         </Grid>
 
-        {/* Fixed Map Column */}
-        <Grid item xs={12} md={6} style={{ height: '100%' }}>
-          <Card style={{ height: '90%', display: 'flex', flexDirection: 'column' }}>
-            <CardContent style={{ flex: 1, padding: 0 }}>
+        {/* Map Column */}
+        <Grid item xs={12} md={7} sx={{ height: '100%' }}>
+          <Paper sx={{ 
+                height: '100%', 
+                borderRadius: '16px', 
+                overflow: 'hidden', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                position: 'relative'
+            }}>
               <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />
-            </CardContent>
-          </Card>
+              <Box sx={{ 
+                  position: 'absolute', 
+                  bottom: 20, 
+                  left: 20, 
+                  zIndex: 1000, 
+                  bgcolor: 'rgba(0,0,0,0.7)', 
+                  color: 'white', 
+                  backdropFilter: 'blur(5px)',
+                  px: 2, 
+                  py: 1, 
+                  borderRadius: 2 
+                }}>
+                  <Typography variant="caption">MAP DATA © MAPTILER</Typography>
+              </Box>
+          </Paper>
         </Grid>
       </Grid>
+      </motion.div>
     </Container>
   );
 };

@@ -1,19 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import AxiosInstance from '../components/AxiosInstance';
-import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+    Alert,
+    Box,
+    Button,
+    Container,
+    IconButton,
+    Paper,
+    Snackbar,
+    CircularProgress as Spinner,
+    TextField,
+    Typography
+} from '@mui/material';
+import { motion } from 'framer-motion';
+import { debounce } from 'lodash';
+import { useEffect, useState } from 'react';
 import ReactFlagsSelect from 'react-flags-select';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  CircularProgress as Spinner,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import AxiosInstance from '../components/AxiosInstance';
 import Gravatar from '../components/Gravatar';
-import { debounce } from 'lodash';
 
 const ProfileEdit = () => {
   const { control, handleSubmit, setValue } = useForm();
@@ -31,7 +36,6 @@ const ProfileEdit = () => {
   const [usernameLoading, setUsernameLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch user profile data
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -46,7 +50,6 @@ const ProfileEdit = () => {
     fetchUserProfile();
   }, []);
 
-  // Handle profile update
   const handleUpdateProfile = async () => {
     try {
       const response = await AxiosInstance.put('/profile/update/', user);
@@ -58,11 +61,9 @@ const ProfileEdit = () => {
     }
   };
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Capitalize first name and last name
     if (name === 'first_name' || name === 'last_name') {
       const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
       setUser((prevUser) => ({ ...prevUser, [name]: capitalizedValue }));
@@ -71,7 +72,6 @@ const ProfileEdit = () => {
     }
   };
 
-  // Check if IFC username is valid
   const checkUsernameIFC = async (username) => {
     try {
       const response = await fetch(
@@ -90,7 +90,6 @@ const ProfileEdit = () => {
     }
   };
 
-  // Debounced username validation
   const checkUsernameDebounced = debounce(async (username) => {
     if (username) {
       setUsernameLoading(true);
@@ -100,7 +99,6 @@ const ProfileEdit = () => {
     }
   }, 500);
 
-  // Show loading spinner while fetching data
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -110,109 +108,154 @@ const ProfileEdit = () => {
   }
 
   return (
-    <Box sx={{ p: 4, maxWidth: 600, margin: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
-        Edit Profile
-      </Typography>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          mb: 4,
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
+    <Container maxWidth="sm">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
       >
-        <Gravatar email={user.email} size={120} alt="Profile Picture" style={{ borderRadius: '50%' }} />
-        <Button
-          variant="outlined"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={() => window.open('https://gravatar.com', '_blank')}
-        >
-          Update Photo on Gravatar
-        </Button>
-      </Box>
-
-      {/* Editable First Name and Last Name */}
-      <TextField
-        fullWidth
-        label="First Name"
-        name="first_name"
-        value={user.first_name}
-        onChange={handleChange}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        fullWidth
-        label="Last Name"
-        name="last_name"
-        value={user.last_name}
-        onChange={handleChange}
-        sx={{ mb: 2 }}
-      />
-
-      {/* Email Field */}
-      <TextField
-        fullWidth
-        label="Email"
-        name="email"
-        value={user.email}
-        onChange={handleChange}
-        sx={{ mb: 2 }}
-      />
-
-      {/* IFC Username Field */}
-      <TextField
-        fullWidth
-        label="IFC Username"
-        name="usernameIFC"
-        value={user.usernameIFC}
-        onChange={handleChange}
-        onBlur={() => checkUsernameDebounced(user.usernameIFC)}
-        sx={{ mb: 2 }}
-      />
-      {usernameLoading && <Spinner size={20} />}
-      {usernameValid === false && <Alert severity="error">Invalid IFC Username.</Alert>}
-      {usernameValid === true && <Alert severity="success">Valid IFC Username!</Alert>}
-
-      {/* Country Select with Search */}
-      <Controller
-        name="country"
-        control={control}
-        render={({ field }) => (
-          <ReactFlagsSelect
-            selected={user.country}
-            onSelect={(code) => {
-              setUser((prevUser) => ({ ...prevUser, country: code }));
-              setValue('country', code);
+        <Box sx={{ mt: 4, mb: 4 }}>
+         <IconButton onClick={() => navigate(-1)} sx={{ color: 'white', border: '1px solid rgba(255,255,255,0.2)', mb: 2 }}>
+                <ArrowBackIcon />
+           </IconButton>
+        <Paper 
+            elevation={24}
+            sx={{ 
+                p: 4, 
+                borderRadius: '20px', 
+                backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
-            searchable
-            placeholder="Select Country"
-            fullWidth
-            className="country-select"
-          />
-        )}
-        defaultValue={user.country}
-      />
+        >
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#fff', textAlign: 'center', mb: 4 }}>
+            EDIT PROFILE
+          </Typography>
+          
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              mb: 4,
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+             <Box sx={{ 
+                p: 0.5, 
+                borderRadius: '50%', 
+                border: '3px solid #4dabf5', 
+                boxShadow: '0 0 15px rgba(77, 171, 245, 0.5)',
+                mb: 2
+            }}>
+                <Gravatar email={user.email} size={120} alt="Profile Picture" style={{ borderRadius: '50%' }} />
+            </Box>
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{ color: '#4dabf5', borderColor: '#4dabf5' }}
+              onClick={() => window.open('https://gravatar.com', '_blank')}
+            >
+              Update Photo on Gravatar
+            </Button>
+          </Box>
 
-      {/* Update Profile Button */}
-      <Button variant="contained" color="primary" onClick={handleUpdateProfile} sx={{ mt: 2 }}>
-        Update Profile
-      </Button>
+          <Box component="form" noValidate autoComplete="off">
+            <TextField
+                fullWidth
+                label="First Name"
+                name="first_name"
+                value={user.first_name}
+                onChange={handleChange}
+                sx={{ mb: 3 }}
+                variant="outlined"
+            />
+            <TextField
+                fullWidth
+                label="Last Name"
+                name="last_name"
+                value={user.last_name}
+                onChange={handleChange}
+                sx={{ mb: 3 }}
+                variant="outlined"
+            />
 
-      {/* Error and Success Messages */}
-      {error && (
-        <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
-          <Alert severity="error">{error}</Alert>
-        </Snackbar>
-      )}
-      {success && (
-        <Snackbar open={success} autoHideDuration={6000} onClose={() => setSuccess(false)}>
-          <Alert severity="success">Profile updated successfully!</Alert>
-        </Snackbar>
-      )}
-    </Box>
+            <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                value={user.email}
+                onChange={handleChange}
+                sx={{ mb: 3 }}
+                variant="outlined"
+            />
+
+            <TextField
+                fullWidth
+                label="Infinite Flight Username"
+                name="usernameIFC"
+                value={user.usernameIFC}
+                onChange={handleChange}
+                onBlur={() => checkUsernameDebounced(user.usernameIFC)}
+                sx={{ mb: 1 }}
+                variant="outlined"
+                helperText="Link your Infinite Flight account stats"
+            />
+            
+            <Box sx={{ minHeight: '30px', mb: 2 }}>
+                {usernameLoading && <Typography variant="caption" sx={{ color: 'white' }}>Validating...</Typography>}
+                {usernameValid === false && <Alert severity="error" sx={{ py: 0 }}>Invalid IFC Username.</Alert>}
+                {usernameValid === true && <Alert severity="success" sx={{ py: 0 }}>Valid IFC Username!</Alert>}
+            </Box>
+
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1, display: 'block' }}>Country</Typography>
+                <Controller
+                    name="country"
+                    control={control}
+                    render={({ field }) => (
+                    <ReactFlagsSelect
+                        selected={user.country}
+                        onSelect={(code) => {
+                        setUser((prevUser) => ({ ...prevUser, country: code }));
+                        setValue('country', code);
+                        }}
+                        searchable
+                        placeholder="Select Country"
+                        fullWidth
+                        className="country-select"
+                        selectButtonClassName="react-flags-select-button"
+                    />
+                    )}
+                    defaultValue={user.country}
+                />
+            </Box>
+
+            <Button 
+                variant="contained" 
+                fullWidth 
+                size="large"
+                onClick={handleUpdateProfile} 
+                sx={{ height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
+            >
+                UPDATE PROFILE
+            </Button>
+          </Box>
+
+          {error && (
+            <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
+              <Alert severity="error">{error}</Alert>
+            </Snackbar>
+          )}
+          {success && (
+            <Snackbar open={success} autoHideDuration={6000} onClose={() => setSuccess(false)}>
+              <Alert severity="success">Profile updated successfully!</Alert>
+            </Snackbar>
+          )}
+        </Paper>
+        </Box>
+      </motion.div>
+    </Container>
   );
 };
 

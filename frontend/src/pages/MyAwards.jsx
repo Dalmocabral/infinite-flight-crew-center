@@ -1,34 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
-import AxiosInstance from '../components/AxiosInstance';
 import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  Paper,
-  CircularProgress,
-  Typography,
-  Avatar,
-  Button,
+    Avatar,
+    Box,
+    Button,
+    CircularProgress,
+    Container,
+    LinearProgress,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    Typography
 } from '@mui/material';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AxiosInstance from '../components/AxiosInstance';
 
 const MyAwards = () => {
   const [awards, setAwards] = useState([]);
   const [userAwards, setUserAwards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obter a lista de prêmios
         const awardsResponse = await AxiosInstance.get('/awards/');
         setAwards(awardsResponse.data);
 
-        // Obter a lista de prêmios do usuário
         const userAwardsResponse = await AxiosInstance.get('/user-awards/');
         setUserAwards(userAwardsResponse.data);
       } catch (err) {
@@ -41,7 +43,6 @@ const MyAwards = () => {
     fetchData();
   }, []);
 
-  // Combinar os dados dos prêmios com os dados de progresso do usuário
   const combinedData = awards.map((award) => {
     const userAward = userAwards.find((ua) => ua.award === award.id);
     return {
@@ -52,101 +53,107 @@ const MyAwards = () => {
     };
   });
 
-  // Filtrar apenas os prêmios com progresso maior que 0
   const filteredData = combinedData.filter((award) => award.progress > 0);
 
-  // Função para navegar para a página de detalhes de um prêmio
   const handleDetailsClick = (award) => {
-    navigate(`/app/awards/awardDetail/${award.id}`, { state: { award } }); // Passa os dados do prêmio
+    navigate(`/app/awards/awardDetail/${award.id}`, { state: { award } });
   };
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
         <CircularProgress />
-      </div>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Typography variant="h6" color="error" align="center" style={{ marginTop: '20px' }}>
+      <Typography variant="h6" color="error" align="center" sx={{ mt: 5 }}>
         Error: {error}
       </Typography>
     );
   }
 
   return (
-    <Paper elevation={3} style={{ padding: '20px', margin: '20px' }}>
-      <Typography variant="h4" align="center" gutterBottom>
-        My World Tour
-      </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell><strong>Title</strong></TableCell>
-            <TableCell><strong>Start</strong></TableCell>
-            <TableCell><strong>End</strong></TableCell>
-            <TableCell><strong>Status</strong></TableCell>
-            <TableCell><strong>Details</strong></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredData.map((award) => (
-            <TableRow key={award.id}>
-              <TableCell>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <Avatar
-                    src={award.link_image}
-                    alt={award.name}
-                    style={{ marginRight: '10px', width: '50px', height: '50px' }}
-                  />
-                  <Typography variant="body1">{award.name}</Typography>
-                </div>
-              </TableCell>
-              <TableCell>
-                {award.start_date ? new Date(award.start_date).toLocaleDateString() : 'Not started'}
-              </TableCell>
-              <TableCell>
-                {award.end_date ? new Date(award.end_date).toLocaleDateString() : 'In progress'}
-              </TableCell>
-              <TableCell>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div
-                    style={{
-                      width: '100px',
-                      height: '10px',
-                      backgroundColor: '#e0e0e0',
-                      borderRadius: '5px',
-                      marginRight: '10px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${award.progress}%`,
-                        height: '100%',
-                        backgroundColor: '#76c7c0',
-                        borderRadius: '5px',
-                      }}
-                    />
-                  </div>
-                  <span>{award.progress}%</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleDetailsClick(award)}
-                >
-                  View Details
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Paper>
+    <Container maxWidth="lg">
+       <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Typography variant="h4" align="center" gutterBottom sx={{ my: 4, fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(77, 171, 245, 0.5)' }}>
+          MY WORLD TOURS
+        </Typography>
+
+        <Paper sx={{ width: '100%', mb: 4, overflow: 'hidden', p: 0, borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <Table>
+                <TableHead>
+                <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Tour</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Start Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Completion Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Progress</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'right' }}>Action</TableCell>
+                </TableRow>
+                </TableHead>
+                <TableBody>
+                {filteredData.map((award) => (
+                    <TableRow key={award.id} hover>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar
+                            src={award.link_image}
+                            alt={award.name}
+                            variant="rounded"
+                            sx={{ mr: 2, width: 48, height: 48 }}
+                        />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{award.name}</Typography>
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        {award.start_date ? new Date(award.start_date).toLocaleDateString() : 'Not started'}
+                    </TableCell>
+                    <TableCell>
+                        {award.end_date ? new Date(award.end_date).toLocaleDateString() : 'In progress'}
+                    </TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: '100%', mr: 1 }}>
+                            <LinearProgress variant="determinate" value={award.progress} sx={{ height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.1)' }} color={award.progress === 100 ? 'success' : 'primary'} />
+                        </Box>
+                        <Box sx={{ minWidth: 35 }}>
+                            <Typography variant="body2" color="text.secondary">{`${Math.round(award.progress)}%`}</Typography>
+                        </Box>
+                        </Box>
+                    </TableCell>
+                    <TableCell align="right">
+                        <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleDetailsClick(award)}
+                        sx={{ borderColor: '#4dabf5', color: '#4dabf5', '&:hover': { borderColor: '#fff', color: '#fff' } }}
+                        >
+                        Details
+                        </Button>
+                    </TableCell>
+                    </TableRow>
+                ))}
+                {filteredData.length === 0 && (
+                     <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 5 }}>
+                            <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.5)' }}>
+                                You haven't started any World Tours yet.
+                            </Typography>
+                            <Button variant="text" onClick={() => navigate('/app/awards')} sx={{ mt: 1 }}>Browse Tours</Button>
+                        </TableCell>
+                     </TableRow>
+                )}
+                </TableBody>
+            </Table>
+        </Paper>
+      </motion.div>
+    </Container>
   );
 };
 

@@ -1,25 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import AxiosInstance from "../components/AxiosInstance";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
-  TextField,
-  Button,
-  Container,
-  Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid,
-  Box,
+    Box,
+    Button,
+    Container,
+    FormControl,
+    Grid,
+    IconButton,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    TextField,
+    Typography
 } from "@mui/material";
 import { LocalizationProvider, TimeField } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import AxiosInstance from "../components/AxiosInstance";
 import aircraftChoices from "../data/aircraftChoices";
 
 const EditPirep = () => {
-  const { id } = useParams(); // Captura o ID da URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     flight_icao: "",
@@ -27,43 +31,36 @@ const EditPirep = () => {
     departure_airport: "",
     arrival_airport: "",
     aircraft: "",
-    flight_duration: dayjs("2022-04-17T00:00"), // Valor inicial para o TimeField
+    flight_duration: dayjs("2022-04-17T00:00"), 
     network: "",
     status: "",
     observation: "",
   });
 
-  // Carrega os dados do PIREP ao montar o componente
   useEffect(() => {
     AxiosInstance.get(`/pirepsflight/${id}/`)
       .then((response) => {
-        // Atualiza o estado com os dados do PIREP
         setFormData({
           ...response.data,
-          flight_duration: dayjs(response.data.flight_duration, "HH:mm:ss"), // Converte a duração para o formato do TimeField
+          flight_duration: dayjs(response.data.flight_duration, "HH:mm:ss"), 
         });
       })
       .catch((error) => console.error("Erro ao carregar o PIREP:", error));
   }, [id]);
 
-  // Função para atualizar o estado dos campos
   const handleChange = (event) => {
     const { name, value } = event.target;
   
     setFormData({
       ...formData,
-      [name]: name === "flight_icao" ? value.toUpperCase() : value, // Transforma apenas flight_icao em maiúsculas
-      [name]: name === "Departure Airport" ? value.toUpperCase() : value, // Transforma apenas flight_icao em maiúsculas
-      [name]: name === "Arrival Airport" ? value.toUpperCase() : value, // Transforma apenas flight_icao em maiúsculas
+      [name]: name === "flight_icao" || name === "departure_airport" || name === "arrival_airport" ? value.toUpperCase() : value, 
     });
   };
 
-  // Função para atualizar o estado do TimeField
   const handleTimeChange = (newValue) => {
     setFormData({ ...formData, flight_duration: newValue });
   };
 
-  // Função para enviar os dados atualizados
   const handleSubmit = async (event) => {
     event.preventDefault();
   
@@ -76,7 +73,7 @@ const EditPirep = () => {
   
     try {
       await AxiosInstance.patch(`/pirepsflight/${id}/`, updatedData);
-      navigate("/app/dashboard"); // ✅ Corrigido para redirecionar corretamente
+      navigate("/app/dashboard"); 
     } catch (error) {
       console.error("Erro ao editar PIREP:", error);
     }
@@ -86,17 +83,35 @@ const EditPirep = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container maxWidth="md">
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            Editar PIREP
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+        <Box sx={{ mt: 4, mb: 4 }}>
+           <IconButton onClick={() => navigate(-1)} sx={{ color: 'white', border: '1px solid rgba(255,255,255,0.2)', mb: 2 }}>
+                <ArrowBackIcon />
+           </IconButton>
+           
+        <Paper 
+            elevation={24}
+            sx={{ 
+                p: { xs: 3, md: 5 }, 
+                borderRadius: '20px', 
+                backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}
+        >
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#fff', textAlign: 'center', mb: 1 }}>
+            EDIT PIREP
           </Typography>
-          <Typography variant="body1" gutterBottom>
-            Edite os dados do voo abaixo:
+          <Typography variant="body1" gutterBottom sx={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center', mb: 4 }}>
+            Update flight details for report #{id}
           </Typography>
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* Flight ICAO */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Flight ICAO"
@@ -108,7 +123,6 @@ const EditPirep = () => {
                 />
               </Grid>
 
-              {/* Flight Number */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Flight Number"
@@ -120,7 +134,6 @@ const EditPirep = () => {
                 />
               </Grid>
 
-              {/* Departure Airport */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Departure Airport"
@@ -132,7 +145,6 @@ const EditPirep = () => {
                 />
               </Grid>
 
-              {/* Arrival Airport */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Arrival Airport"
@@ -144,7 +156,6 @@ const EditPirep = () => {
                 />
               </Grid>
 
-              {/* Aircraft */}
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Aircraft</InputLabel>
@@ -163,7 +174,6 @@ const EditPirep = () => {
                 </FormControl>
               </Grid>
 
-              {/* Flight Duration */}
               <Grid item xs={12} sm={6}>
                 <TimeField
                   label="Flight Duration (HH:mm)"
@@ -174,7 +184,6 @@ const EditPirep = () => {
                 />
               </Grid>
 
-              {/* Network */}
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Network</InputLabel>
@@ -191,15 +200,22 @@ const EditPirep = () => {
                 </FormControl>
               </Grid>
 
-              {/* Botão de Enviar */}
               <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary" fullWidth>
-                  Salvar Alterações
+                <Button 
+                    type="submit" 
+                    variant="contained" 
+                    fullWidth
+                    size="large"
+                    sx={{ mt: 2, height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
+                >
+                  SAVE CHANGES
                 </Button>
               </Grid>
             </Grid>
           </form>
+        </Paper>
         </Box>
+        </motion.div>
       </Container>
     </LocalizationProvider>
   );

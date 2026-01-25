@@ -1,43 +1,40 @@
-import React, { useState, useEffect } from 'react';
 import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  CssBaseline,
-  Box,
-  IconButton,
-  Switch,
-  ThemeProvider,
-  Divider,
-  Menu,
-  MenuItem,
-  Avatar,
-  Tooltip,
-} from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  EmojiEvents as AwardsIcon,
-  Flight as FlightsIcon,
-  Star as MyAwardsIcon,
-  Map as MapIcon,
-  Brightness4 as DarkModeIcon,
-  Brightness7 as LightModeIcon,
-  Logout as LogoutIcon,
-  Group as GroupIcon,
-  Assignment as PirepsIcon,
-  Public as PublicIcon,
+    EmojiEvents as AwardsIcon,
+    Brightness4 as DarkModeIcon,
+    Dashboard as DashboardIcon,
+    Flight as FlightsIcon,
+    Group as GroupIcon,
+    Brightness7 as LightModeIcon,
+    Logout as LogoutIcon,
+    Map as MapIcon,
+    Menu as MenuIcon,
+    Public as PublicIcon
 } from '@mui/icons-material';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
-import { lightTheme, darkTheme } from '../theme';
+import {
+    AppBar,
+    Avatar,
+    Box,
+    CssBaseline,
+    Divider,
+    Drawer,
+    IconButton,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Menu,
+    MenuItem,
+    Switch,
+    ThemeProvider,
+    Toolbar,
+    Typography
+} from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../auth';
-import Gravatar from '../components/Gravatar';
 import AxiosInstance from '../components/AxiosInstance';
+import Gravatar from '../components/Gravatar';
+import { darkTheme, lightTheme } from '../theme';
 import Notifications from './Notifications'; // Importando o componente Notifications
 
 const drawerWidth = 240;
@@ -319,13 +316,7 @@ const Navbar = () => {
           </Drawer>
         </Box>
 
-        <Box
-          component="main"
-          sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
-        >
-          <Toolbar />
-          <Outlet />
-        </Box>
+{/* Main content removed from here to be handled by Layout */}
       </Box>
     </ThemeProvider>
   );

@@ -1,32 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  Tabs,
-  Tab,
-  Box,
-  Typography,
-  Paper,
-  useTheme,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  Grid,
-  Card,
-  CardContent,
-} from '@mui/material';
-import SwapVertIcon from '@mui/icons-material/SwapVert';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StraightenIcon from '@mui/icons-material/Straighten';
+import {
+    Box,
+    Button,
+    Container,
+    Grid,
+    List,
+    ListItem,
+    ListItemText,
+    Paper,
+    Tab,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Tabs,
+    Typography,
+    useTheme
+} from '@mui/material';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
-import FlightMap from '../components/FlightMap';
 import DistanceCalculator from '../components/DistanceCalculator';
+import FlightMap from '../components/FlightMap';
 
 const AwardDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -41,7 +40,6 @@ const AwardDetail = () => {
   const { award, userId } = location.state || {}; // Recebe o ID do usuário
   const navigate = useNavigate();
 
-  // Função para buscar as pernas do voo do usuário específico
   const fetchFlightLegs = async (userId) => {
     if (!award) return;
     try {
@@ -53,7 +51,6 @@ const AwardDetail = () => {
     }
   };
 
-  // Função para buscar os dados dos aeroportos
   const fetchAirports = async () => {
     try {
       const response = await fetch(
@@ -66,7 +63,6 @@ const AwardDetail = () => {
     }
   };
 
-  // Função para calcular as métricas
   const calculateMetrics = (flights) => {
     const totalFlightsCount = flights.length;
     const totalHoursCount = flights.reduce((acc, flight) => acc + (flight.flight_duration || 0), 0);
@@ -79,146 +75,169 @@ const AwardDetail = () => {
     setAverageFlights(averageFlightsCount);
   };
 
-  // Efeito para buscar as pernas do voo quando o prêmio é carregado
   useEffect(() => {
     if (activeTab === 1 || activeTab === 2) {
-      fetchFlightLegs(userId); // Passa o ID do usuário
+      fetchFlightLegs(userId);
     }
   }, [activeTab, award, userId]);
 
-  // Efeito para buscar os dados dos aeroportos
   useEffect(() => {
     fetchAirports();
   }, []);
 
-  // Função para mudar a aba ativa
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      {/* Navbar com abas */}
-      <Paper sx={{ mb: 3, backgroundColor: theme.palette.background.paper }}>
+    <Container maxWidth="xl" sx={{ mt: 3, mb: 5 }}>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        {award?.link_image && (
+             <Box
+                component="img"
+                src={award.link_image}
+                alt={award.name}
+                sx={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 2, mr: 2, border: '1px solid rgba(255,255,255,0.2)' }}
+            />
+        )}
+        <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>{award?.name || 'Tour Details'}</Typography>
+            <Typography variant="subtitle1" color="text.secondary">World Tour Qualification</Typography>
+        </Box>
+      </Box>
+
+      <Paper 
+        sx={{ 
+            mb: 3, 
+            backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.1)'
+        }}
+      >
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           centered
-          sx={{ '& .MuiTabs-indicator': { backgroundColor: '#2196F3' } }}
+          sx={{ 
+            '& .MuiTabs-indicator': { backgroundColor: '#4dabf5', height: 3 },
+            '& .MuiTab-root': { color: 'rgba(255,255,255,0.7)', fontWeight: 'bold', fontSize: '1rem' },
+            '& .Mui-selected': { color: '#4dabf5 !important' }
+           }}
         >
           <Tab label="Description" />
           <Tab label="Leg Overview" />
-          <Tab label="Tour Status" />
+          <Tab label="Tour Map & Status" />
         </Tabs>
       </Paper>
 
       {/* Conteúdo das seções */}
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 1 }}>
         {activeTab === 0 && (
-          <Box id="description">
-            <Typography variant="h4" gutterBottom>
-              {award?.name || 'No Award Selected'}
-            </Typography>
-            {award?.link_image && (
-              <Box
-                component="img"
-                src={award.link_image}
-                alt={award.name}
-                sx={{ width: '100%', maxHeight: '300px', objectFit: 'cover', mb: 2 }}
-              />
-            )}
-            <Typography paragraph>{award?.description || 'No description available.'}</Typography>
-          </Box>
+          <Paper 
+            sx={{ 
+                p: 4, 
+                backgroundColor: 'rgba(10, 25, 41, 0.5)', 
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255,255,255,0.1)' 
+            }}
+          >
+            <Box id="description" sx={{ textAlign: 'center', maxWidth: 800, mx: 'auto' }}>
+                <Typography variant="h5" gutterBottom sx={{color: '#4dabf5', mb: 3}}>Mission Briefing</Typography>
+                <Typography paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.9)' }}>
+                    {award?.description || 'No description available for this tour.'}
+                </Typography>
+            </Box>
+          </Paper>
         )}
 
         {activeTab === 1 && (
           <Box id="leg-overview">
-            <Typography variant="h4" gutterBottom align="center">
-              Leg Overview
-            </Typography>
-            <Typography paragraph align="center">
-              Here you will see an overview of the tour legs.
+            <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+              Flight Legs ({flightLegs.length})
             </Typography>
 
-
-
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>#</TableCell>
-                    <TableCell>Departure</TableCell>
-                    <TableCell>Destination</TableCell>
-                    <TableCell>Distance</TableCell>
-                    <TableCell>Estimated Time</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Departure</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Destination</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Distance</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Est. Time</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {flightLegs.map((leg, index) => (
-                    <TableRow key={leg.id}>
+                    <TableRow key={leg.id} hover>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
-                        {leg.from_airport}
-                        <br />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {airportsData[leg.from_airport]?.country && (
                             <img
                               src={`https://flagcdn.com/w320/${airportsData[leg.from_airport].country.toLowerCase()}.png`}
                               alt={airportsData[leg.from_airport].country}
-                              style={{ width: '24px', height: 'auto', border: '1px solid #ddd' }}
+                              style={{ width: '24px', borderRadius: '4px' }}
                             />
                           )}
-                          {airportsData[leg.from_airport]?.name || 'N/A'}
-
-                        </div>
+                          <Typography fontWeight="bold">{leg.from_airport}</Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">{airportsData[leg.from_airport]?.name}</Typography>
                       </TableCell>
                       <TableCell>
-                        {leg.to_airport}
-                        <br />
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {airportsData[leg.to_airport]?.country && (
                             <img
                               src={`https://flagcdn.com/w320/${airportsData[leg.to_airport].country.toLowerCase()}.png`}
                               alt={airportsData[leg.to_airport].country}
-                              style={{ width: '24px', height: 'auto', border: '1px solid #ddd' }}
+                              style={{ width: '24px', borderRadius: '4px' }}
                             />
                           )}
-                          {airportsData[leg.to_airport]?.name || 'N/A'}
-
-                        </div>
+                          <Typography fontWeight="bold">{leg.to_airport}</Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">{airportsData[leg.to_airport]?.name}</Typography>
                       </TableCell>
                       <TableCell>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-    <StraightenIcon />
-    <DistanceCalculator
-      fromAirport={leg.from_airport}
-      toAirport={leg.to_airport}
-      airportsData={airportsData}
-    />
-  </div>
-</TableCell>
-<TableCell>
-  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-    <AccessTimeIcon />
-    <DistanceCalculator
-      fromAirport={leg.from_airport}
-      toAirport={leg.to_airport}
-      airportsData={airportsData}
-      showTime={true}
-    />
-  </div>
-</TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#4dabf5' }}>
+                            <StraightenIcon fontSize="small" />
+                            <DistanceCalculator
+                            fromAirport={leg.from_airport}
+                            toAirport={leg.to_airport}
+                            airportsData={airportsData}
+                            />
+                        </Box>
+                        </TableCell>
+                        <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#f50057' }}>
+                            <AccessTimeIcon fontSize="small" />
+                            <DistanceCalculator
+                            fromAirport={leg.from_airport}
+                            toAirport={leg.to_airport}
+                            airportsData={airportsData}
+                            showTime={true}
+                            />
+                        </Box>
+                        </TableCell>
                       <TableCell>
                         <Button
-                          variant="contained"
-                          color="primary"
+                          variant={leg.pirep_status === 'Approved' ? "outlined" : "contained"}
+                          color={leg.pirep_status === 'Approved' ? "success" : "primary"}
+                          size="small"
                           onClick={() => {
                             navigate('/app/pirepsflights', { state: { leg } });
                           }}
                           disabled={leg.pirep_status === 'Approved'}
                         >
-                          {leg.pirep_status === 'Approved' ? 'Approved' : 'File PIREP'}
+                          {leg.pirep_status === 'Approved' ? 'Completed' : 'Fly Leg'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -231,44 +250,68 @@ const AwardDetail = () => {
 
         {activeTab === 2 && (
           <Box id="tour-status">
-            <Typography variant="h4" gutterBottom align="center">
-              Tour Status
-            </Typography>
-            <Typography paragraph align="center">
-              Here you can see the current status of the tour.
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              {/* Mapa */}
-              <Box sx={{ flex: 2, height: '500px' }}>
-                <FlightMap flightLegs={flightLegs} airportsData={airportsData} />
-              </Box>
-
-              {/* Lista de pernas */}
-              <Box sx={{ flex: 1 }}>
-                <List>
-                  {flightLegs.map((leg, index) => (
-                    <ListItem
-                      key={leg.id}
-                      sx={{
-                        backgroundColor:
-                          leg.pirep_status === 'Approved' ? theme.palette.success.light : 'inherit',
-                        mb: 1,
-                        borderRadius: 1,
-                      }}
+            
+            <Grid container spacing={3}>
+                <Grid item xs={12} md={8}>
+                    <Paper 
+                        sx={{ 
+                            p: 2, 
+                            height: '600px', 
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            overflow: 'hidden' 
+                        }}
                     >
-                      <ListItemText
-                        primary={`Leg ${index + 1}: ${leg.from_airport} → ${leg.to_airport}`}
-                        secondary={`Status: ${leg.pirep_status || 'Pendente'}`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Box>
+                         <FlightMap flightLegs={flightLegs} airportsData={airportsData} />
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Paper 
+                        sx={{ 
+                            p: 3, 
+                            height: '600px', 
+                            overflowY: 'auto',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            backgroundColor: 'rgba(10, 25, 41, 0.5)'
+                        }}
+                    >
+                         <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>Progression Log</Typography>
+                        <List>
+                        {flightLegs.map((leg, index) => (
+                            <ListItem
+                            key={leg.id}
+                            sx={{
+                                backgroundColor:
+                                leg.pirep_status === 'Approved' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(255,255,255,0.05)',
+                                mb: 1,
+                                borderRadius: 2,
+                                border: leg.pirep_status === 'Approved' ? '1px solid rgba(46, 204, 113, 0.3)' : 'none'
+                            }}
+                            >
+                            <ListItemText
+                                primary={
+                                    <Typography variant="body2" fontWeight="bold">
+                                        Leg {index + 1}: {leg.from_airport} ➝ {leg.to_airport}
+                                    </Typography>
+                                }
+                                secondary={
+                                    <Typography variant="caption" sx={{ color: leg.pirep_status === 'Approved' ? '#2ecc71' : 'text.secondary' }}>
+                                        Status: {leg.pirep_status || 'Pending'}
+                                    </Typography>
+                                }
+                            />
+                            </ListItem>
+                        ))}
+                        </List>
+                    </Paper>
+                </Grid>
+            </Grid>
           </Box>
         )}
       </Box>
-    </Box>
+      </motion.div>
+    </Container>
   );
 };
 

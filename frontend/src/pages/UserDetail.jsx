@@ -1,49 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import FlightIcon from '@mui/icons-material/Flight';
+import PreviewIcon from '@mui/icons-material/Preview';
+import PublicIcon from '@mui/icons-material/Public';
+import {
+    Box,
+    Card,
+    CardContent,
+    CardMedia,
+    Chip,
+    Container,
+    Divider,
+    Grid,
+    IconButton,
+    LinearProgress,
+    Pagination,
+    Paper,
+    CircularProgress as Spinner,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography
+} from '@mui/material';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  CircularProgress as Spinner,
-  CardMedia,
-  Pagination,
-  LinearProgress,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Paper,
-  Button,
-} from '@mui/material';
 import Gravatar from '../components/Gravatar';
-import FlightIcon from '@mui/icons-material/Flight';
-import PublicIcon from '@mui/icons-material/Public';
-import PreviewIcon from '@mui/icons-material/Preview';
-import { Tooltip, IconButton, Fade } from "@mui/material";
-import { Badge } from '@mui/material';
-import { Chip } from "@mui/material";
 
 const UserDetail = () => {
-  const { id } = useParams(); // Pega o ID do usuário da URL
+  const { id } = useParams();
   const [user, setUser] = useState(null);
-  const [ifcData, setIfcData] = useState(null); // Dados do Infinite Flight
-  const [userMetrics, setUserMetrics] = useState(null); // Dados das métricas do usuário
+  const [ifcData, setIfcData] = useState(null);
+  const [userMetrics, setUserMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userAwards, setUserAwards] = useState([]);
   const [awards, setAwards] = useState([]);
-  const [approvedFlights, setApprovedFlights] = useState([]); // Voos aprovados
-  const [error, setError] = useState(null); // Estado para erros
-  const [awardsPage, setAwardsPage] = useState(1); // Paginação de prêmios
-  const [flightsPage, setFlightsPage] = useState(1); // Paginação de voos
-  const itemsPerPage = 6; // Número de itens por página (prêmios)
-  const rowsPerPage = 5; // Número de linhas por página (voos)
+  const [approvedFlights, setApprovedFlights] = useState([]);
+  const [error, setError] = useState(null);
+  const [awardsPage, setAwardsPage] = useState(1);
+  const [flightsPage, setFlightsPage] = useState(1);
+  const itemsPerPage = 6;
+  const rowsPerPage = 5;
 
-  // Buscar prêmios e prêmios do usuário
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,14 +58,12 @@ const UserDetail = () => {
         console.error('Erro ao buscar dados:', error);
         setError('Erro ao carregar prêmios.');
       } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
   }, [id]);
 
-  // Combinar os dados de prêmios com os dados do usuário
   const combinedAwards = userAwards.map((userAward) => {
     const awardData = awards.find((award) => award.id === userAward.award);
     return {
@@ -77,17 +75,15 @@ const UserDetail = () => {
     };
   });
 
-  // Lógica de paginação para prêmios
   const paginatedAwards = combinedAwards.slice((awardsPage - 1) * itemsPerPage, awardsPage * itemsPerPage);
 
-  // Busca os dados do usuário
   useEffect(() => {
     AxiosInstance.get(`users/${id}/`)
       .then((res) => {
         setUser(res.data);
-        fetchInfiniteFlightData(res.data.usernameIFC); // Busca dados do Infinite Flight
-        fetchUserMetrics(res.data.id); // Busca as métricas do usuário
-        fetchApprovedFlights(res.data.id); // Busca os voos aprovados do usuário
+        fetchInfiniteFlightData(res.data.usernameIFC);
+        fetchUserMetrics(res.data.id);
+        fetchApprovedFlights(res.data.id);
       })
       .catch((error) => {
         console.error('Erro ao buscar os dados do usuário:', error);
@@ -96,7 +92,6 @@ const UserDetail = () => {
       });
   }, [id]);
 
-  // Busca os dados do Infinite Flight
   const fetchInfiniteFlightData = async (username) => {
     if (!username) {
       setLoading(false);
@@ -116,46 +111,39 @@ const UserDetail = () => {
 
       const data = await response.json();
       if (data.errorCode === 0 && data.result.length > 0) {
-        setIfcData(data.result[0]); // Armazena os dados do Infinite Flight
+        setIfcData(data.result[0]);
       }
     } catch (error) {
       console.error('Erro ao buscar dados do Infinite Flight:', error);
-      setError('Erro ao carregar dados do Infinite Flight.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Busca as métricas do usuário
   const fetchUserMetrics = async (userId) => {
     try {
       const response = await AxiosInstance.get(`user-metrics/${userId}/`);
-      setUserMetrics(response.data); // Armazena as métricas do usuário
+      setUserMetrics(response.data);
     } catch (error) {
       console.error('Erro ao buscar métricas do usuário:', error);
-      setError('Erro ao carregar métricas do usuário.');
     }
   };
 
-  // Busca os voos aprovados do usuário
   const fetchApprovedFlights = async (userId) => {
     try {
       const response = await AxiosInstance.get(`user-approved-flights/${userId}/`);
-      setApprovedFlights(response.data); // Armazena os voos aprovados do usuário
+      setApprovedFlights(response.data);
     } catch (error) {
       console.error('Erro ao buscar voos aprovados:', error);
-      setError('Erro ao carregar voos aprovados.');
     }
   };
 
-  // Ordenar os voos aprovados pela data (do mais recente para o mais antigo)
   const sortedFlights = approvedFlights.sort((a, b) => {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
-    return dateB - dateA; // Ordena do mais recente para o mais antigo
+    return dateB - dateA;
   });
 
-  // Aplicar a paginação aos voos ordenados
   const paginatedFlights = sortedFlights.slice((flightsPage - 1) * rowsPerPage, flightsPage * rowsPerPage);
 
   if (loading) {
@@ -167,10 +155,9 @@ const UserDetail = () => {
   }
 
   if (!user) {
-    return <Typography>User not found.</Typography>;
+    return <Typography sx={{color: 'white', textAlign: 'center', mt: 10}}>User not found.</Typography>;
   }
 
-  // Format duration from seconds to HH:MM
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -179,181 +166,213 @@ const UserDetail = () => {
 
 
   return (
-    <Box sx={{ p: 4, textAlign: 'center' }}>
+    <Container maxWidth="xl" sx={{ p: 4 }}>
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+    >
       {/* Gravatar no centro */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-        <Gravatar
-          email={user.email}
-          size={120}
-          alt={`Imagem de perfil de ${user.first_name} ${user.last_name}`}
-          style={{ borderRadius: '50%' }}
-        />
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 5 }}>
+        <Box sx={{ 
+            p: 0.5, 
+            borderRadius: '50%', 
+            border: '3px solid #4dabf5', 
+            boxShadow: '0 0 25px rgba(77, 171, 245, 0.6)',
+            mb: 2
+        }}>
+            <Gravatar
+            email={user.email}
+            size={160}
+            alt={`Imagem de perfil de ${user.first_name} ${user.last_name}`}
+            style={{ borderRadius: '50%' }}
+            />
+        </Box>
+        <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#fff' }}>{user.first_name} {user.last_name}</Typography>
+        <Box display="flex" alignItems="center" gap={1} mt={1}>
+            <img
+                src={`https://flagcdn.com/w320/${user.country ? user.country.toLowerCase() : ''}.png`}
+                alt={user.country || 'Country'}
+                style={{ width: '32px', borderRadius: '4px' }}
+            />
+            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.7)' }}>{user.country}</Typography>
+        </Box>
       </Box>
 
       {/* Cards lado a lado */}
       <Grid container spacing={4} justifyContent="center">
         {/* Card do Sistema World Tour */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ boxShadow: 3, borderRadius: 2, position: 'relative', overflow: 'hidden', minHeight: '300px' }}>
+          <Card 
+            sx={{ 
+                height: '100%', 
+                borderRadius: '16px', 
+                position: 'relative', 
+                overflow: 'hidden', 
+                backgroundColor: 'rgba(10, 25, 41, 0.7)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white'
+            }}
+          >
             <PublicIcon
               sx={{
                 position: 'absolute',
-                bottom: -20,
-                right: -20,
+                bottom: -40,
+                right: -40,
                 fontSize: 300,
-                color: 'rgba(0, 0, 0, 0.1)',
+                color: 'rgba(255, 255, 255, 0.05)',
               }}
             />
-            <CardContent sx={{ textAlign: 'left', position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  Sistema World Tour
+            <CardContent sx={{ position: 'relative', zIndex: 1, p: 4 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#4dabf5', borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 1, mb: 3 }}>
+                   INTERNAL STATS
                 </Typography>
-                <Typography variant="body1">
-                  Name: {user.first_name} {user.last_name}
-                </Typography>
-                <Typography variant="body1">
-                  Country: <img
-                    src={`https://flagcdn.com/w320/${user.country ? user.country.toLowerCase() : ''}.png`}
-                    alt={user.country || 'País não informado'}
-                    style={{ width: '24px', height: 'auto' }}
-                  />
-                </Typography>
+                
                 {userMetrics ? (
-                  <>
-                    <Typography variant="body1" sx={{ mt: 2 }}>
-                      Total Flights: {userMetrics.total_flights}
-                    </Typography>
-                    <Typography variant="body1">
-                      Total Hours: {userMetrics.total_flight_time}h
-                    </Typography>
-                    <Typography variant="body1">
-                      Total Flights (Last 30 Days): {userMetrics.total_flights_last_30_days}
-                    </Typography>
-                    <Typography variant="body1">
-                      Total Hours (Last 30 Days): {userMetrics.total_flight_time_last_30_days}h
-                    </Typography>
-                    <Typography variant="body1">
-                      Average Flights (Last 30 Days): {userMetrics.average_flights_per_day.toFixed(2)} flights/day
-                    </Typography>
-                    <Typography variant="body1">
-                      Average Hours (Last 30 Days): {userMetrics.average_flight_time_per_day.toFixed(2)} hours/day
-                    </Typography>
-                  </>
+                   <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Total Flights</Typography>
+                             <Typography variant="h4" fontWeight="bold">{userMetrics.total_flights}</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Total Hours</Typography>
+                             <Typography variant="h4" fontWeight="bold">{userMetrics.total_flight_time}h</Typography>
+                        </Grid>
+                        <Grid item xs={12}><Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} /></Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Last 30 Days (Flights)</Typography>
+                             <Typography variant="h6" fontWeight="bold">{userMetrics.total_flights_last_30_days}</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Last 30 Days (Hours)</Typography>
+                             <Typography variant="h6" fontWeight="bold">{userMetrics.total_flight_time_last_30_days}h</Typography>
+                        </Grid>
+                   </Grid>
                 ) : (
                   <Typography variant="body1" color="text.secondary">
                     No metrics available.
                   </Typography>
                 )}
-              </Box>
             </CardContent>
           </Card>
         </Grid>
 
         {/* Card do Infinite Flight */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ boxShadow: 3, borderRadius: 2, position: 'relative', overflow: 'hidden', minHeight: '300px' }}>
+          <Card 
+             sx={{ 
+                height: '100%', 
+                borderRadius: '16px', 
+                position: 'relative', 
+                overflow: 'hidden', 
+                backgroundColor: 'rgba(10, 25, 41, 0.7)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white'
+            }}
+          >
             <FlightIcon
               sx={{
                 position: 'absolute',
-                bottom: -20,
-                right: -20,
+                bottom: -40,
+                right: -40,
                 fontSize: 300,
-                color: 'rgba(0, 0, 0, 0.1)',
+                color: 'rgba(255, 255, 255, 0.05)',
               }}
             />
-            <CardContent sx={{ textAlign: 'left', position: 'relative', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  Infinite Flight
+            <CardContent sx={{ position: 'relative', zIndex: 1, p: 4 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#2ecc71', borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 1, mb: 3 }}>
+                   INFINITE FLIGHT LIVE
                 </Typography>
                 {ifcData ? (
-                  <>
-                    <Typography variant="body1">
-                      Flights Online: {ifcData.onlineFlights}
-                    </Typography>
-                    <Typography variant="body1">
-                      XP: {ifcData.xp}
-                    </Typography>
-                    <Typography variant="body1">
-                      Time flight: {ifcData.flightTime} minutos
-                    </Typography>
-                    <Typography variant="body1">
-                      Level: {ifcData.grade}
-                    </Typography>
-                  </>
+                   <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Grade</Typography>
+                             <Typography variant="h4" fontWeight="bold">Grade {ifcData.grade}</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">XP</Typography>
+                             <Typography variant="h4" fontWeight="bold">{ifcData.xp.toLocaleString()}</Typography>
+                        </Grid>
+                        <Grid item xs={12}><Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} /></Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Total Flight Time</Typography>
+                             <Typography variant="h6" fontWeight="bold">{(ifcData.flightTime / 60).toFixed(1)}h</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Online Flights</Typography>
+                             <Typography variant="h6" fontWeight="bold">{ifcData.onlineFlights}</Typography>
+                        </Grid>
+                   </Grid>
                 ) : (
                   <Typography variant="body1" color="text.secondary">
-                    No data available.
+                    Infinite Flight data not linked or unavailable.
                   </Typography>
                 )}
-              </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
       {/* Seção de Prêmios */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-          World Tour Awards Achieved
+      <Box sx={{ mt: 6 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#fff', textAlign: 'center', mb: 4 }}>
+          AWARDS & BADGES
         </Typography>
-        {/* Contêiner com barra de rolagem */}
         <Box
           sx={{
-            maxHeight: '400px', // Altura máxima para exibir a barra de rolagem
-            overflowY: 'auto', // Habilita a rolagem vertical
-            p: 1, // Adiciona um pequeno padding
+            maxHeight: '400px',
+            overflowY: 'auto',
+            p: 2,
+            backgroundColor: 'rgba(255,255,255,0.02)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.1)'
           }}
         >
-          <Grid container spacing={2} justifyContent="center">
+          <Grid container spacing={3} justifyContent="center">
             {combinedAwards.length > 0 ? (
               combinedAwards.map((award) => (
-                <Grid
-                  item
-                  xs={6}
-                  sm={4}
-                  md={3}
-                  key={award.id}
-                  sx={{ display: 'flex', justifyContent: 'center' }}
-                >
-                  <Box sx={{ textAlign: 'center' }}>
-                    {/* Card do Prêmio */}
-                    <Card
+                <Grid item xs={6} sm={4} md={2} key={award.id} sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Box sx={{ textAlign: 'center', p: 2, borderRadius: '12px', bgcolor: 'rgba(0,0,0,0.2)', width: '100%' }}>
+                    <Box
                       sx={{
-                        boxShadow: 3,
+                        width: '80px',
+                        height: '80px',
                         borderRadius: '50%',
-                        width: '100px',
-                        height: '100px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                         overflow: 'hidden',
+                         border: '2px solid gold',
+                         boxShadow: '0 0 10px gold',
+                         mx: 'auto'
                       }}
                     >
                       <CardMedia
                         component="img"
                         image={award.image}
                         alt={award.name}
-                        sx={{ width: '80px', height: '80px', borderRadius: '50%' }}
+                        sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
-                    </Card>
-                    {/* Nome do Prêmio */}
-                    <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
+                    </Box>
+                    <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold', color: 'gold' }}>
                       {award.name}
                     </Typography>
-                    {/* Barra de Progresso */}
                     <Box sx={{ width: '100%', mt: 1 }}>
-                      <LinearProgress variant="determinate" value={award.progress} />
-                      <Typography variant="caption" sx={{ mt: 1 }}>
-                        {award.progress}% Completed
+                      <LinearProgress 
+                        variant="determinate" 
+                        value={award.progress} 
+                        sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.2)' }} 
+                        color="warning" 
+                      />
+                      <Typography variant="caption" sx={{ mt: 0.5, display: 'block', color: 'rgba(255,255,255,0.6)' }}>
+                        {award.progress}%
                       </Typography>
                     </Box>
                   </Box>
                 </Grid>
               ))
             ) : (
-              <Typography variant="body2" color="text.secondary">
-                No awards won yet.
+              <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                No active tours or awards yet.
               </Typography>
             )}
           </Grid>
@@ -361,52 +380,45 @@ const UserDetail = () => {
       </Box>
 
       {/* Tabela de voos aprovados */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Flights
+      <Box sx={{ mt: 6 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#fff' }}>
+          FLIGHT HISTORY
         </Typography>
-        {error && (
-          <Typography variant="body2" color="error">
-            {error}
-          </Typography>
-        )}
         {approvedFlights.length > 0 ? (
 
           <>
-            <TableContainer component={Paper}>
+            <Paper sx={{ width: '100%', overflow: 'hidden', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <TableContainer>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Flight</TableCell>
-                    <TableCell>Dep</TableCell>
-                    <TableCell>Arr</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Network</TableCell>
-                    <TableCell>Duration</TableCell>
-                    <TableCell>Aircraft</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Action</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Flight</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Dep</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Arr</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Network</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Aircraft</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedFlights.map((flight) => (
-
-                    <TableRow key={flight.id}>
-                      <TableCell>{flight.flight}</TableCell>
+                    <TableRow key={flight.id} hover>
+                      <TableCell sx={{ fontFamily: 'monospace' }}>{flight.flight}</TableCell>
                       <TableCell>{flight.dep}</TableCell>
                       <TableCell>{flight.arr}</TableCell>
                       <TableCell>{new Date(flight.date).toLocaleDateString()}</TableCell>
                       <TableCell>
-                        <Badge
-                          color={flight.network === 'Expert' ? 'success' : 'primary'}
-                          badgeContent={flight.network}
-                        />
+                        <Chip label={flight.network} size="small" variant="outlined" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
                       </TableCell>
                       <TableCell>{formatDuration(flight.duration)}</TableCell>
                       <TableCell>{flight.aircraft}</TableCell>
                       <TableCell>
                         <Chip
                           label={flight.status}
+                          size="small"
                           color={
                             flight.status === "Pending"
                               ? "warning"
@@ -416,11 +428,11 @@ const UserDetail = () => {
                                   ? "error"
                                   : "default"
                           }
-                          variant="outlined" // Ou remova para um fundo sólido
+                          sx={{ fontWeight: 'bold' }}
                         />
                       </TableCell>
                       <TableCell>
-                        <IconButton component="a" href={`/app/briefing/${flight.id}`}>
+                        <IconButton component="a" href={`/app/briefing/${flight.id}`} sx={{ color: '#4dabf5' }}>
                           <PreviewIcon />
                         </IconButton>
                       </TableCell>
@@ -429,22 +441,25 @@ const UserDetail = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            </Paper>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
               <Pagination
                 count={Math.ceil(approvedFlights.length / rowsPerPage)}
                 page={flightsPage}
                 onChange={(event, value) => setFlightsPage(value)}
                 color="primary"
+                sx={{ '& .MuiPaginationItem-root': { color: 'white' } }}
               />
             </Box>
           </>
         ) : (
-          <Typography variant="body2" color="text.secondary">
-            Nenhum voo aprovado encontrado.
+          <Typography variant="body2" color="rgba(255,255,255,0.5)">
+            No approved flights found for this pilot.
           </Typography>
         )}
       </Box>
-    </Box>
+      </motion.div>
+    </Container>
   );
 };
 

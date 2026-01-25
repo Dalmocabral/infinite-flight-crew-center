@@ -1,45 +1,45 @@
-import React, { useState } from 'react';
+import { LockReset } from '@mui/icons-material';
 import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  Container,
-  CssBaseline,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Snackbar,
-  Alert,
+    Alert,
+    Box,
+    Button,
+    Container,
+    CssBaseline,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Link,
+    Paper,
+    Snackbar,
+    TextField,
+    Typography
 } from '@mui/material';
-import AxiosInstance from '../components/AxiosInstance'; // Importe o AxiosInstance
-import { useNavigate } from 'react-router-dom'; // Para redirecionar o usuário
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AxiosInstance from '../components/AxiosInstance';
 
 const PasswordResetRequest = () => {
   const [email, setEmail] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false); // Estado para controlar o diálogo
-  const [snackbarOpen, setSnackbarOpen] = useState(false); // Estado para controlar o Snackbar
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-  const navigate = useNavigate(); // Hook para redirecionamento
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      // Envia a solicitação de reset de senha para o backend
       await AxiosInstance.post('/api/password_reset/', {
         email: email,
       });
 
-      // Abre o diálogo de confirmação
       setDialogOpen(true);
     } catch (error) {
-      // Exibe mensagem de erro
-      setSnackbarMessage('Failed to send password reset request. Please try again.');
+      setSnackbarMessage('Failed to send password reset request. Please check your email.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
       console.error('Error:', error.response ? error.response.data : error.message);
@@ -48,7 +48,7 @@ const PasswordResetRequest = () => {
 
   const handleCloseDialog = () => {
     setDialogOpen(false);
-    navigate('/login'); // Redireciona para a página de login
+    navigate('/login');
   };
 
   const handleCloseSnackbar = () => {
@@ -56,85 +56,144 @@ const PasswordResetRequest = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        backgroundColor: '#f5f5f5',
-      }}
-    >
+    <>
       <CssBaseline />
-      <Container component="main" maxWidth="xs">
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Typography component="h1" variant="h5" sx={{ mb: 2 }}>
-            Reset Your Password
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 3, textAlign: 'center' }}>
-            Enter your email address below, and we'll send you instructions to reset your password.
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-            {/* Campo de E-mail */}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Email Address"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            {/* Botão de Envio */}
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Send Reset Instructions
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
-
-      {/* Diálogo de Confirmação */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Password Reset Request Sent</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please check your email inbox (and spam folder) for instructions on how to reset your password.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar para Feedback */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      <Box
+        sx={{
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.1) 0%, transparent 60%)',
+            animation: 'pulse 10s infinite',
+          },
+        }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+        <Container component="main" maxWidth="xs" sx={{ position: 'relative', zIndex: 1 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <Paper
+              elevation={24}
+              sx={{
+                padding: 5,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                backdropFilter: 'blur(20px)',
+                backgroundColor: 'rgba(10, 25, 41, 0.65)',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              }}
+            >
+              <Box
+                  sx={{
+                    m: 1,
+                    bgcolor: 'transparent',
+                    color: 'primary.main',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <LockReset sx={{ fontSize: 60 }} />
+              </Box>
+
+              <Typography component="h1" variant="h5" sx={{ mb: 2, color: '#fff', textAlign: 'center' }}>
+                RESET PASSWORD
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 4, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>
+                Enter your email address to receive reset instructions.
+              </Typography>
+
+              <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  label="Email Address"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  sx={{
+                    '& .MuiOutlinedInput-root': { color: 'white' },
+                    '& .MuiInputLabel-root': { color: 'rgba(255,255,255,0.7)' },
+                  }}
+                />
+
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2, height: '48px' }}
+                    >
+                    SEND INSTRUCTIONS
+                    </Button>
+                </motion.div>
+
+                <Box sx={{ textAlign: 'center', mt: 2 }}>
+                  <Link href="/login" variant="body2" sx={{ color: '#4dabf5', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                    Back to Login
+                  </Link>
+                </Box>
+              </Box>
+            </Paper>
+          </motion.div>
+        </Container>
+
+        <Dialog 
+            open={dialogOpen} 
+            onClose={handleCloseDialog}
+            PaperProps={{
+                sx: {
+                    backgroundColor: 'rgba(10, 25, 41, 0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'white'
+                }
+            }}
+        >
+          <DialogTitle sx={{ color: '#4dabf5' }}>Request Sent</DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ color: 'rgba(255,255,255,0.8)' }}>
+              Check your email for reset instructions.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} autoFocus sx={{ color: '#4dabf5' }}>
+              OK
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%', borderRadius: '12px' }} variant="filled">
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </>
   );
 };
 

@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import SendIcon from '@mui/icons-material/Send';
 import {
-  Box,
-  Typography,
-  TextField,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Button,
-  Grid,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Alert, // Importe o componente Alert
+    Alert,
+    Button,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    FormControl,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    TextField,
+    Typography
 } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimeField } from '@mui/x-date-pickers/TimeField';
 import dayjs from 'dayjs';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import aircraftChoices from '../data/aircraftChoices';
 
@@ -94,32 +96,48 @@ const PirepsFlights = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container maxWidth="md">
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
-            Pireps Flights
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+        >
+        <Paper 
+            elevation={24}
+            sx={{ 
+                p: { xs: 3, md: 5 }, 
+                mt: 4, 
+                mb: 4,
+                borderRadius: '20px', 
+                backgroundColor: 'rgba(10, 25, 41, 0.7)', 
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}
+        >
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#fff', textAlign: 'center', mb: 1 }}>
+            FILE MANUAL PIREP
           </Typography>
-          <Typography variant="body1" gutterBottom>
-            Fill in the flight details below:
+          <Typography variant="body1" gutterBottom sx={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center', mb: 3 }}>
+            Use this form to manually submit a flight report if your ACARS failed.
           </Typography>
 
-          {/* Alerta em vermelho */}
-          <Alert severity="warning" sx={{ mb: 3 }}>
+          <Alert severity="warning" sx={{ mb: 4, borderRadius: '12px', '& .MuiAlert-icon': { color: '#ff9800' } }}>
             Due to high demand, flight approval may take up to 3 days. Thank you for your patience.
           </Alert>
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* Leg Number */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Leg Number"
-                  value={leg?.leg_number || ''}
-                  fullWidth
-                  disabled
-                />
-              </Grid>
+              {leg && (
+                 <Grid item xs={12}>
+                  <TextField
+                    label="Leg Number"
+                    value={leg.leg_number}
+                    fullWidth
+                    disabled
+                    variant="filled"
+                  />
+                 </Grid>
+              )}
 
-              {/* Flight ICAO */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Flight ICAO"
@@ -127,10 +145,10 @@ const PirepsFlights = () => {
                   onChange={(e) => setFlightIcao(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
+                  placeholder="e.g. AAL"
                 />
               </Grid>
 
-              {/* Flight Number */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Flight Number"
@@ -138,10 +156,10 @@ const PirepsFlights = () => {
                   onChange={(e) => setFlightNumber(e.target.value)}
                   fullWidth
                   required
+                  placeholder="e.g. 1234"
                 />
               </Grid>
 
-              {/* Departure Airport */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Departure Airport"
@@ -149,10 +167,10 @@ const PirepsFlights = () => {
                   onChange={(e) => setDepartureAirport(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
+                  placeholder="ICAO Code"
                 />
               </Grid>
 
-              {/* Arrival Airport */}
               <Grid item xs={12} sm={6}>
                 <TextField
                   label="Arrival Airport"
@@ -160,10 +178,10 @@ const PirepsFlights = () => {
                   onChange={(e) => setArrivalAirport(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
+                  placeholder="ICAO Code"
                 />
               </Grid>
 
-              {/* Aircraft */}
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Aircraft</InputLabel>
@@ -181,7 +199,6 @@ const PirepsFlights = () => {
                 </FormControl>
               </Grid>
 
-              {/* Flight Duration */}
               <Grid item xs={12} sm={6}>
                 <TimeField
                   label="Flight Duration (HH:mm)"
@@ -189,10 +206,10 @@ const PirepsFlights = () => {
                   onChange={(newValue) => setFlightDuration(newValue)}
                   format="HH:mm"
                   fullWidth
+                  required
                 />
               </Grid>
 
-              {/* Network */}
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>
                   <InputLabel>Network</InputLabel>
@@ -201,32 +218,54 @@ const PirepsFlights = () => {
                     onChange={(e) => setNetwork(e.target.value)}
                     label="Network"
                   >
-                    <MenuItem value="Casual">Casual</MenuItem>
-                    <MenuItem value="Training">Training</MenuItem>
-                    <MenuItem value="Expert">Expert</MenuItem>
+                    <MenuItem value="Casual">Casual Server</MenuItem>
+                    <MenuItem value="Training">Training Server</MenuItem>
+                    <MenuItem value="Expert">Expert Server</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
 
-              {/* Botão de Enviar */}
               <Grid item xs={12}>
-                <Button type="submit" variant="contained" color="primary" fullWidth>
-                  Submit
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Button 
+                        type="submit" 
+                        variant="contained" 
+                        fullWidth 
+                        size="large"
+                        startIcon={<SendIcon />}
+                        sx={{ mt: 2, height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
+                    >
+                    SUBMIT PIREP
+                    </Button>
+                </motion.div>
               </Grid>
             </Grid>
           </form>
-        </Box>
+        </Paper>
+        </motion.div>
       </Container>
 
-      {/* Dialog de Sucesso ou Erro */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>{dialogType === 'success' ? 'Success' : 'Error'}</DialogTitle>
+
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog}
+        PaperProps={{
+            sx: {
+                backgroundColor: 'rgba(10, 25, 41, 0.9)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white'
+            }
+        }}
+      >
+        <DialogTitle sx={{ color: dialogType === 'success' ? '#2ecc71' : '#f44336' }}>
+            {dialogType === 'success' ? 'Success' : 'Error'}
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText>{dialogMessage}</DialogContentText>
+          <DialogContentText sx={{ color: 'rgba(255,255,255,0.8)' }}>{dialogMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">OK</Button>
+          <Button onClick={handleCloseDialog} autoFocus sx={{ color: '#4dabf5' }}>OK</Button>
         </DialogActions>
       </Dialog>
     </LocalizationProvider>

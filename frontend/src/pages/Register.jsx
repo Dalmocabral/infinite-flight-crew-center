@@ -13,81 +13,13 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { motion } from "framer-motion";
-import { debounce } from "lodash";
-import { useState } from "react";
-import ReactFlagsSelect from "react-flags-select";
-import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import AxiosInstance from "../components/AxiosInstance";
-
-// Custom dark/aviation theme (consistent with Login)
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#4dabf5',
-    },
-    secondary: {
-      main: '#f50057',
-    },
-    background: {
-      default: '#0a1929',
-      paper: 'rgba(10, 25, 41, 0.7)',
-    },
-  },
-  typography: {
-    fontFamily: '"Orbitron", "Roboto", "Helvetica", "Arial", sans-serif',
-    h5: {
-      fontWeight: 700,
-      letterSpacing: '0.1em',
-    },
-    button: {
-      fontWeight: 600,
-      letterSpacing: '0.05em',
-    },
-  },
-  components: {
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            '& fieldset': {
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-            },
-            '&:hover fieldset': {
-              borderColor: 'rgba(255, 255, 255, 0.5)',
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: '#4dabf5',
-            },
-          },
-          '& .MuiInputLabel-root': {
-            color: 'rgba(255, 255, 255, 0.7)',
-          },
-          '& .MuiInputBase-input': {
-            color: '#fff',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '25px',
-          padding: '12px 24px',
-          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-          boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
-          color: 'white',
-        },
-      },
-    },
-  },
-});
-
+import { motion } from 'framer-motion';
+import { debounce } from 'lodash';
+import { useState } from 'react';
+import ReactFlagsSelect from 'react-flags-select';
+import { Controller, useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import AxiosInstance from '../components/AxiosInstance';
 const Register = () => {
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
@@ -216,7 +148,7 @@ const Register = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <CssBaseline />
       <Box
          sx={{
@@ -538,7 +470,7 @@ const Register = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </ThemeProvider>
+    </>
   );
 };
 

@@ -1,51 +1,52 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Container,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Tooltip,
-  Fade,
-  IconButton,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-} from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import FlightIcon from "@mui/icons-material/Flight";
 import AirplanemodeActiveIcon from "@mui/icons-material/AirplanemodeActive";
-import PreviewIcon from "@mui/icons-material/Preview";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"; // Trophy icon
-import { Bar, Doughnut } from "react-chartjs-2";
+import FlightIcon from "@mui/icons-material/Flight";
+import PreviewIcon from "@mui/icons-material/Preview";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip as ChartTooltip,
-  Legend,
-  ArcElement,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Grid,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Tooltip,
+    Typography
+} from "@mui/material";
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Tooltip as ChartTooltip,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title
 } from "chart.js";
-import AxiosInstance from "../components/AxiosInstance";
 import dayjs from "dayjs";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Bar, Doughnut } from "react-chartjs-2";
+import { useNavigate } from "react-router-dom";
+import AxiosInstance from "../components/AxiosInstance";
 
 // Register Chart.js components
 ChartJS.register(
@@ -59,6 +60,10 @@ ChartJS.register(
   Legend,
   ArcElement
 );
+
+// Global Chart defaults for dark theme
+ChartJS.defaults.color = '#fff';
+ChartJS.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
 
 const Dashboard = () => {
   const [flights, setFlights] = useState([]); // State for flights data
@@ -189,9 +194,11 @@ const Dashboard = () => {
     labels: Object.keys(flightsByDay),
     datasets: [
       {
-        label: "Voos por Dia (Aprovados)",
+        label: "Flights per Day (Approved)",
         data: Object.values(flightsByDay),
-        backgroundColor: "#1976d2",
+        backgroundColor: "#4dabf5", // Light Blue
+        borderColor: "#2196f3",
+        borderWidth: 1,
       },
     ],
   };
@@ -207,15 +214,17 @@ const Dashboard = () => {
     labels: Object.keys(aircraftCount),
     datasets: [
       {
-        label: "Tipos de Aeronave (Aprovados)",
+        label: "Aircraft Types (Approved)",
         data: Object.values(aircraftCount),
         backgroundColor: [
-          "#1976d2",
-          "#ff9800",
-          "#4caf50",
-          "#f44336",
-          "#9c27b0",
+          "#4dabf5", // Blue
+          "#f50057", // Pink
+          "#2ecc71", // Green
+          "#f1c40f", // Yellow
+          "#9c27b0", // Purple
         ],
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
       },
     ],
   };
@@ -228,38 +237,56 @@ const Dashboard = () => {
   };
 
   const barChartOptions = {
-    responsive: false, // Evita o problema do "limbo"
-    maintainAspectRatio: false, // Permite definir altura customizada
+    responsive: true, 
+    maintainAspectRatio: false, 
     scales: {
       y: {
         beginAtZero: true,
+        grid: { color: 'rgba(255,255,255,0.1)' }
       },
+      x: {
+        grid: { color: 'rgba(255,255,255,0.1)' }
+      }
     },
+    plugins: {
+        legend: { labels: { color: 'white' } }
+    }
   };
   
   const doughnutChartOptions = {
-    responsive: false, // Evita bug de redimensionamento infinito
+    responsive: true, 
     maintainAspectRatio: false,
+    plugins: {
+        legend: { position: 'right', labels: { color: 'white' } }
+    }
   };
   
   return (
-    <Container maxWidth="lg">
-      <Typography variant="h4" sx={{ my: 3, textAlign: "center" }}>
-        My Flights
+    <Container maxWidth="xl">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
+        
+      <Typography variant="h4" sx={{ my: 3, textAlign: "left", fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(77, 171, 245, 0.5)' }}>
+        PILOT DASHBOARD
       </Typography>
 
       {/* Info Cards */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Latest Flight Card */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
-            <AirplanemodeActiveIcon sx={{ fontSize: 40, color: "#1976d2" }} />
+          <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+            <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(33, 150, 243, 0.1)', mr: 2, ml: 1 }}>
+                <AirplanemodeActiveIcon sx={{ fontSize: 40, color: "#4dabf5" }} />
+            </Box>
             <CardContent>
-              <Typography variant="h6">Latest Flight Plan</Typography>
-              <Typography variant="h5">
+              <Typography variant="subtitle2" color="textSecondary">LATEST FLIGHT PLAN</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                 {lastFlight
                   ? `${lastFlight.departure_airport} ✈ ${lastFlight.arrival_airport}`
-                  : "Nenhum voo"}
+                  : "N/A"}
               </Typography>
             </CardContent>
           </Card>
@@ -267,154 +294,180 @@ const Dashboard = () => {
 
         {/* Total Hours Card */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
-            <AccessTimeIcon sx={{ fontSize: 40, color: "#ff9800" }} />
+          <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+            <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(245, 0, 87, 0.1)', mr: 2, ml: 1 }}>
+                <AccessTimeIcon sx={{ fontSize: 40, color: "#f50057" }} />
+            </Box>
             <CardContent>
-              <Typography variant="h6">Total Hours</Typography>
-              <Typography variant="h5">{totalDuration}h</Typography>
+              <Typography variant="subtitle2" color="textSecondary">TOTAL FLIGHT TIME</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{totalDuration}h</Typography>
             </CardContent>
           </Card>
         </Grid>
 
         {/* Total Flights Card */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
-            <FlightIcon sx={{ fontSize: 40, color: "#1976d2" }} />
+          <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+            <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(46, 204, 113, 0.1)', mr: 2, ml: 1 }}>
+                <FlightIcon sx={{ fontSize: 40, color: "#2ecc71" }} />
+            </Box>
             <CardContent>
-              <Typography variant="h6">Total Flights</Typography>
-              <Typography variant="h5">{totalFlights}</Typography>
+              <Typography variant="subtitle2" color="textSecondary">COMPLETED FLIGHTS</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{totalFlights}</Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
       {/* Flights Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: "auto" }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#1976d2" }}>
-              {[
-                "Flight",
-                "Dep",
-                "Arr",
-                "Date",
-                "Network",
-                "Duration",
-                "Aircraft",
-                "Status",
-                "Action",
-              ].map((header, index) => (
-                <TableCell
-                  key={index}
-                  sx={{ color: "#fff", fontWeight: "bold", cursor: "pointer" }}
-                  onClick={() => handleSort(header.toLowerCase())}
-                >
-                  {header} {sortConfig.key === header.toLowerCase() && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {flights.slice(0, 5).map((flight) => (
-              <TableRow key={flight.id}>
-                <TableCell>{flight.flight_icao} {flight.flight_number}</TableCell>
-                <TableCell>{flight.departure_airport}</TableCell>
-                <TableCell>{flight.arrival_airport}</TableCell>
-                <TableCell>{dayjs(flight.registration_date).format("MM/DD/YYYY")}</TableCell>
-                <TableCell><Chip label={flight.network || "N/A"} color="primary" /></TableCell>
-                <TableCell>{flight.flight_duration}</TableCell>
-                <TableCell>{flight.aircraft}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={flight.status || "Scheduled"}
-                    color={
-                      flight.status === "Approved"
-                        ? "success"
-                        : flight.status === "Rejected"
-                        ? "error"
-                        : "warning"
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Tooltip title="Review flight log" placement="top" arrow>
-                    <IconButton component="a"  href={`/app/briefing/${flight.id}`}>
-                      <PreviewIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Edit" placement="top" arrow>
-                    <IconButton
-                      onClick={() => handleEdit(flight.id)}
-                      disabled={flight.status === "Approved" || flight.status === "Rejected"}
+      <Paper sx={{ width: '100%', mb: 4, overflow: 'hidden', p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Recent Flights</Typography>
+             <Button variant="outlined" size="small" onClick={() => navigate('/app/my-flights')}>View All</Button>
+          </Box>
+        <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader>
+            <TableHead>
+                <TableRow>
+                {[
+                    "Flight",
+                    "Dep",
+                    "Arr",
+                    "Date",
+                    "Network",
+                    "Duration",
+                    "Aircraft",
+                    "Status",
+                    "Action",
+                ].map((header, index) => (
+                    <TableCell
+                    key={index}
+                    sx={{ fontWeight: "bold", cursor: "pointer" }}
+                    onClick={() => handleSort(header.toLowerCase())}
                     >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete" placement="top" arrow>
-                    <IconButton
-                      color="error"
-                      disabled={flight.status === "Approved"}
-                      onClick={() => handleDeleteClick(flight.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    {header} {sortConfig.key === header.toLowerCase() && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </TableCell>
+                ))}
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {flights.slice(0, 5).map((flight) => (
+                <TableRow key={flight.id} hover>
+                    <TableCell><Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography></TableCell>
+                    <TableCell>{flight.departure_airport}</TableCell>
+                    <TableCell>{flight.arrival_airport}</TableCell>
+                    <TableCell>{dayjs(flight.registration_date).format("MM/DD/YYYY")}</TableCell>
+                    <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }} /></TableCell>
+                    <TableCell>{flight.flight_duration}</TableCell>
+                    <TableCell>{flight.aircraft}</TableCell>
+                    <TableCell>
+                    <Chip
+                        label={flight.status || "Scheduled"}
+                        size="small"
+                        color={
+                        flight.status === "Approved"
+                            ? "success"
+                            : flight.status === "Rejected"
+                            ? "error"
+                            : "warning"
+                        }
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                    </TableCell>
+                    <TableCell>
+                    <Tooltip title="Details">
+                        <IconButton size="small" href={`/app/briefing/${flight.id}`} sx={{ color: '#4dabf5' }}>
+                        <PreviewIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Edit">
+                        <span>
+                        <IconButton
+                            size="small"
+                            onClick={() => handleEdit(flight.id)}
+                            disabled={flight.status === "Approved" || flight.status === "Rejected"}
+                            sx={{ color: '#fff' }}
+                        >
+                            <EditIcon fontSize="small"  />
+                        </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <span>
+                        <IconButton
+                            size="small"
+                            disabled={flight.status === "Approved"}
+                            onClick={() => handleDeleteClick(flight.id)}
+                            sx={{ color: '#f50057' }}
+                        >
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        </span>
+                    </Tooltip>
+                    </TableCell>
+                </TableRow>
+                ))}
+            </TableBody>
+            </Table>
+        </TableContainer>
+      </Paper>
 
       {/* Charts */}
-      <Grid container spacing={2} sx={{ mt: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ p: 2, minHeight: 400 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>  
-            Flights per Day (Last 30 Days)
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={8}>
+          <Card sx={{ p: 3, minHeight: 400 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>  
+            Flight Activity (30 Days)
             </Typography>
-            <Bar data={barChartData} options={barChartOptions} width={400} height={300} />
+            <Box sx={{ height: 320 }}>
+                <Bar data={barChartData} options={barChartOptions} />
+            </Box>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ p: 2, minHeight: 400 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-            Aircraft Types (Last 30 Days)
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 3, minHeight: 400 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Fleet Usage
             </Typography>
-            <Doughnut data={doughnutChartData} options={doughnutChartOptions} width={400} height={300} />
+            <Box sx={{ height: 320 }}>
+                <Doughnut data={doughnutChartData} options={doughnutChartOptions} />
+            </Box>
           </Card>
         </Grid>
       </Grid>
 
       {/* Rankings Cards */}
-      <Grid container spacing={2} sx={{ mt: 3 }}>
+      <Grid container spacing={3}>
         {/* Top 5 Flight Duration */}
         <Grid item xs={12} md={6}>
           <Card sx={{ p: 2 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-              Top 5 Best Flight Times
-              </Typography>
-              <TableContainer component={Paper}>
-                <Table>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <EmojiEventsIcon sx={{ color: "#ffd700", mr: 1 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Top Pilots (Flight Time)</Typography>
+              </Box>
+              <TableContainer>
+                <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>#</TableCell>
-                      <TableCell>Piloto</TableCell>
-                      <TableCell>Tempo Total</TableCell>
+                      <TableCell>Rank</TableCell>
+                      <TableCell>Pilot</TableCell>
+                      <TableCell align="right">Time</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {topDuration.map((user, index) => (
                       <TableRow key={user.pilot__first_name}>
                         <TableCell>
-                          {index === 0 && <EmojiEventsIcon sx={{ color: "gold" }} />}
-                          {index === 1 && <EmojiEventsIcon sx={{ color: "silver" }} />}
-                          {index === 2 && <EmojiEventsIcon sx={{ color: "brown" }} />}
-                          {index > 2 && <Typography>{index + 1}</Typography>}
+                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {index === 0 && <span style={{fontSize:'1.2em'}}>🥇</span>}
+                                {index === 1 && <span style={{fontSize:'1.2em'}}>🥈</span>}
+                                {index === 2 && <span style={{fontSize:'1.2em'}}>🥉</span>}
+                                {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
+                           </Box>
                         </TableCell>
                         <TableCell>{`${user.pilot__first_name} ${user.pilot__last_name}`}</TableCell>
-                        <TableCell>{formatDuration(user.total_duration)}</TableCell>
+                        <TableCell align="right" sx={{ fontFamily: 'monospace', color: '#4dabf5' }}>{formatDuration(user.total_duration)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -428,29 +481,32 @@ const Dashboard = () => {
         <Grid item xs={12} md={6}>
           <Card sx={{ p: 2 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-              Top 5 Total Flights
-              </Typography>
-              <TableContainer component={Paper}>
-                <Table>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <EmojiEventsIcon sx={{ color: "#silver", mr: 1 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Top Pilots (Flights)</Typography>
+              </Box>
+              <TableContainer>
+                <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>#</TableCell>
-                      <TableCell>Piloto</TableCell>
-                      <TableCell>Total de Voos</TableCell>
+                      <TableCell>Rank</TableCell>
+                      <TableCell>Pilot</TableCell>
+                      <TableCell align="right">Flights</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {topFlights.map((user, index) => (
                       <TableRow key={user.pilot__first_name}>
                         <TableCell>
-                          {index === 0 && <EmojiEventsIcon sx={{ color: "gold" }} />}
-                          {index === 1 && <EmojiEventsIcon sx={{ color: "silver" }} />}
-                          {index === 2 && <EmojiEventsIcon sx={{ color: "brown" }} />}
-                          {index > 2 && <Typography>{index + 1}</Typography>}
+                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {index === 0 && <span style={{fontSize:'1.2em'}}>🥇</span>}
+                                {index === 1 && <span style={{fontSize:'1.2em'}}>🥈</span>}
+                                {index === 2 && <span style={{fontSize:'1.2em'}}>🥉</span>}
+                                {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
+                           </Box>
                         </TableCell>
                         <TableCell>{`${user.pilot__first_name} ${user.pilot__last_name}`}</TableCell>
-                        <TableCell>{user.total_flights}</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>{user.total_flights}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -462,20 +518,32 @@ const Dashboard = () => {
       </Grid>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Confirmar Exclusão</DialogTitle>
+      <Dialog 
+        open={openDialog} 
+        onClose={() => setOpenDialog(false)}
+        PaperProps={{
+            sx: {
+                backgroundColor: 'rgba(10, 25, 41, 0.9)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white'
+            }
+        }}
+      >
+        <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
-          <DialogContentText>Tem certeza de que deseja excluir este voo?</DialogContentText>
+          <DialogContentText sx={{ color: 'rgba(255,255,255,0.7)' }}>Are you sure you want to delete this flight?</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="primary">
-            Cancelar
+          <Button onClick={() => setOpenDialog(false)} sx={{ color: 'white' }}>
+            Cancel
           </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Excluir
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
+      </motion.div>
     </Container>
   );
 };
