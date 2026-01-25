@@ -4,6 +4,7 @@ import Layout from './components/Layout'; // New Layout Wrapper
 import aviationTheme from './theme/aviationTheme'; // Global Theme
 
 import ProtectedRoutes from './components/ProtectedRoutes';
+import AdminRedirect from './pages/AdminRedirect';
 import AwardDetail from './pages/AwardDetail';
 import Awards from './pages/Awards';
 import Dashboard from './pages/Dashboard';
@@ -32,6 +33,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/request/passworld_reset" element={<PassworldResetRequest />} />
         <Route path="/password_reset" element={<PasswordResetConfirm />} />
+        
+        {/* Redirect /admin to Django Admin */}
+        <Route path="/admin" element={<AdminRedirect />} />
         
         {/* Protected Application Routes - Wrapped in Layout */}
         <Route path="/app" element={<Layout />}>
