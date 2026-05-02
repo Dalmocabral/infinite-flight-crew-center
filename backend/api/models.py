@@ -176,6 +176,7 @@ class PirepsFlight (models.Model):
     registration_date = models.DateTimeField(default=timezone.now)
     network = models.CharField(max_length=200, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Em análise')
+    submission_type = models.CharField(max_length=20, choices=[('Manual', 'Manual'), ('Auto', 'Auto')], default='Manual')
     observation = models.TextField(max_length=500, null=True, blank=True)  # Permite valores nulos e campos em branco
     # Outros campos relevantes sobre o voo
 

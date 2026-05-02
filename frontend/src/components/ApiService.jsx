@@ -109,6 +109,16 @@ const ApiService = {
       return response.data;
     });
   },
+
+  getUserFlights: (userId) => {
+    return getCached(`user_flights_${userId}`, TTL.flights, async () => {
+      const response = await axios.get(`${BASE_URL}/users/${userId}/flights?apikey=${API_KEY}`);
+      if (response.data.result && response.data.result.data) {
+        return response.data.result.data;
+      }
+      return [];
+    });
+  },
 };
 
 export default ApiService;

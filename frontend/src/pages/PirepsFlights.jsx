@@ -25,6 +25,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
+import ApiService from '../components/ApiService';
 import aircraftChoices from '../data/aircraftChoices';
 
 const PirepsFlights = () => {
@@ -44,12 +45,65 @@ const PirepsFlights = () => {
   const [dialogMessage, setDialogMessage] = useState('');
   const [dialogType, setDialogType] = useState('success');
 
+  const [submissionType, setSubmissionType] = useState('Manual');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [apiMessage, setApiMessage] = useState(null);
+
   useEffect(() => {
     if (leg) {
       setDepartureAirport(leg.from_airport);
       setArrivalAirport(leg.to_airport);
+      verifyFlightWithApi(leg.from_airport, leg.to_airport);
     }
   }, [leg]);
+
+  const verifyFlightWithApi = async (from, to) => {
+    setIsVerifying(true);
+    setApiMessage(null);
+    try {
+      const userRes = await AxiosInstance.get('users/me/');
+      const usernameIFC = userRes.data.usernameIFC;
+
+      if (!usernameIFC) {
+        setApiMessage({ type: 'warning', text: 'No IFC Username found in your profile. Proceeding with Manual submission.' });
+        setIsVerifying(false);
+        return;
+      }
+
+      const ifcUser = await ApiService.userStatusByUsername(usernameIFC);
+      if (!ifcUser) {
+        setApiMessage({ type: 'warning', text: `IFC account "${usernameIFC}" not found in the Infinite Flight database. Proceeding with Manual submission.` });
+        setIsVerifying(false);
+        return;
+      }
+
+      const flights = await ApiService.getUserFlights(ifcUser.id);
+      
+      const match = flights.find(f => f.originAirport === from && f.destinationAirport === to);
+
+      if (match) {
+        let matchedServer = 'Casual';
+        if (match.server.includes('Training')) matchedServer = 'Training';
+        if (match.server.includes('Expert')) matchedServer = 'Expert';
+
+        const hours = Math.floor(match.totalTime / 60);
+        const minutes = Math.floor(match.totalTime % 60);
+
+        setNetwork(matchedServer);
+        setFlightDuration(dayjs().hour(hours).minute(minutes));
+        setSubmissionType('Auto');
+        setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
+      } else {
+        setSubmissionType('Manual');
+        setApiMessage({ type: 'warning', text: 'Your flight was not found in the Infinite Flight database. Please fill manually.' });
+      }
+    } catch (error) {
+      console.error('Error verifying flight:', error);
+      setApiMessage({ type: 'warning', text: 'Failed to connect to the Infinite Flight database. Proceeding with Manual submission.' });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -71,7 +125,12 @@ const PirepsFlights = () => {
       aircraft: aircraft,
       flight_duration: formattedDuration,
       network: network,
+      submission_type: submissionType,
     };
+    
+    if (submissionType === 'Auto') {
+      formData.status = 'Approved';
+    }
 
     try {
       await AxiosInstance.post('pirepsflight/', formData);
@@ -85,6 +144,7 @@ const PirepsFlights = () => {
       setArrivalAirport('');
       setAircraft('');
       setFlightDuration(dayjs('2022-04-17T00:00'));
+      setSubmissionType('Manual');
     } catch (error) {
       console.error('Error saving Pireps:', error.response ? error.response.data : error.message);
       setDialogMessage('Error saving Pireps. Please check the data and try again.');
@@ -117,12 +177,22 @@ const PirepsFlights = () => {
             FILE MANUAL PIREP
           </Typography>
           <Typography variant="body1" gutterBottom sx={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center', mb: 3 }}>
-            Use this form to manually submit a flight report if your ACARS failed.
+            Use this form to manually submit a flight report or automatically verify a flown leg.
           </Typography>
 
-          <Alert severity="warning" sx={{ mb: 4, borderRadius: '12px', '& .MuiAlert-icon': { color: '#ff9800' } }}>
-            Due to high demand, flight approval may take up to 3 days. Thank you for your patience.
-          </Alert>
+          {isVerifying ? (
+             <Alert severity="info" sx={{ mb: 4, borderRadius: '12px' }}>
+               Verifying flight with the Infinite Flight database...
+             </Alert>
+          ) : apiMessage ? (
+             <Alert severity={apiMessage.type} sx={{ mb: 4, borderRadius: '12px', '& .MuiAlert-icon': { color: apiMessage.type === 'warning' ? '#ff9800' : '#2ecc71' } }}>
+               {apiMessage.text}
+             </Alert>
+          ) : (
+            <Alert severity="warning" sx={{ mb: 4, borderRadius: '12px', '& .MuiAlert-icon': { color: '#ff9800' } }}>
+              Due to high demand, manual flight approval may take up to 3 days. Thank you for your patience.
+            </Alert>
+          )}
 
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>

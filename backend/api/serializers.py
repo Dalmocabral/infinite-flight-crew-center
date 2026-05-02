@@ -49,7 +49,7 @@ class PirepsFlightSerializer(serializers.ModelSerializer):
     class Meta:
         model = PirepsFlight
         fields = ('id', 'flight_icao', 'flight_number', 'departure_airport', 'arrival_airport', 
-                  'aircraft', 'flight_duration', 'network', 'registration_date', 'status', 'observation')
+                  'aircraft', 'flight_duration', 'network', 'registration_date', 'status', 'submission_type', 'observation')
         read_only_fields = ('pilot',)  # Impede alteração do piloto
 
 class AwardsSerializer(serializers.ModelSerializer):

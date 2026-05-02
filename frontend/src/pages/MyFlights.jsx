@@ -111,6 +111,7 @@ const MyFlights = () => {
                     {!isMobile && <TableCell sx={{ fontWeight: 'bold' }}>Network</TableCell>}
                     {!isMobile && <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>}
                     <TableCell sx={{ fontWeight: 'bold' }}>Aircraft</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Validation</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                 </TableRow>
@@ -127,6 +128,18 @@ const MyFlights = () => {
                     {!isMobile && <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }} /></TableCell>}
                     {!isMobile && <TableCell>{flight.flight_duration}</TableCell>}
                     <TableCell>{flight.aircraft}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
+                        size="small"
+                        variant="outlined"
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          borderColor: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.3)', 
+                          color: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.7)' 
+                        }}
+                      />
+                    </TableCell>
                     <TableCell>
                         <Chip
                         label={flight.status || 'Scheduled'}
