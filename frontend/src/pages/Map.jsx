@@ -1,5 +1,4 @@
 import { Box, FormControl, MenuItem, Paper, Select, Typography } from "@mui/material";
-import axios from "axios";
 import L from "leaflet";
 import "leaflet-rotatedmarker";
 import "leaflet/dist/leaflet.css";
@@ -14,7 +13,6 @@ const sessions = {
 };
 
 const MapWithFlights = () => {
-    // Force dark mode for map to match theme
   const darkMode = true; 
 
   const [selectedSession, setSelectedSession] = useState(
@@ -23,17 +21,49 @@ const MapWithFlights = () => {
 
   const [flights, setFlights] = useState([]);
   const [selectedFlight, setSelectedFlight] = useState(null); 
+  const [isIdle, setIsIdle] = useState(false);
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markersLayer = useRef(null);
   const tileLayer = useRef(null);
   const polylineLayer = useRef(null); 
   const routeLayer = useRef(null); 
+  const lastActivityRef = useRef(Date.now());
+
+  // Idle detection logic
+  useEffect(() => {
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+      if (isIdle) {
+        setIsIdle(false);
+      }
+    };
+
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+    window.addEventListener("scroll", handleActivity);
+    window.addEventListener("touchstart", handleActivity);
+
+    const idleCheckInterval = setInterval(() => {
+      // 15 minutes of inactivity
+      if (Date.now() - lastActivityRef.current > 15 * 60 * 1000) {
+        setIsIdle(true);
+      }
+    }, 10000);
+
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("scroll", handleActivity);
+      window.removeEventListener("touchstart", handleActivity);
+      clearInterval(idleCheckInterval);
+    };
+  }, [isIdle]);
 
   useEffect(() => {
     if (!map.current) {
       map.current = L.map(mapContainer.current, {
-          zoomControl: false // We will add it manually or customized if needed
+          zoomControl: false 
       }).setView([-12.1632, -53.5151], 3);
 
       L.control.zoom({
@@ -61,6 +91,8 @@ const MapWithFlights = () => {
   }, []);
 
   useEffect(() => {
+    if (isIdle) return; // Suspende o polling se inativo
+
     const fetchFlights = async () => {
       try {
         const data = await ApiService.getFlightData(selectedSession);
@@ -71,11 +103,11 @@ const MapWithFlights = () => {
     };
 
     fetchFlights(); 
-
-    const interval = setInterval(fetchFlights, 10000); 
+    // Mínimo de 15 segundos para /flights
+    const interval = setInterval(fetchFlights, 15000); 
 
     return () => clearInterval(interval); 
-  }, [selectedSession]);
+  }, [selectedSession, isIdle]);
 
   useEffect(() => {
     if (!map.current || !markersLayer.current) return;
@@ -149,10 +181,8 @@ const MapWithFlights = () => {
 
   const fetchFlightPlan = async (flightId) => {
     try {
-      const response = await axios.get(
-        `https://api.infiniteflight.com/public/v2/sessions/${selectedSession}/flights/${flightId}/flightplan?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw`
-      );
-      const flightPlanData = response.data.result.flightPlanItems;
+      const data = await ApiService.getFlightPlan(selectedSession, flightId);
+      const flightPlanData = data.result.flightPlanItems;
 
       const validItems = flightPlanData.filter(
         (item) => item.location.latitude !== 0 && item.location.longitude !== 0
@@ -218,6 +248,12 @@ const MapWithFlights = () => {
               ))}
             </Select>
          </FormControl>
+
+         {isIdle && (
+            <Typography variant="caption" sx={{ color: 'red', mt: 2, display: 'block' }}>
+              Inativo. Atualizações pausadas. Mexa o mouse para retomar.
+            </Typography>
+         )}
       </Paper>
 
       <div ref={mapContainer} style={{ width: "100%", height: "100%" }} />

@@ -20,6 +20,7 @@ import ReactFlagsSelect from 'react-flags-select';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
+import ApiService from '../components/ApiService';
 const Register = () => {
   const [showPassword1, setShowPassword1] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
@@ -53,23 +54,8 @@ const Register = () => {
 
   const checkUsernameIFC = async (username) => {
     try {
-      const params = { discourseNames: [username] };
-      const headers = { 'Content-type': 'application/json', 'Accept': 'text/plain' };
-      const url = 'https://api.infiniteflight.com/public/v2/user/stats?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw';
-
-      const response = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(params),
-        headers,
-      });
-
-      if (!response.ok) {
-        return response.status;
-      }
-
-      const data = await response.json();
-
-      if (data.result && data.result.length > 0 && data.result[0].userId) {
+      const userStat = await ApiService.userStatusByUsername(username);
+      if (userStat && userStat.userId) {
         return 200;
       } else {
         return 404;

@@ -1,10 +1,12 @@
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StraightenIcon from '@mui/icons-material/Straighten';
+import DescriptionIcon from '@mui/icons-material/Description';
 import {
     Box,
     Button,
     Container,
     Grid,
+    IconButton,
     List,
     ListItem,
     ListItemText,
@@ -173,6 +175,7 @@ const AwardDetail = () => {
                     <TableCell sx={{ fontWeight: 'bold' }}>Destination</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Distance</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Est. Time</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Simbrief FPL</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
@@ -227,18 +230,27 @@ const AwardDetail = () => {
                             />
                         </Box>
                         </TableCell>
+                      <TableCell align="center">
+                          <IconButton
+                            color="info"
+                            href={`https://dispatch.simbrief.com/options/custom?orig=${leg.from_airport}&dest=${leg.to_airport}`}
+                            target="_blank"
+                          >
+                            <DescriptionIcon />
+                          </IconButton>
+                      </TableCell>
                       <TableCell>
-                        <Button
-                          variant={leg.pirep_status === 'Approved' ? "outlined" : "contained"}
-                          color={leg.pirep_status === 'Approved' ? "success" : "primary"}
-                          size="small"
-                          onClick={() => {
-                            navigate('/app/pirepsflights', { state: { leg } });
-                          }}
-                          disabled={leg.pirep_status === 'Approved'}
-                        >
-                          {leg.pirep_status === 'Approved' ? 'Completed' : 'Fly Leg'}
-                        </Button>
+                          <Button
+                            variant={leg.pirep_status === 'Approved' ? "outlined" : "contained"}
+                            color={leg.pirep_status === 'Approved' ? "success" : "primary"}
+                            size="small"
+                            onClick={() => {
+                              navigate('/app/pirepsflights', { state: { leg } });
+                            }}
+                            disabled={leg.pirep_status === 'Approved'}
+                          >
+                            {leg.pirep_status === 'Approved' ? 'Completed' : 'Fly Leg'}
+                          </Button>
                       </TableCell>
                     </TableRow>
                   ))}

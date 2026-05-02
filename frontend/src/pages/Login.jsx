@@ -53,6 +53,7 @@ const Login = () => {
       });
 
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('loginTimestamp', Date.now().toString());
 
       setSnackbarMessage('Login successful! Welcome aboard.');
       setSnackbarSeverity('success');

@@ -74,17 +74,8 @@ const ProfileEdit = () => {
 
   const checkUsernameIFC = async (username) => {
     try {
-      const response = await fetch(
-        'https://api.infiniteflight.com/public/v2/user/stats?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw',
-        {
-          method: 'POST',
-          headers: { 'Content-type': 'application/json', Accept: 'text/plain' },
-          body: JSON.stringify({ discourseNames: [username] }),
-        }
-      );
-      if (!response.ok) return response.status;
-      const data = await response.json();
-      return data.result && data.result.length > 0 && data.result[0].userId ? 200 : 404;
+      const userStat = await ApiService.userStatusByUsername(username);
+      return userStat && userStat.userId ? 200 : 404;
     } catch {
       return 500;
     }

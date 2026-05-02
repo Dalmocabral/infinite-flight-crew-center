@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import Gravatar from '../components/Gravatar';
+import ApiService from '../components/ApiService';
 
 const UserDetail = () => {
   const { id } = useParams();
@@ -99,19 +100,9 @@ const UserDetail = () => {
     }
 
     try {
-      const params = { discourseNames: [username] };
-      const headers = { 'Content-type': 'application/json', Accept: 'text/plain' };
-      const url = 'https://api.infiniteflight.com/public/v2/user/stats?apikey=nvo8c790hfa9q3duho2jhgd2jf8tgwqw';
-
-      const response = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify(params),
-        headers,
-      });
-
-      const data = await response.json();
-      if (data.errorCode === 0 && data.result.length > 0) {
-        setIfcData(data.result[0]);
+      const userStat = await ApiService.userStatusByUsername(username);
+      if (userStat) {
+        setIfcData(userStat);
       }
     } catch (error) {
       console.error('Erro ao buscar dados do Infinite Flight:', error);
