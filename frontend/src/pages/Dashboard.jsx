@@ -4,6 +4,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"; // Trophy icon
 import FlightIcon from "@mui/icons-material/Flight";
+import FlightLandIcon from "@mui/icons-material/FlightLand";
+import StarRateIcon from "@mui/icons-material/StarRate";
+import WarningIcon from "@mui/icons-material/Warning";
 import PreviewIcon from "@mui/icons-material/Preview";
 import {
     Box,
@@ -47,6 +50,7 @@ import { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
+import ApiService from "../components/ApiService";
 
 // Register Chart.js components
 ChartJS.register(
@@ -72,13 +76,32 @@ const Dashboard = () => {
   const [openDialog, setOpenDialog] = useState(false); // State for delete confirmation dialog
   const [selectedFlightId, setSelectedFlightId] = useState(null); // State for selected flight ID
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" }); // State for table sorting
+  const [ifStats, setIfStats] = useState(null);
+  const [ifUsername, setIfUsername] = useState(null);
   const navigate = useNavigate();
 
   // Fetch flights and rankings on component mount
   useEffect(() => {
     fetchFlights();
     fetchRankings();
+    fetchIfStats();
   }, []);
+
+  const fetchIfStats = async () => {
+    try {
+      const userRes = await AxiosInstance.get('/users/me/');
+      const username = userRes.data.usernameIFC;
+      if (username) {
+        setIfUsername(username);
+        const stats = await ApiService.userStatusByUsername(username);
+        if (stats) {
+          setIfStats(stats);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching IF stats:', error);
+    }
+  };
 
   // Fetch flights data from the API
   const fetchFlights = async () => {
@@ -318,6 +341,71 @@ const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Official Infinite Flight Stats */}
+      {ifUsername ? (
+        ifStats ? (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', color: '#fff' }}>
+              Infinite Flight Official Stats (Live)
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+                  <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(255, 193, 7, 0.1)', mr: 2, ml: 1 }}>
+                      <StarRateIcon sx={{ fontSize: 40, color: "#ffc107" }} />
+                  </Box>
+                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                    <Typography variant="caption" color="textSecondary">PILOT GRADE</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Grade {ifStats.grade}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+                  <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(77, 171, 245, 0.1)', mr: 2, ml: 1 }}>
+                      <FlightLandIcon sx={{ fontSize: 40, color: "#4dabf5" }} />
+                  </Box>
+                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                    <Typography variant="caption" color="textSecondary">TOTAL LANDINGS</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{ifStats.landingCount}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+                  <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(156, 39, 176, 0.1)', mr: 2, ml: 1 }}>
+                      <AccessTimeIcon sx={{ fontSize: 40, color: "#9c27b0" }} />
+                  </Box>
+                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                    <Typography variant="caption" color="textSecondary">IF FLIGHT TIME</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{Math.floor(ifStats.flightTime / 60)}h</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+                  <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(244, 67, 54, 0.1)', mr: 2, ml: 1 }}>
+                      <WarningIcon sx={{ fontSize: 40, color: "#f44336" }} />
+                  </Box>
+                  <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                    <Typography variant="caption" color="textSecondary">VIOLATIONS</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: ifStats.violations > 5 ? '#f44336' : 'inherit' }}>{ifStats.violations}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Box>
+        ) : (
+          <Typography sx={{ color: 'rgba(255,255,255,0.5)', mb: 4 }}>Loading Official IF Stats...</Typography>
+        )
+      ) : (
+        <Paper sx={{ p: 2, mb: 4, backgroundColor: 'rgba(255, 152, 0, 0.1)', border: '1px solid rgba(255, 152, 0, 0.3)', borderRadius: '12px' }}>
+            <Typography sx={{ color: '#ff9800' }}>
+              <strong>Sync your Infinite Flight profile!</strong> Add your "Username IFC" in your profile settings to display your official stats here.
+            </Typography>
+        </Paper>
+      )}
 
       {/* Flights Table */}
       <Paper sx={{ width: '100%', mb: 4, overflow: 'hidden', p: 2 }}>

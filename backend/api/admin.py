@@ -5,8 +5,20 @@ class FlightLegInline(admin.TabularInline):
     model = FlightLeg
     extra = 1
 
+@admin.register(Aircraft)
+class AircraftAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'if_id')
+    list_editable = ('category',)
+    search_fields = ('name',)
+    list_filter = ('category',)
+
 class AllowedAircraftInline(admin.TabularInline):
     model = AllowedAircraft
+    extra = 1
+    autocomplete_fields = ['aircraft']
+
+class AllowedCategoryInline(admin.TabularInline):
+    model = AllowedCategory
     extra = 1
 
 class AllowedIcaoInline(admin.TabularInline):
@@ -39,7 +51,7 @@ class PirepsFlightAdmin(admin.ModelAdmin):
 class AwardAdmin(admin.ModelAdmin):
     # Added description and name as requested
     list_display = ('name', 'description', 'type')
-    inlines = [FlightLegInline, AllowedAircraftInline, AllowedIcaoInline]
+    inlines = [FlightLegInline, AllowedAircraftInline, AllowedCategoryInline, AllowedIcaoInline]
 
 # Remove the old registration for Award and PirepsFlight if they exist (Award is handled by decorator, but we'll ensure clean file)
 

@@ -54,10 +54,34 @@ class PirepsFlightSerializer(serializers.ModelSerializer):
 
 class AwardsSerializer(serializers.ModelSerializer):
     total_legs = serializers.SerializerMethodField()  # Campo calculado para o total de pernas
+    allowed_aircrafts = serializers.SerializerMethodField()
+    allowed_categories = serializers.SerializerMethodField()
 
     class Meta:
         model = Award
         fields = '__all__'
+
+    def get_allowed_aircrafts(self, obj):
+        # Local nested serialization to avoid circular dependencies if any
+        direct_aircrafts = [{"id": a.id, "aircraft_id": str(a.aircraft.if_id), "aircraft_name": a.aircraft.name} for a in obj.allowed_aircrafts.all()]
+        
+        # Include aircrafts from allowed categories
+        allowed_cats = [c.category for c in obj.allowed_categories.all()]
+        if allowed_cats:
+            from .models import Aircraft
+            cat_aircrafts = Aircraft.objects.filter(category__in=allowed_cats)
+            for ac in cat_aircrafts:
+                if not any(d['aircraft_id'] == str(ac.if_id) for d in direct_aircrafts):
+                    direct_aircrafts.append({
+                        "id": f"cat-{ac.if_id}",
+                        "aircraft_id": str(ac.if_id),
+                        "aircraft_name": ac.name
+                    })
+        return direct_aircrafts
+
+    def get_allowed_categories(self, obj):
+        return [{"id": c.id, "category": c.category} for c in obj.allowed_categories.all()]
+
 
     def get_total_legs(self, obj):
         # Retorna o número total de pernas associadas ao prêmio
@@ -69,8 +93,21 @@ class FlightLegSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AllowedAircraftSerializer(serializers.ModelSerializer):
+    aircraft_name = serializers.CharField(source='aircraft.name', read_only=True)
+    aircraft_id = serializers.UUIDField(source='aircraft.if_id', read_only=True)
+
     class Meta:
         model = AllowedAircraft
+        fields = ['id', 'aircraft', 'aircraft_name', 'aircraft_id']
+
+class AllowedCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AllowedCategory
+        fields = '__all__'
+
+class AircraftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Aircraft
         fields = '__all__'
 
 class AllowedIcaoSerializer(serializers.ModelSerializer):

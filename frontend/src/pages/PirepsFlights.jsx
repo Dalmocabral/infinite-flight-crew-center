@@ -26,12 +26,11 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import ApiService from '../components/ApiService';
-import aircraftChoices from '../data/aircraftChoices';
 
 const PirepsFlights = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { leg } = location.state || {};
+  const { leg, award } = location.state || {};
 
   const [flightIcao, setFlightIcao] = useState('');
   const [flightNumber, setFlightNumber] = useState('');
@@ -48,8 +47,16 @@ const PirepsFlights = () => {
   const [submissionType, setSubmissionType] = useState('Manual');
   const [isVerifying, setIsVerifying] = useState(false);
   const [apiMessage, setApiMessage] = useState(null);
+  
+  const [aircraftList, setAircraftList] = useState([]);
 
   useEffect(() => {
+    AxiosInstance.get('aircrafts/')
+      .then(res => {
+          setAircraftList(res.data);
+      })
+      .catch(err => console.error('Error fetching aircrafts:', err));
+      
     if (leg) {
       setDepartureAirport(leg.from_airport);
       setArrivalAirport(leg.to_airport);
@@ -82,6 +89,21 @@ const PirepsFlights = () => {
       const match = flights.find(f => f.originAirport === from && f.destinationAirport === to);
 
       if (match) {
+        // Validate Aircraft Rules if any
+        if (award?.allowed_aircrafts && award.allowed_aircrafts.length > 0) {
+            const isAircraftAllowed = award.allowed_aircrafts.some(ac => ac.aircraft_id === match.aircraftId);
+            if (!isAircraftAllowed) {
+                setSubmissionType('Manual');
+                setApiMessage({ type: 'error', text: 'Aircraft mismatch! The aircraft used for this flight does not comply with the Award rules. Auto-PIREP blocked.' });
+                return;
+            } else {
+                const matchedAc = award.allowed_aircrafts.find(ac => ac.aircraft_id === match.aircraftId);
+                if (matchedAc) {
+                    setAircraft(matchedAc.aircraft_name);
+                }
+            }
+        }
+
         let matchedServer = 'Casual';
         if (match.server.includes('Training')) matchedServer = 'Training';
         if (match.server.includes('Expert')) matchedServer = 'Expert';
@@ -128,6 +150,20 @@ const PirepsFlights = () => {
       submission_type: submissionType,
     };
     
+    // Validate manual submission if this is part of an award
+    if (submissionType === 'Manual' && award && (award.allowed_aircrafts?.length > 0 || award.allowed_categories?.length > 0)) {
+        const selectedAcData = aircraftList.find(a => a.name === aircraft);
+        const acCategory = selectedAcData ? selectedAcData.category : 'Uncategorized';
+        
+        const isNameAllowed = award.allowed_aircrafts.some(ac => ac.aircraft_name === aircraft);
+        const isCategoryAllowed = award.allowed_categories.some(cat => cat.category === acCategory);
+        
+        if (!isNameAllowed && !isCategoryAllowed) {
+            setApiMessage({ type: 'error', text: 'Aircraft mismatch! The aircraft used for this manual submission does not comply with the Award rules. Please select a valid aircraft.' });
+            return; // Stop submission
+        }
+    }
+
     if (submissionType === 'Auto') {
       formData.status = 'Approved';
     }
@@ -260,9 +296,9 @@ const PirepsFlights = () => {
                     onChange={(e) => setAircraft(e.target.value)}
                     label="Aircraft"
                   >
-                    {aircraftChoices.map((choice) => (
-                      <MenuItem key={choice.value} value={choice.value}>
-                        {choice.label}
+                    {aircraftList.map((choice) => (
+                      <MenuItem key={choice.if_id} value={choice.name}>
+                        {choice.name} ({choice.category})
                       </MenuItem>
                     ))}
                   </Select>

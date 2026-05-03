@@ -47,6 +47,28 @@ class CustomUser(AbstractUser):
 
 User = get_user_model()
 
+AIRCRAFT_CATEGORIES = [
+    ('XS', 'Extra Small'),
+    ('S', 'Small'),
+    ('M', 'Medium'),
+    ('L', 'Large'),
+    ('XL', 'Extra Large'),
+    ('GA', 'General Aviation'),
+    ('Bizjet', 'Business Jet'),
+    ('Cargo', 'Cargo'),
+    ('Military', 'Military'),
+    ('Uncategorized', 'Uncategorized'),
+]
+
+class Aircraft(models.Model):
+    if_id = models.UUIDField(primary_key=True)
+    name = models.CharField(max_length=255)
+    category = models.CharField(max_length=15, choices=AIRCRAFT_CATEGORIES, default='Uncategorized')
+
+    def __str__(self):
+        return self.name
+
+
 class Award(models.Model):
     CHOICE_TYPE = [
         ('Tour', 'Tour'),  # Tupla (valor para o banco, valor legível)
@@ -83,10 +105,17 @@ class FlightLeg(models.Model):
 
 class AllowedAircraft(models.Model):
     award = models.ForeignKey(Award, related_name='allowed_aircrafts', on_delete=models.CASCADE)
-    aircraft = models.CharField(max_length=5, choices=CHOICE_AIRCRAFT)
+    aircraft = models.ForeignKey(Aircraft, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.aircraft
+        return self.aircraft.name
+
+class AllowedCategory(models.Model):
+    award = models.ForeignKey(Award, related_name='allowed_categories', on_delete=models.CASCADE)
+    category = models.CharField(max_length=15, choices=AIRCRAFT_CATEGORIES)
+
+    def __str__(self):
+        return self.category
 
 class AllowedIcao(models.Model):
     award = models.ForeignKey(Award, related_name='allowed_icao', on_delete=models.CASCADE)
@@ -112,20 +141,30 @@ class UserAward(models.Model):
         completed_flights = 0
         total_flights = self.award.flight_legs.count()
 
-        # Coletar ICAOs permitidos e aeronaves permitidas
+        # Coletar ICAOs permitidos, aeronaves e categorias
         allowed_icaos = set(icao.company_icao.upper() for icao in self.award.allowed_icao.all())
-        allowed_aircrafts = set(aircraft.aircraft for aircraft in self.award.allowed_aircrafts.all())
+        allowed_aircrafts = set(allowed.aircraft.name for allowed in self.award.allowed_aircrafts.all())
+        allowed_categories = set(cat.category for cat in self.award.allowed_categories.all())
 
         for required_flight in self.award.flight_legs.all():
             for user_flight in user_flights:
-                # Verificar se os aeroportos batem
                 if required_flight.from_airport == user_flight.departure_airport and required_flight.to_airport == user_flight.arrival_airport:
-                    
                     # Verificar se precisa checar ICAO (caso haja ICAOs definidos)
                     icao_check = not allowed_icaos or user_flight.flight_icao.upper() in allowed_icaos
-
-                    # Verificar se precisa checar aeronaves (caso haja aeronaves definidas)
-                    aircraft_check = not allowed_aircrafts or user_flight.aircraft in allowed_aircrafts
+                    
+                    # Verificar se precisa checar aeronaves/categorias (caso haja restrição definida)
+                    has_aircraft_restriction = bool(allowed_aircrafts or allowed_categories)
+                    
+                    aircraft_check = True
+                    if has_aircraft_restriction:
+                        aircraft_obj = Aircraft.objects.filter(name=user_flight.aircraft).first()
+                        aircraft_category = aircraft_obj.category if aircraft_obj else 'Uncategorized'
+                        
+                        # Voo é válido se o avião estiver na lista de aviões permitidos OU a categoria do avião estiver nas categorias permitidas
+                        if user_flight.aircraft in allowed_aircrafts or aircraft_category in allowed_categories:
+                            aircraft_check = True
+                        else:
+                            aircraft_check = False
 
                     # Checar se todos os critérios (quando aplicáveis) estão corretos
                     if icao_check and aircraft_check:

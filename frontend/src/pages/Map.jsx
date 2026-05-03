@@ -1,10 +1,11 @@
-import { Box, FormControl, MenuItem, Paper, Select, Typography } from "@mui/material";
+import { Box, FormControl, MenuItem, Paper, Select, Typography, FormControlLabel, Switch } from "@mui/material";
 import L from "leaflet";
 import "leaflet-rotatedmarker";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import airplaneUserIcon from "../assets/image/airplane_user.png";
 import ApiService from "../components/ApiService";
+import AxiosInstance from "../components/AxiosInstance";
 
 const sessions = {
   training: { id: "9ed5512e-b6eb-401f-bab8-42bdbdcf2bab", name: "Training Server" },
@@ -22,6 +23,8 @@ const MapWithFlights = () => {
   const [flights, setFlights] = useState([]);
   const [selectedFlight, setSelectedFlight] = useState(null); 
   const [isIdle, setIsIdle] = useState(false);
+  const [vaUsernames, setVaUsernames] = useState([]);
+  const [showOnlyVA, setShowOnlyVA] = useState(true);
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markersLayer = useRef(null);
@@ -71,9 +74,9 @@ const MapWithFlights = () => {
       }).addTo(map.current);
 
       tileLayer.current = L.tileLayer(
-        "https://api.maptiler.com/maps/dark-v2/{z}/{x}/{y}.png?key=oLMznTPIDCPrc3mGZdoh", 
+        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", 
         {
-          attribution: '© <a href="https://www.maptiler.com/">MapTiler</a> © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
         }
       ).addTo(map.current);
 
@@ -91,12 +94,34 @@ const MapWithFlights = () => {
   }, []);
 
   useEffect(() => {
+    const fetchVaUsers = async () => {
+      try {
+        const response = await AxiosInstance.get('/users/');
+        const usernames = response.data.map(u => u.usernameIFC).filter(Boolean);
+        setVaUsernames(usernames);
+      } catch (error) {
+        console.error('Error fetching VA users:', error);
+      }
+    };
+    fetchVaUsers();
+  }, []);
+
+  useEffect(() => {
     if (isIdle) return; // Suspende o polling se inativo
 
     const fetchFlights = async () => {
       try {
         const data = await ApiService.getFlightData(selectedSession);
-        setFlights(data);
+        if (showOnlyVA) {
+          if (vaUsernames.length > 0) {
+            const filteredData = data.filter(flight => vaUsernames.includes(flight.username));
+            setFlights(filteredData);
+          } else {
+            setFlights([]);
+          }
+        } else {
+          setFlights(data);
+        }
       } catch (error) {
         console.error("Error fetching flight data:", error);
       }
@@ -107,7 +132,7 @@ const MapWithFlights = () => {
     const interval = setInterval(fetchFlights, 15000); 
 
     return () => clearInterval(interval); 
-  }, [selectedSession, isIdle]);
+  }, [selectedSession, isIdle, vaUsernames, showOnlyVA]);
 
   useEffect(() => {
     if (!map.current || !markersLayer.current) return;
@@ -248,6 +273,19 @@ const MapWithFlights = () => {
               ))}
             </Select>
          </FormControl>
+
+         <FormControlLabel
+            control={
+              <Switch
+                checked={showOnlyVA}
+                onChange={(e) => setShowOnlyVA(e.target.checked)}
+                color="primary"
+                size="small"
+              />
+            }
+            label={<Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>Show VA Pilots Only</Typography>}
+            sx={{ mt: 1, ml: 0 }}
+          />
 
          {isIdle && (
             <Typography variant="caption" sx={{ color: 'red', mt: 2, display: 'block' }}>

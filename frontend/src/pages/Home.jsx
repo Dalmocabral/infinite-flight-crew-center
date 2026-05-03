@@ -130,23 +130,25 @@ const Home = () => {
       >
         <Container maxWidth="xl">
             <Toolbar disableGutters>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontFamily: '"Orbitron", sans-serif', fontWeight: 700, color: '#4dabf5', letterSpacing: '2px' }}>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontFamily: '"Orbitron", sans-serif', fontWeight: 700, color: '#4dabf5', letterSpacing: { xs: '0px', md: '2px' }, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                 INFINITE WORLD TOUR
             </Typography>
-            <Button color="inherit" component={Link} to="/" sx={{ mx: 1 }}>
+            <Button color="inherit" component={Link} to="/" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
                 Home
             </Button>
-            <Button color="inherit" component={Link} to="/register" sx={{ mx: 1 }}>
+            <Button color="inherit" component={Link} to="/register" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
                 Sign Up
             </Button>
             <Button 
                 variant="outlined" 
                 onClick={handleLoginClick} 
                 sx={{ 
-                    ml: 2, 
+                    ml: { xs: 1, md: 2 }, 
                     borderColor: '#4dabf5', 
                     color: '#4dabf5',
-                    "&:hover": { borderColor: '#fff', color: '#fff' }
+                    "&:hover": { borderColor: '#fff', color: '#fff' },
+                    fontSize: { xs: '0.75rem', md: '0.875rem' },
+                    padding: { xs: '4px 10px', md: '5px 15px' }
                 }}
             >
                 Login
@@ -165,24 +167,24 @@ const Home = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
             >
-              <Typography variant="h2" component="h1" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, textTransform: "uppercase", fontSize: { xs: '2.5rem', md: '4rem'}, lineHeight: 1.1, mb: 3, background: '-webkit-linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              <Typography variant="h2" component="h1" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, textTransform: "uppercase", fontSize: { xs: '2rem', md: '4rem'}, lineHeight: 1.1, mb: 3, background: '-webkit-linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Infinite World Tour
               </Typography>
-              <Typography variant="h5" component="p" sx={{ lineHeight: 1.6, mb: 4, opacity: 0.9, fontSize: '1.1rem', fontWeight: 300 }}>
+              <Typography variant="h5" component="p" sx={{ lineHeight: 1.6, mb: 4, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
                 Welcome to the Infinite World Tour System, your gateway to exploring the virtual world of aviation in the Infinite Flight simulator! Uncover challenges, earn rewards, and connect with a global community.
               </Typography>
               
-              <Box sx={{ display: 'flex', gap: 2, mb: 6 }}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 6, justifyContent: { xs: 'center', md: 'flex-start' } }}>
                 <Button 
                   component={Link} 
                   to="/register" 
                   variant="contained" 
                   size="large"
                   sx={{ 
-                    fontSize: '1rem', 
+                    fontSize: { xs: '0.85rem', md: '1rem' }, 
                     fontWeight: 'bold', 
-                    px: 4, 
-                    py: 1.5,
+                    px: { xs: 3, md: 4 }, 
+                    py: { xs: 1, md: 1.5 },
                   }}
                 >
                   Join Now
@@ -192,10 +194,10 @@ const Home = () => {
                   variant="outlined" 
                   size="large"
                   sx={{ 
-                    fontSize: '1rem', 
+                    fontSize: { xs: '0.85rem', md: '1rem' }, 
                     fontWeight: 'bold', 
-                    px: 4, 
-                    py: 1.5,
+                    px: { xs: 3, md: 4 }, 
+                    py: { xs: 1, md: 1.5 },
                   }}
                 >
                   Login
@@ -203,29 +205,29 @@ const Home = () => {
               </Box>
 
               {/* Estatísticas */}
-              <Grid container spacing={4} className={styles['stats-section']}>
-                <Grid item>
+              <Grid container spacing={2} className={styles['stats-section']}>
+                <Grid item xs={6} sm={6} md={3}>
                   <FlightStats
                     label="Total Flights"
                     value={stats.total_flights}
                     icon={<Flight fontSize="large" sx={{ color: '#4dabf5' }} />} 
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={6} sm={6} md={3}>
                   <FlightStats
                     label="Total Hours"
                     value={stats.total_hours}
                     icon={<Schedule fontSize="large" sx={{ color: '#e91e63' }} />} 
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={6} sm={6} md={3}>
                   <FlightStats
                     label="Total Pilots"
                     value={stats.total_pilots}
                     icon={<Person fontSize="large" sx={{ color: '#00e676' }} />} 
                   />
                 </Grid>
-                <Grid item>
+                <Grid item xs={6} sm={6} md={3}>
                   <FlightStats
                     label="Airports"
                     value={stats.total_airports}

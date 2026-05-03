@@ -156,6 +156,21 @@ const AwardDetail = () => {
                 <Typography paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.9)' }}>
                     {award?.description || 'No description available for this tour.'}
                 </Typography>
+                
+                <Box sx={{ mt: 5, p: 3, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <Typography variant="h6" gutterBottom sx={{color: '#4dabf5', mb: 2}}>Allowed Aircraft</Typography>
+                    {((award?.allowed_aircrafts && award.allowed_aircrafts.length > 0) || (award?.allowed_categories && award.allowed_categories.length > 0)) ? (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+                            {award.allowed_aircrafts && award.allowed_aircrafts.map((ac, index) => (
+                                <Box key={`ac-${index}`} sx={{ px: 2, py: 1, backgroundColor: 'rgba(77, 171, 245, 0.1)', border: '1px solid #4dabf5', borderRadius: '20px', fontSize: '0.9rem', color: 'white' }}>
+                                    {ac.aircraft_name}
+                                </Box>
+                            ))}
+                        </Box>
+                    ) : (
+                        <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.6)' }}>Any Aircraft</Typography>
+                    )}
+                </Box>
             </Box>
           </Paper>
         )}
@@ -245,7 +260,7 @@ const AwardDetail = () => {
                             color={leg.pirep_status === 'Approved' ? "success" : "primary"}
                             size="small"
                             onClick={() => {
-                              navigate('/app/pirepsflights', { state: { leg } });
+                              navigate('/app/pirepsflights', { state: { leg, award } });
                             }}
                             disabled={leg.pirep_status === 'Approved'}
                           >

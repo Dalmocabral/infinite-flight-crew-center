@@ -10,6 +10,7 @@ from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model, authenticate
 from django.db.models import Sum, Count
 from django.http import HttpResponse
+from django.utils import timezone
 
 from knox.models import AuthToken
 from datetime import timedelta
@@ -146,7 +147,12 @@ class DashboardViewSet(viewsets.ViewSet):
 class AwardViewSet(viewsets.ModelViewSet):
     queryset = Award.objects.all()
     serializer_class = AwardsSerializer
-    permission_classes = [permissions.AllowAny]  # Ou outra permissão, se necessário
+    permission_classes = [permissions.IsAuthenticated]
+
+class AircraftViewSet(viewsets.ModelViewSet):
+    queryset = Aircraft.objects.all().order_by('name')
+    serializer_class = AircraftSerializer
+    permission_classes = [permissions.IsAuthenticated]  # Ou outra permissão, se necessário
 
 class FlightLegViewSet(viewsets.ModelViewSet):
     serializer_class = FlightLegSerializer

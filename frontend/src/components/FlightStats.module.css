@@ -44,3 +44,20 @@
     margin: 0;
     font-family: 'Orbitron', sans-serif; /* Tech feel */
 }
+
+@media (max-width: 600px) {
+    .counter-container {
+        padding: 12px;
+        min-width: auto;
+    }
+    .counter-icon {
+        font-size: 2rem;
+    }
+    .counter-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+    .counter-value {
+        font-size: 1.5rem;
+    }
+}
