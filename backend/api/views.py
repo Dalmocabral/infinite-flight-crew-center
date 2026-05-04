@@ -149,6 +149,57 @@ class AwardViewSet(viewsets.ModelViewSet):
     serializer_class = AwardsSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    @action(detail=True, methods=['get'])
+    def pilot_progress(self, request, pk=None):
+        award = self.get_object()
+        user_awards = UserAward.objects.filter(award=award).select_related('user')
+        flight_legs = list(award.flight_legs.all().order_by('id'))
+        
+        allowed_icaos = set(icao.company_icao.upper() for icao in award.allowed_icao.all())
+        allowed_aircrafts = set(allowed.aircraft.name for allowed in award.allowed_aircrafts.all())
+        allowed_cats = set(cat.category for cat in award.allowed_categories.all())
+        has_aircraft_restriction = bool(allowed_aircrafts or allowed_cats)
+        
+        # Pre-fetch aircraft categories to optimize
+        aircraft_map = {a.name: a.category for a in Aircraft.objects.all()}
+        
+        results = []
+        for ua in user_awards:
+            user_flights = PirepsFlight.objects.filter(pilot=ua.user, status='Approved').order_by('registration_date')
+            
+            completed_legs = {}
+            for idx, required_flight in enumerate(flight_legs):
+                for user_flight in user_flights:
+                    if required_flight.from_airport == user_flight.departure_airport and required_flight.to_airport == user_flight.arrival_airport:
+                        flight_icao = user_flight.flight_icao.upper() if user_flight.flight_icao else ""
+                        icao_check = not allowed_icaos or flight_icao in allowed_icaos
+                        
+                        aircraft_check = True
+                        if has_aircraft_restriction:
+                            aircraft_category = aircraft_map.get(user_flight.aircraft, 'Uncategorized')
+                            if user_flight.aircraft in allowed_aircrafts or aircraft_category in allowed_cats:
+                                aircraft_check = True
+                            else:
+                                aircraft_check = False
+                                
+                        if icao_check and aircraft_check:
+                            completed_legs[f'leg_{idx+1}'] = user_flight.registration_date.strftime('%d %b %Y, %H:%M')
+                            break
+                            
+            results.append({
+                'user_id': ua.user.id,
+                'user_name': f"{ua.user.first_name} {ua.user.last_name}",
+                'progress': ua.progress,
+                'start_date': ua.start_date.strftime('%d %b %Y') if ua.start_date else None,
+                'end_date': ua.end_date.strftime('%d %b %Y') if ua.end_date else None,
+                'completed_legs': completed_legs
+            })
+            
+        return Response({
+            'total_legs': len(flight_legs),
+            'pilots': results
+        })
+
 class AircraftViewSet(viewsets.ModelViewSet):
     queryset = Aircraft.objects.all().order_by('name')
     serializer_class = AircraftSerializer

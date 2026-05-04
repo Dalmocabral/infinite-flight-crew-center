@@ -20,7 +20,8 @@ import {
     TableRow,
     Tabs,
     Typography,
-    useTheme
+    useTheme,
+    Tooltip
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -28,6 +29,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import DistanceCalculator from '../components/DistanceCalculator';
 import FlightMap from '../components/FlightMap';
+import CheckIcon from '@mui/icons-material/Check';
 
 const AwardDetail = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -37,6 +39,7 @@ const AwardDetail = () => {
   const [totalHours, setTotalHours] = useState(0);
   const [averageHours, setAverageHours] = useState(0);
   const [averageFlights, setAverageFlights] = useState(0);
+  const [pilotProgress, setPilotProgress] = useState({ total_legs: 0, pilots: [] });
   const theme = useTheme();
   const location = useLocation();
   const { award, userId } = location.state || {}; // Recebe o ID do usuário
@@ -77,9 +80,22 @@ const AwardDetail = () => {
     setAverageFlights(averageFlightsCount);
   };
 
+  const fetchPilotProgress = async () => {
+    if (!award) return;
+    try {
+      const response = await AxiosInstance.get(`/awards/${award.id}/pilot_progress/`);
+      setPilotProgress(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar progresso dos pilotos:', error);
+    }
+  };
+
   useEffect(() => {
-    if (activeTab === 1 || activeTab === 2) {
+    if (activeTab === 1 || activeTab === 2 || activeTab === 3) {
       fetchFlightLegs(userId);
+    }
+    if (activeTab === 2) {
+      fetchPilotProgress();
     }
   }, [activeTab, award, userId]);
 
@@ -334,6 +350,54 @@ const AwardDetail = () => {
                     </Paper>
                 </Grid>
             </Grid>
+
+            {/* Pilot Progress Table */}
+            <Box sx={{ mt: 5 }}>
+              <Typography variant="h6" sx={{ color: '#4dabf5', textAlign: 'center', mb: 2, textTransform: 'uppercase', letterSpacing: 1 }}>
+                Pilots
+              </Typography>
+              <TableContainer component={Paper} sx={{ backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                <Table size="small" sx={{ minWidth: 800 }}>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                      <TableCell sx={{ color: '#4dabf5', fontWeight: 'bold' }}>Full name</TableCell>
+                      {Array.from({ length: pilotProgress.total_legs }).map((_, i) => (
+                        <TableCell key={`head-leg-${i}`} align="center" sx={{ color: '#4dabf5', fontSize: '0.75rem', p: 1 }}>LEG {i + 1}</TableCell>
+                      ))}
+                      <TableCell align="center" sx={{ color: '#4dabf5', fontSize: '0.8rem' }}>Progress</TableCell>
+                      <TableCell align="center" sx={{ color: '#4dabf5', fontSize: '0.8rem' }}>Started</TableCell>
+                      <TableCell align="center" sx={{ color: '#4dabf5', fontSize: '0.8rem' }}>Completed</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {pilotProgress.pilots.map((pilot) => (
+                      <TableRow key={pilot.user_id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 }, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <TableCell sx={{ color: 'white', py: 1.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Box sx={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#1976d2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                    {pilot.user_name.charAt(0)}
+                                </Box>
+                                <Typography variant="body2">{pilot.user_name}</Typography>
+                            </Box>
+                        </TableCell>
+                        {Array.from({ length: pilotProgress.total_legs }).map((_, i) => (
+                          <TableCell key={`cell-leg-${i}`} align="center" sx={{ py: 1 }}>
+                            {pilot.completed_legs[`leg_${i + 1}`] ? (
+                              <Tooltip title={pilot.completed_legs[`leg_${i + 1}`]} placement="top" arrow>
+                                <CheckIcon sx={{ color: '#2ecc71', fontSize: '1.2rem', cursor: 'pointer' }} />
+                              </Tooltip>
+                            ) : null}
+                          </TableCell>
+                        ))}
+                        <TableCell align="center" sx={{ color: 'white' }}>{Math.round(pilot.progress)}%</TableCell>
+                        <TableCell align="center" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>{pilot.start_date || '-'}</TableCell>
+                        <TableCell align="center" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.8rem' }}>{pilot.end_date || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
           </Box>
         )}
       </Box>

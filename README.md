@@ -8,13 +8,14 @@ O **Infinite Flight Crew Center** é um sistema completo desenvolvido para entus
 
 ## ✨ Funcionalidades
 
-O sistema oferece uma gama de funcionalidades projetadas para enriquecer a experiência do usuário:
+O sistema oferece uma gama de funcionalidades projetadas para enriquecer a experiência de voo virtual (VAs):
 
-*   **Rastreamento de Voos** ✈️: Permite aos usuários registrar e gerenciar seus voos virtuais, mantendo um histórico detalhado de suas jornadas.
-*   **Sistema de Conquistas (Awards)** 🏆: Desbloqueie conquistas e prêmios baseados em desafios de voo concluídos, incentivando a exploração e o aprimoramento das habilidades de pilotagem.
+*   **Rastreamento de Voos (PIREPs)** ✈️: Permite aos usuários registrar e gerenciar seus voos manuais e automáticos, mantendo um histórico detalhado do Logbook.
+*   **Infinite World Tours (Awards)** 🌍: Sistema robusto de criação de Tours/Prêmios com múltiplas pernas (legs). O sistema checa automaticamente se o voo do piloto bate com as regras do Tour (Origem, Destino, CIA Aérea/ICAO e Categoria da Aeronave).
+*   **Validação de Aeronaves Dinâmica** 🛫: Sincronização direta com a API do Infinite Flight. As restrições de aeronaves nos Tours podem ser feitas por modelo exato (Ex: Boeing 737-800) ou por Categoria Global (GA, Bizjet, M, L, XL, Cargo, Military).
+*   **Painel de Progresso de Pilotos** 📊: Inspirado nas melhores plataformas de tracker (como o Newsky), um dashboard visual dinâmico que rastreia perna-a-perna o progresso dos pilotos inscritos nos Tours, com *tooltips* detalhados de data e hora.
+*   **Sistema Interativo de Briefing** 🗺️: Prepare-se para seus voos com briefings detalhados em mapas interativos (MapTiler/Leaflet), desenhando rotas de origem ao destino e informando notas de despacho.
 *   **Autenticação de Usuários** 🔒: Implementa um sistema de login seguro com autenticação JWT (JSON Web Token), garantindo a privacidade e a segurança dos dados dos usuários.
-*   **Classificação (Leaderboard)** 📊: Compare seu progresso e desempenho com outros pilotos da comunidade, promovendo uma competição saudável e engajamento.
-*   **Sistema Interativo de Briefing** 📄: Prepare-se para seus voos com briefings detalhados, fornecendo informações cruciais para cada missão.
 
 ## 🛠️ Tecnologias Utilizadas
 

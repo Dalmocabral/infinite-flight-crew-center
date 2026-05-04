@@ -206,28 +206,28 @@ const Home = () => {
 
               {/* Estatísticas */}
               <Grid container spacing={2} className={styles['stats-section']}>
-                <Grid item xs={6} sm={6} md={3}>
+                <Grid item xs={6} sm={6} md={6}>
                   <FlightStats
                     label="Total Flights"
                     value={stats.total_flights}
                     icon={<Flight fontSize="large" sx={{ color: '#4dabf5' }} />} 
                   />
                 </Grid>
-                <Grid item xs={6} sm={6} md={3}>
+                <Grid item xs={6} sm={6} md={6}>
                   <FlightStats
                     label="Total Hours"
                     value={stats.total_hours}
                     icon={<Schedule fontSize="large" sx={{ color: '#e91e63' }} />} 
                   />
                 </Grid>
-                <Grid item xs={6} sm={6} md={3}>
+                <Grid item xs={6} sm={6} md={6}>
                   <FlightStats
                     label="Total Pilots"
                     value={stats.total_pilots}
                     icon={<Person fontSize="large" sx={{ color: '#00e676' }} />} 
                   />
                 </Grid>
-                <Grid item xs={6} sm={6} md={3}>
+                <Grid item xs={6} sm={6} md={6}>
                   <FlightStats
                     label="Airports"
                     value={stats.total_airports}

@@ -150,7 +150,8 @@ class UserAward(models.Model):
             for user_flight in user_flights:
                 if required_flight.from_airport == user_flight.departure_airport and required_flight.to_airport == user_flight.arrival_airport:
                     # Verificar se precisa checar ICAO (caso haja ICAOs definidos)
-                    icao_check = not allowed_icaos or user_flight.flight_icao.upper() in allowed_icaos
+                    flight_icao = user_flight.flight_icao.upper() if user_flight.flight_icao else ""
+                    icao_check = not allowed_icaos or flight_icao in allowed_icaos
                     
                     # Verificar se precisa checar aeronaves/categorias (caso haja restrição definida)
                     has_aircraft_restriction = bool(allowed_aircrafts or allowed_categories)
@@ -209,7 +210,7 @@ class PirepsFlight (models.Model):
     flight_number = models.CharField(max_length=10)
     departure_airport = models.CharField(max_length=50)
     arrival_airport = models.CharField(max_length=50)    
-    aircraft = models.CharField(choices=aircraft_choices, default=aircraft_choices[0][0], max_length=50)
+    aircraft = models.CharField(max_length=100)
     pilot = models.ForeignKey(User, on_delete=models.CASCADE)
     flight_duration = models.DurationField(null=True, blank=True)     
     registration_date = models.DateTimeField(default=timezone.now)
