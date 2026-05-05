@@ -1,11 +1,9 @@
 // src/component/AxiosInstance.jsx
 import axios from 'axios';
 
-const isDevelopment = import.meta.env.MODE === 'development';
-
-const baseURL = isDevelopment
-  ? import.meta.env.VITE_API_BASE_URL_LOCAL
-  : import.meta.env.VITE_API_BASE_URL_DEPLOY;
+const baseURL = import.meta.env.DEV
+  ? 'http://localhost:8000/'
+  : 'https://infinite-flight-crew-center.onrender.com/';
 
 const AxiosInstance = axios.create({ baseURL });
 
