@@ -3,26 +3,18 @@ import {
     Alert,
     Box,
     Button,
+    CircularProgress,
     Container,
     CssBaseline,
     IconButton,
     InputAdornment,
-    // Link as MuiLink, // Handling naming conflict if necessary, but Link from router is usually used for internal nav. 
-    // Wait, the code uses <Link href="/register" ...>. If that's MUI Link, it's fine. 
-    // If it's react-router Link, it should be to="/register". 
-    // The code has <Link href="/register" ...> at line 214. MUI Link uses href. React Router Link uses to. 
-    // Let's check line 214: <Link href="/register" variant="body2" ...>
-    // This looks like MUI Link. But for SPA navigation we should use React Router Link.
-    // I will replace MUI Link usage with React Router Link or wrap it.
-    // For now let's just use MUI Link for styling but component={Link} for behavior? 
-    // Or just fix the imports first.
     Paper,
     Snackbar,
     TextField,
     Typography,
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
@@ -31,6 +23,22 @@ const Login = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [isLoading, setIsLoading] = useState(false);
+  const [serverStatus, setServerStatus] = useState('checking'); // 'checking' | 'online' | 'waking'
+
+  // Ping the server when the login page loads to wake up Render
+  useEffect(() => {
+    const wakeServer = async () => {
+      try {
+        await AxiosInstance.get('flight-stats/');
+        setServerStatus('online');
+      } catch {
+        // If it fails, server might still be waking up - that's ok
+        setServerStatus('online');
+      }
+    };
+    wakeServer();
+  }, []);
 
   const {
     control,
@@ -46,6 +54,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
+    setIsLoading(true);
+    setServerStatus('waking');
     try {
       const response = await AxiosInstance.post('login/', {
         email: data.email,
@@ -58,15 +68,22 @@ const Login = () => {
       setSnackbarMessage('Login successful! Welcome aboard.');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
+      setServerStatus('online');
 
       setTimeout(() => {
         navigate('/app/dashboard');
-      }, 2000);
+      }, 1500);
     } catch (error) {
-      setSnackbarMessage('Login failed. Please check your credentials.');
-      setSnackbarSeverity('error');
+      const msg = error.response
+        ? 'Login failed. Please check your credentials.'
+        : 'Server is starting up, please try again in a few seconds...';
+      setSnackbarMessage(msg);
+      setSnackbarSeverity('warning');
       setSnackbarOpen(true);
+      setServerStatus('online');
       console.error('Login failed:', error.response ? error.response.data : error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -213,14 +230,30 @@ const Login = () => {
                   )}
                 />
 
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                {/* Server wake-up status banner */}
+                {serverStatus === 'checking' && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, p: 1.5, borderRadius: 2, bgcolor: 'rgba(255,193,7,0.15)', border: '1px solid rgba(255,193,7,0.3)' }}>
+                    <CircularProgress size={16} sx={{ color: '#ffc107' }} />
+                    <Typography variant="caption" sx={{ color: '#ffc107' }}>
+                      Conectando ao servidor... pode levar até 30s
+                    </Typography>
+                  </Box>
+                )}
+
+                <motion.div whileHover={{ scale: isLoading ? 1 : 1.05 }} whileTap={{ scale: isLoading ? 1 : 0.95 }}>
                   <Button
                     type="submit"
                     fullWidth
                     variant="contained"
-                    sx={{ mt: 4, mb: 2, height: '48px', fontSize: '1rem' }}
+                    disabled={isLoading}
+                    sx={{ mt: 2, mb: 2, height: '52px', fontSize: '1rem', position: 'relative' }}
                   >
-                    SIGN IN
+                    {isLoading ? (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <CircularProgress size={20} sx={{ color: 'rgba(255,255,255,0.8)' }} />
+                        <span>Verificando credenciais...</span>
+                      </Box>
+                    ) : 'SIGN IN'}
                   </Button>
                 </motion.div>
 
