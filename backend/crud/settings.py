@@ -56,9 +56,17 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    'https://infinite-flight-crew-center.vercel.app',
     'https://render-deploy-world-tour.onrender.com',
+    'https://crew-center-djnago-react.onrender.com',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://infinite-flight-crew-center.vercel.app',
+    'https://render-deploy-world-tour.onrender.com',
+    'https://crew-center-djnago-react.onrender.com',
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser'
