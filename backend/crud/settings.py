@@ -60,8 +60,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     'https://infinite-flight-crew-center.vercel.app',
-    'https://render-deploy-world-tour.onrender.com',
-    'https://crew-center-djnago-react.onrender.com',
+    'https://infinite-flight-crew-center.onrender.com',
 ]
 
 AUTH_USER_MODEL = 'api.CustomUser'
