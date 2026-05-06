@@ -168,8 +168,14 @@ class AwardViewSet(viewsets.ModelViewSet):
             user_flights = PirepsFlight.objects.filter(pilot=ua.user, status='Approved').order_by('registration_date')
             
             completed_legs = {}
+            used_flight_ids = set()  # Cada PIREP só pode completar UMA perna
+
             for idx, required_flight in enumerate(flight_legs):
                 for user_flight in user_flights:
+                    # Pula PIREPs que já foram usados em outras pernas
+                    if user_flight.id in used_flight_ids:
+                        continue
+
                     if required_flight.from_airport == user_flight.departure_airport and required_flight.to_airport == user_flight.arrival_airport:
                         flight_icao = user_flight.flight_icao.upper() if user_flight.flight_icao else ""
                         icao_check = not allowed_icaos or flight_icao in allowed_icaos
@@ -184,7 +190,9 @@ class AwardViewSet(viewsets.ModelViewSet):
                                 
                         if icao_check and aircraft_check:
                             completed_legs[f'leg_{idx+1}'] = user_flight.registration_date.strftime('%d %b %Y, %H:%M')
+                            used_flight_ids.add(user_flight.id)  # Marca como usado
                             break
+
                             
             results.append({
                 'user_id': ua.user.id,
