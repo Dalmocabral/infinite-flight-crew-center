@@ -228,26 +228,34 @@ class FlightLegViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
-        
-        # Pre-fetch relevant PIREPs for the logged-in user
-        # We fetch only the fields we need: dep, arr, and status
-        user_pireps = PirepsFlight.objects.filter(
-            pilot=request.user
-        ).values('departure_airport', 'arrival_airport', 'status')
 
-        # Create a lookup dictionary: (dep, arr) -> status
-        # Note: If there are multiple flights for the same route, this takes the last one found.
-        # Given the context, taking 'Approved' priority or latest would be better, but simple map is a start.
-        status_map = {
-            (p['departure_airport'], p['arrival_airport']): p['status']
-            for p in user_pireps
-        }
+        # Busca todos os PIREPs aprovados do usuário, em ordem cronológica
+        user_pireps = list(
+            PirepsFlight.objects.filter(
+                pilot=request.user,
+                status='Approved'
+            ).order_by('registration_date')
+            .values('departure_airport', 'arrival_airport', 'status')
+        )
 
+        # Monta um pool de PIREPs disponíveis por rota: {(dep, arr): [pirep, pirep, ...]}
+        from collections import defaultdict
+        pirep_pool = defaultdict(list)
+        for p in user_pireps:
+            pirep_pool[(p['departure_airport'], p['arrival_airport'])].append(p)
+
+        # Para cada perna, consome UM pirep do pool (em ordem cronológica)
+        # Isso garante que rotas repetidas exijam múltiplos PIREPs separados
         for leg_data in response.data:
             key = (leg_data['from_airport'], leg_data['to_airport'])
-            leg_data['pirep_status'] = status_map.get(key, None)
-            
+            if pirep_pool[key]:
+                pirep = pirep_pool[key].pop(0)  # Consome o mais antigo disponível
+                leg_data['pirep_status'] = pirep['status']
+            else:
+                leg_data['pirep_status'] = None
+
         return response
+
 
 class AllowedAircraftViewSet(viewsets.ModelViewSet):
     queryset = AllowedAircraft.objects.all()
