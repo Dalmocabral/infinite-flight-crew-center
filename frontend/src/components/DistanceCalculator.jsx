@@ -1,14 +1,14 @@
 import React from 'react';
 
-// 1 NM = 1.852 km
+// 1 NM = 1.852 km | 1 km = 0.539957 NM
 const KM_TO_NM = 0.539957;
 
 /**
- * Calcula a distância ortodrômica (great-circle) entre dois pontos usando a fórmula de Haversine.
- * Retorna a distância em Milhas Náuticas (NM).
+ * Calcula a distância ortodrômica (great-circle) entre dois pontos usando Haversine.
+ * Retorna em Milhas Náuticas (NM).
  */
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; // Raio da Terra em km
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
   const a =
@@ -18,31 +18,48 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distanceKm = R * c;
-  return distanceKm * KM_TO_NM; // Converte para Milhas Náuticas
+  return R * c * KM_TO_NM;
 };
 
 /**
- * Estima o tempo de voo com base na distância em NM.
- * Usa velocidades médias de cruzeiro realistas em knots.
+ * Estima o tempo de bloco (block time) em Infinite Flight.
+ * Considera velocidade média de cruzeiro + overhead de subida/descida/taxi.
+ *
+ * Velocidades médias de cruzeiro em IF por faixa:
+ *   < 150 NM  → voos GA / turboélice locais       ~170 kts + 10 min overhead
+ *   150-400 NM → voos regionais (CRJ, E175)        ~290 kts + 20 min overhead
+ *   400-800 NM → narrow-body curto (737, A320)     ~360 kts + 30 min overhead
+ *   800-2500 NM → narrow/wide médio (737, A330)    ~400 kts + 40 min overhead
+ *   > 2500 NM  → wide-body longo alcance (777,787) ~450 kts + 50 min overhead
  */
 const calculateFlightTime = (distanceNm) => {
   let speedKnots;
-  if (distanceNm < 200) {
-    speedKnots = 250; // Voos muito curtos (turboélice / jato regional)
-  } else if (distanceNm < 600) {
-    speedKnots = 380; // Voos curtos (narrow-body)
-  } else if (distanceNm < 2000) {
-    speedKnots = 450; // Voos médios (narrow/wide-body)
+  let overheadMinutes; // Tempo extra para subida + descida + taxi
+
+  if (distanceNm < 150) {
+    speedKnots = 170;
+    overheadMinutes = 10;
+  } else if (distanceNm < 400) {
+    speedKnots = 290;
+    overheadMinutes = 20;
+  } else if (distanceNm < 800) {
+    speedKnots = 360;
+    overheadMinutes = 30;
+  } else if (distanceNm < 2500) {
+    speedKnots = 400;
+    overheadMinutes = 45;
   } else {
-    speedKnots = 480; // Voos longos (wide-body de longo alcance)
+    speedKnots = 450;
+    overheadMinutes = 60;
   }
 
-  const flightTimeHours = distanceNm / speedKnots;
-  const hours = Math.floor(flightTimeHours);
-  const minutes = Math.round((flightTimeHours - hours) * 60);
+  const cruiseTotalMinutes = (distanceNm / speedKnots) * 60;
+  const totalMinutes = Math.round(cruiseTotalMinutes + overheadMinutes);
 
-  return `${hours}h ${minutes}m`;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
 };
 
 const DistanceCalculator = ({ fromAirport, toAirport, airportsData, showTime = false }) => {
