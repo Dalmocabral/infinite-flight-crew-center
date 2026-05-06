@@ -146,42 +146,51 @@ class UserAward(models.Model):
         allowed_aircrafts = set(allowed.aircraft.name for allowed in self.award.allowed_aircrafts.all())
         allowed_categories = set(cat.category for cat in self.award.allowed_categories.all())
 
-        for required_flight in self.award.flight_legs.all():
-            for user_flight in user_flights:
+        # Ordenar voos por data para consumir em ordem cronológica
+        sorted_flights = sorted(user_flights, key=lambda f: f.registration_date)
+
+        # Rastrear quais PIREPs já foram usados para não contar o mesmo voo duas vezes
+        used_flight_ids = set()
+
+        for required_flight in self.award.flight_legs.all().order_by('id'):
+            for user_flight in sorted_flights:
+                # Pula PIREPs já consumidos por outras pernas
+                if user_flight.id in used_flight_ids:
+                    continue
+
                 if required_flight.from_airport == user_flight.departure_airport and required_flight.to_airport == user_flight.arrival_airport:
-                    # Verificar se precisa checar ICAO (caso haja ICAOs definidos)
+                    # Verificar se precisa checar ICAO
                     flight_icao = user_flight.flight_icao.upper() if user_flight.flight_icao else ""
                     icao_check = not allowed_icaos or flight_icao in allowed_icaos
-                    
-                    # Verificar se precisa checar aeronaves/categorias (caso haja restrição definida)
+
+                    # Verificar aeronave/categoria
                     has_aircraft_restriction = bool(allowed_aircrafts or allowed_categories)
-                    
                     aircraft_check = True
                     if has_aircraft_restriction:
                         aircraft_obj = Aircraft.objects.filter(name=user_flight.aircraft).first()
                         aircraft_category = aircraft_obj.category if aircraft_obj else 'Uncategorized'
-                        
-                        # Voo é válido se o avião estiver na lista de aviões permitidos OU a categoria do avião estiver nas categorias permitidas
                         if user_flight.aircraft in allowed_aircrafts or aircraft_category in allowed_categories:
                             aircraft_check = True
                         else:
                             aircraft_check = False
 
-                    # Checar se todos os critérios (quando aplicáveis) estão corretos
                     if icao_check and aircraft_check:
                         completed_flights += 1
-                        break  # Para de verificar outros voos, pois este já completou o trecho
-        
+                        used_flight_ids.add(user_flight.id)  # Marca como consumido
+                        break
+
         # Calcular progresso
         if total_flights > 0:
             progress = (completed_flights / total_flights) * 100
         else:
             progress = 0
-        
+
         self.progress = progress
         if progress == 100 and not self.end_date:
             self.end_date = timezone.now()
         self.save()
+
+
 
 
     def start_award(self):
