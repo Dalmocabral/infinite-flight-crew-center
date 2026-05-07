@@ -29,6 +29,7 @@ import AxiosInstance from '../components/AxiosInstance';
 
 const MyFlights = () => {
   const [flights, setFlights] = useState([]);
+  const [airportsData, setAirportsData] = useState({});
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -38,7 +39,20 @@ const MyFlights = () => {
 
   useEffect(() => {
     fetchFlights();
+    fetchAirports();
   }, []);
+
+  const fetchAirports = async () => {
+    try {
+      const response = await fetch(
+        'https://raw.githubusercontent.com/Dalmocabral/Airport/refs/heads/master/airports.json'
+      );
+      const data = await response.json();
+      setAirportsData(data);
+    } catch (error) {
+      console.error('Erro ao buscar dados dos aeroportos:', error);
+    }
+  };
 
   const fetchFlights = async () => {
     try {
@@ -51,6 +65,7 @@ const MyFlights = () => {
       console.error('Error fetching flights:', error);
     }
   };
+
 
   const filteredFlights = flights.filter((flight) =>
      flight.flight_number.toLowerCase().includes(search.toLowerCase()) ||
@@ -122,8 +137,30 @@ const MyFlights = () => {
                     .map((flight) => (
                     <TableRow key={flight.id} hover>
                     <TableCell><Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography></TableCell>
-                    <TableCell>{flight.departure_airport}</TableCell>
-                    <TableCell>{flight.arrival_airport}</TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {airportsData[flight.departure_airport] && (
+                                <img
+                                    src={`https://flagcdn.com/w320/${airportsData[flight.departure_airport].country.toLowerCase()}.png`}
+                                    alt={airportsData[flight.departure_airport].country}
+                                    style={{ width: '20px', borderRadius: '2px' }}
+                                />
+                            )}
+                            {flight.departure_airport}
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {airportsData[flight.arrival_airport] && (
+                                <img
+                                    src={`https://flagcdn.com/w320/${airportsData[flight.arrival_airport].country.toLowerCase()}.png`}
+                                    alt={airportsData[flight.arrival_airport].country}
+                                    style={{ width: '20px', borderRadius: '2px' }}
+                                />
+                            )}
+                            {flight.arrival_airport}
+                        </Box>
+                    </TableCell>
                     <TableCell>{dayjs(flight.registration_date).format('MM/DD/YYYY')}</TableCell>
                     {!isMobile && <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }} /></TableCell>}
                     {!isMobile && <TableCell>{flight.flight_duration}</TableCell>}
