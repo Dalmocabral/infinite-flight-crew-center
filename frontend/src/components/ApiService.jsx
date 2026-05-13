@@ -119,6 +119,13 @@ const ApiService = {
       return [];
     });
   },
+  
+  getAircraftList: () => {
+    return getCached('if_aircraft_list', TTL.airports, async () => {
+      const response = await axios.get(`${BASE_URL}/aircraft?apikey=${API_KEY}`);
+      return response.data.result || [];
+    });
+  },
 };
 
 export default ApiService;
