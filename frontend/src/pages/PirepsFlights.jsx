@@ -62,7 +62,7 @@ const PirepsFlights = () => {
       setArrivalAirport(leg.to_airport);
       verifyFlightWithApi(leg.from_airport, leg.to_airport);
     }
-  }, [leg]);
+  }, [leg, aircraftList]);
 
   const verifyFlightWithApi = async (from, to) => {
     setIsVerifying(true);
@@ -96,16 +96,38 @@ const PirepsFlights = () => {
 
       if (match) {
         // Validate Aircraft Rules if any
+        let isAircraftAllowed = true;
+        const matchId = match.aircraftId?.toLowerCase();
+        
         if (award?.allowed_aircrafts && award.allowed_aircrafts.length > 0) {
-            const isAircraftAllowed = award.allowed_aircrafts.some(ac => ac.aircraft_id === match.aircraftId);
+            // 1. Check by UUID (most precise)
+            const allowedById = award.allowed_aircrafts.some(ac => ac.aircraft_id?.toLowerCase() === matchId);
+            
+            // 2. Check by Category (using our local aircraft database)
+            const dbAircraft = aircraftList.find(a => a.if_id?.toLowerCase() === matchId);
+            const allowedByCategory = dbAircraft && award.allowed_categories?.some(cat => cat.category === dbAircraft.category);
+            
+            // 3. Check by Name fallback
+            const allowedByName = dbAircraft && award.allowed_aircrafts.some(ac => ac.aircraft_name === dbAircraft.name);
+            
+            isAircraftAllowed = allowedById || allowedByCategory || allowedByName;
+
             if (!isAircraftAllowed) {
                 setSubmissionType('Manual');
-                setApiMessage({ type: 'error', text: 'Aircraft mismatch! The aircraft used for this flight does not comply with the Award rules. Auto-PIREP blocked.' });
+                setApiMessage({ 
+                    type: 'error', 
+                    text: `Aircraft mismatch! The aircraft used (${dbAircraft?.name || match.aircraftId}) does not comply with the Award rules. Auto-PIREP blocked.` 
+                });
                 return;
             } else {
-                const matchedAc = award.allowed_aircrafts.find(ac => ac.aircraft_id === match.aircraftId);
-                if (matchedAc) {
-                    setAircraft(matchedAc.aircraft_name);
+                // Auto-fill the aircraft name from our database if found, otherwise from the award list
+                if (dbAircraft) {
+                    setAircraft(dbAircraft.name);
+                } else {
+                    const matchedAc = award.allowed_aircrafts.find(ac => ac.aircraft_id?.toLowerCase() === matchId);
+                    if (matchedAc) {
+                        setAircraft(matchedAc.aircraft_name);
+                    }
                 }
             }
         }
