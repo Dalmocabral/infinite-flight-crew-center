@@ -62,7 +62,7 @@ const PirepsFlights = () => {
       setArrivalAirport(leg.to_airport);
       verifyFlightWithApi(leg.from_airport, leg.to_airport);
     }
-  }, [leg, aircraftList]);
+  }, [leg]);
 
   const verifyFlightWithApi = async (from, to) => {
     setIsVerifying(true);
@@ -95,48 +95,19 @@ const PirepsFlights = () => {
       );
 
       if (match) {
-        const matchId = match.aircraftId?.toLowerCase();
-        
-        // Fetch live aircraft list from Infinite Flight to get the real name
-        const ifAircrafts = await ApiService.getAircraftList();
-        const actualAircraft = ifAircrafts.find(a => a.id?.toLowerCase() === matchId);
-        const actualName = actualAircraft?.name || "";
-
-        // Get local aircraft data for category check
-        const dbAircraft = aircraftList.find(a => a.if_id?.toLowerCase() === matchId);
-
         // Validate Aircraft Rules if any
-        let isAircraftAllowed = true;
         if (award?.allowed_aircrafts && award.allowed_aircrafts.length > 0) {
-            // 1. Check by ID (most precise)
-            const allowedById = award.allowed_aircrafts.some(ac => ac.aircraft_id?.toLowerCase() === matchId);
-            
-            // 2. Check by Category
-            const allowedByCategory = dbAircraft && award.allowed_categories?.some(cat => cat.category === dbAircraft.category);
-            
-            // 3. Check by Name (Live & Permissive)
-            const allowedByName = actualName && award.allowed_aircrafts.some(ac => {
-                const aName = ac.aircraft_name.toLowerCase();
-                const fName = actualName.toLowerCase();
-                return fName.includes(aName) || aName.includes(fName);
-            });
-
-            isAircraftAllowed = allowedById || allowedByCategory || allowedByName;
-
+            const isAircraftAllowed = award.allowed_aircrafts.some(ac => ac.aircraft_id === match.aircraftId);
             if (!isAircraftAllowed) {
                 setSubmissionType('Manual');
-                setApiMessage({ 
-                    type: 'error', 
-                    text: `Aircraft mismatch! You flew the "${actualName || match.aircraftId}", but the rules require a different aircraft. Auto-PIREP blocked.` 
-                });
+                setApiMessage({ type: 'error', text: 'Aircraft mismatch! The aircraft used for this flight does not comply with the Award rules. Auto-PIREP blocked.' });
                 return;
             } else {
-                // Auto-fill the aircraft name
-                setAircraft(actualName || dbAircraft?.name || "Airbus A319");
+                const matchedAc = award.allowed_aircrafts.find(ac => ac.aircraft_id === match.aircraftId);
+                if (matchedAc) {
+                    setAircraft(matchedAc.aircraft_name);
+                }
             }
-        } else {
-            // No aircraft restrictions, just fill the name
-            setAircraft(actualName || dbAircraft?.name || "Airbus A319");
         }
 
         let matchedServer = 'Casual';
