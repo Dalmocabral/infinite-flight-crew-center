@@ -84,9 +84,15 @@ const PirepsFlights = () => {
         return;
       }
 
-      const flights = await ApiService.getUserFlights(ifcUser.id);
+      // The field in UserStats is userId, not id
+      const flights = await ApiService.getUserFlights(ifcUser.userId);
       
-      const match = flights.find(f => f.originAirport === from && f.destinationAirport === to);
+      // Some versions of the API might use departureAirport/arrivalAirport for logbook
+      // but current docs say originAirport/destinationAirport. We'll check both.
+      const match = flights.find(f => 
+        (f.originAirport === from || f.departureAirport === from) && 
+        (f.destinationAirport === to || f.arrivalAirport === to)
+      );
 
       if (match) {
         // Validate Aircraft Rules if any
@@ -105,9 +111,10 @@ const PirepsFlights = () => {
         }
 
         let matchedServer = 'Casual';
-        if (match.server.includes('Training')) matchedServer = 'Training';
-        if (match.server.includes('Expert')) matchedServer = 'Expert';
+        if (match.server && match.server.includes('Training')) matchedServer = 'Training';
+        if (match.server && match.server.includes('Expert')) matchedServer = 'Expert';
 
+        // totalTime is in minutes according to IF API docs for logbook
         const hours = Math.floor(match.totalTime / 60);
         const minutes = Math.floor(match.totalTime % 60);
 
@@ -117,7 +124,7 @@ const PirepsFlights = () => {
         setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
       } else {
         setSubmissionType('Manual');
-        setApiMessage({ type: 'warning', text: 'Your flight was not found in the Infinite Flight database. Please fill manually.' });
+        setApiMessage({ type: 'warning', text: 'Your flight was not found in the Infinite Flight database. Please check if you flew Online (Multiplayer) and if the airports match exactly.' });
       }
     } catch (error) {
       console.error('Error verifying flight:', error);
