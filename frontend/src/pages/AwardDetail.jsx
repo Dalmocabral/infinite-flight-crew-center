@@ -298,7 +298,7 @@ const AwardDetail = () => {
                 <Grid item xs={12} md={8}>
                     <Paper 
                         sx={{ 
-                            p: 0, 
+                            p: 2, 
                             height: '600px', 
                             borderRadius: '16px',
                             border: '1px solid rgba(255,255,255,0.1)',
@@ -334,17 +334,9 @@ const AwardDetail = () => {
                             >
                             <ListItemText
                                 primary={
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        Leg {index + 1}: 
-                                        {airportsData[leg.from_airport] && (
-                                          <img src={`https://flagcdn.com/w320/${airportsData[leg.from_airport].country.toLowerCase()}.png`} style={{ width: 16 }} />
-                                        )}
-                                        {leg.from_airport} ➝ 
-                                        {airportsData[leg.to_airport] && (
-                                          <img src={`https://flagcdn.com/w320/${airportsData[leg.to_airport].country.toLowerCase()}.png`} style={{ width: 16 }} />
-                                        )}
-                                        {leg.to_airport}
-                                    </Box>
+                                    <Typography variant="body2" fontWeight="bold">
+                                        Leg {index + 1}: {leg.from_airport} ➝ {leg.to_airport}
+                                    </Typography>
                                 }
                                 secondary={
                                     <Typography variant="caption" sx={{ color: leg.pirep_status === 'Approved' ? '#2ecc71' : 'text.secondary' }}>
@@ -385,15 +377,7 @@ const AwardDetail = () => {
                                 <Box sx={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#1976d2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold' }}>
                                     {pilot.user_name.charAt(0)}
                                 </Box>
-                                {pilot.user_country && (
-                                    <img
-                                        src={`https://flagcdn.com/w320/${pilot.user_country.toLowerCase()}.png`}
-                                        alt={pilot.user_country}
-                                        style={{ width: '20px', borderRadius: '2px' }}
-                                    />
-                                )}
                                 <Typography variant="body2">{pilot.user_name}</Typography>
-
                             </Box>
                         </TableCell>
                         {Array.from({ length: pilotProgress.total_legs }).map((_, i) => (

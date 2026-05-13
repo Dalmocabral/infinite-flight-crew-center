@@ -567,18 +567,7 @@ const Dashboard = () => {
                                 {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
                            </Box>
                         </TableCell>
-                        <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {user.pilot__country && (
-                                    <img
-                                        src={`https://flagcdn.com/w320/${user.pilot__country.toLowerCase()}.png`}
-                                        alt={user.pilot__country}
-                                        style={{ width: '20px', height: 'auto', borderRadius: '2px' }}
-                                    />
-                                )}
-                                <Typography variant="body2">{`${user.pilot__first_name} ${user.pilot__last_name}`}</Typography>
-                            </Box>
-                        </TableCell>
+                        <TableCell>{`${user.pilot__first_name} ${user.pilot__last_name}`}</TableCell>
                         <TableCell align="right" sx={{ fontFamily: 'monospace', color: '#4dabf5' }}>{formatDuration(user.total_duration)}</TableCell>
                       </TableRow>
                     ))}
@@ -617,18 +606,7 @@ const Dashboard = () => {
                                 {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
                            </Box>
                         </TableCell>
-                        <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                {user.pilot__country && (
-                                    <img
-                                        src={`https://flagcdn.com/w320/${user.pilot__country.toLowerCase()}.png`}
-                                        alt={user.pilot__country}
-                                        style={{ width: '20px', height: 'auto', borderRadius: '2px' }}
-                                    />
-                                )}
-                                <Typography variant="body2">{`${user.pilot__first_name} ${user.pilot__last_name}`}</Typography>
-                            </Box>
-                        </TableCell>
+                        <TableCell>{`${user.pilot__first_name} ${user.pilot__last_name}`}</TableCell>
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>{user.total_flights}</TableCell>
                       </TableRow>
                     ))}

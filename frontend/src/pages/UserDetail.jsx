@@ -163,57 +163,30 @@ const UserDetail = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
     >
-      {/* Profile Header */}
-      <Box 
-        sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            mb: 6,
-            textAlign: 'center'
-        }}
-      >
+      {/* Gravatar no centro */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 5 }}>
         <Box sx={{ 
             p: 0.5, 
             borderRadius: '50%', 
-            border: '4px solid #4dabf5', 
-            boxShadow: '0 0 30px rgba(77, 171, 245, 0.4)',
-            mb: 3,
-            transition: 'transform 0.3s ease',
-            '&:hover': { transform: 'scale(1.05)' }
+            border: '3px solid #4dabf5', 
+            boxShadow: '0 0 25px rgba(77, 171, 245, 0.6)',
+            mb: 2
         }}>
             <Gravatar
             email={user.email}
-            size={180}
+            size={160}
             alt={`Imagem de perfil de ${user.first_name} ${user.last_name}`}
-            style={{ borderRadius: '50%', display: 'block' }}
+            style={{ borderRadius: '50%' }}
             />
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-            <Typography variant="h2" sx={{ fontWeight: '800', color: '#fff', letterSpacing: '-1px' }}>
-                {user.first_name} {user.last_name}
-            </Typography>
-        </Box>
-        <Box 
-            sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1.5, 
-                backgroundColor: 'rgba(255,255,255,0.05)', 
-                px: 2, 
-                py: 0.5, 
-                borderRadius: '20px',
-                border: '1px solid rgba(255,255,255,0.1)'
-            }}
-        >
+        <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#fff' }}>{user.first_name} {user.last_name}</Typography>
+        <Box display="flex" alignItems="center" gap={1} mt={1}>
             <img
                 src={`https://flagcdn.com/w320/${user.country ? user.country.toLowerCase() : ''}.png`}
                 alt={user.country || 'Country'}
-                style={{ width: '24px', height: 'auto', borderRadius: '2px' }}
+                style={{ width: '32px', borderRadius: '4px' }}
             />
-            <Typography variant="subtitle1" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 }}>
-                {user.country}
-            </Typography>
+            <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.7)' }}>{user.country}</Typography>
         </Box>
       </Box>
 
