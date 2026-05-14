@@ -57,13 +57,15 @@ const PirepsFlights = () => {
           setAircraftList(res.data);
       })
       .catch(err => console.error('Error fetching aircrafts:', err));
-      
-    if (leg) {
+  }, []);
+
+  useEffect(() => {
+    if (leg && aircraftList.length > 0) {
       setDepartureAirport(leg.from_airport);
       setArrivalAirport(leg.to_airport);
       verifyFlightWithApi(leg.from_airport, leg.to_airport);
     }
-  }, [leg]);
+  }, [leg, aircraftList]);
 
   const verifyFlightWithApi = async (from, to) => {
     setIsVerifying(true);
@@ -97,8 +99,33 @@ const PirepsFlights = () => {
       );
 
       if (match) {
-        // Find aircraft info in our internal list to get Name and Category
-        const matchedInternalAc = aircraftList.find(ac => ac.if_id === match.aircraftId);
+        // Find aircraft info in our internal list
+        // Try matching by ID first (Case-insensitive)
+        let matchedInternalAc = aircraftList.find(ac => 
+            ac.if_id && match.aircraftId && ac.if_id.toLowerCase() === match.aircraftId.toLowerCase()
+        );
+
+        // Fallback 1: Try lookup by liveryId if aircraftId is zero or not found
+        if (!matchedInternalAc && match.liveryId) {
+            try {
+                const liveryRes = await AxiosInstance.get(`aircrafts/lookup_by_livery/?livery_id=${match.liveryId}`);
+                matchedInternalAc = {
+                    if_id: liveryRes.data.aircraft_id,
+                    name: liveryRes.data.aircraft_name,
+                    category: liveryRes.data.category
+                };
+            } catch (err) {
+                // Livery not found in DB
+            }
+        }
+
+        // Fallback 2: Try matching by name (if available)
+        if (!matchedInternalAc && match.aircraftName) {
+            matchedInternalAc = aircraftList.find(ac => 
+                ac.name.toLowerCase() === match.aircraftName.toLowerCase()
+            );
+        }
+
         if (matchedInternalAc) {
             setAircraft(matchedInternalAc.name);
         }
@@ -111,7 +138,10 @@ const PirepsFlights = () => {
         const hasAllowedCategories = award?.allowed_categories && award.allowed_categories.length > 0;
 
         if (hasAllowedAircrafts || hasAllowedCategories) {
-            const isNameAllowed = hasAllowedAircrafts && award.allowed_aircrafts.some(ac => ac.aircraft_id === match.aircraftId);
+            // Use the recovered ID from matchedInternalAc if available, otherwise fallback to match.aircraftId
+            const effectiveAircraftId = (matchedInternalAc?.if_id || match.aircraftId || "").toLowerCase();
+            
+            const isNameAllowed = hasAllowedAircrafts && award.allowed_aircrafts.some(ac => ac.aircraft_id.toLowerCase() === effectiveAircraftId);
             const isCategoryAllowed = hasAllowedCategories && matchedInternalAc && award.allowed_categories.some(cat => cat.category === matchedInternalAc.category);
             
             if (!isNameAllowed && !isCategoryAllowed) {
@@ -141,7 +171,10 @@ const PirepsFlights = () => {
         setIsLocked(true);
       } else {
         setSubmissionType('Manual');
-        setApiMessage({ type: 'warning', text: 'Your flight was not found in the Infinite Flight database. Please check if you flew Online (Multiplayer) and if the airports match exactly.' });
+        setApiMessage({ 
+            type: 'warning', 
+            text: 'Attention: Your flight was not automatically located in the Infinite Flight database. This can happen if the flight was conducted offline or on a non-official server. You may proceed with a MANUAL submission, but please note that this type of report may take up to 3 business days to be reviewed and approved by our team.' 
+        });
       }
     } catch (error) {
       console.error('Error verifying flight:', error);

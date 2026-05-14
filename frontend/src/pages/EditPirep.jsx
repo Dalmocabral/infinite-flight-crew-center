@@ -20,11 +20,11 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
-import aircraftChoices from "../data/aircraftChoices";
 
 const EditPirep = () => {
   const { id } = useParams(); 
   const navigate = useNavigate();
+  const [aircraftList, setAircraftList] = useState([]);
   const [formData, setFormData] = useState({
     flight_icao: "",
     flight_number: "",
@@ -38,6 +38,11 @@ const EditPirep = () => {
   });
 
   useEffect(() => {
+    // Fetch Aircraft List
+    AxiosInstance.get('aircrafts/')
+      .then(res => setAircraftList(res.data))
+      .catch(err => console.error('Error fetching aircrafts:', err));
+
     AxiosInstance.get(`/pirepsflight/${id}/`)
       .then((response) => {
         setFormData({
@@ -165,9 +170,9 @@ const EditPirep = () => {
                     onChange={handleChange}
                     label="Aircraft"
                   >
-                    {aircraftChoices.map((choice) => (
-                      <MenuItem key={choice.value} value={choice.value}>
-                        {choice.label}
+                    {aircraftList.map((choice) => (
+                      <MenuItem key={choice.if_id} value={choice.name}>
+                        {choice.name} ({choice.category})
                       </MenuItem>
                     ))}
                   </Select>

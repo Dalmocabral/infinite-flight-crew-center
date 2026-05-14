@@ -33,6 +33,13 @@ const TTL = {
 };
 
 const ApiService = {
+  getSessions: () => {
+    return getCached('all_sessions', TTL.sessions, async () => {
+      const response = await axios.get(`${BASE_URL}/sessions?apikey=${API_KEY}`);
+      return response.data.result || [];
+    });
+  },
+
   getSessionData: (sessionId) => {
     return getCached(`session_${sessionId}`, TTL.sessions, async () => {
       const response = await axios.get(`${BASE_URL}/sessions/${sessionId}?apikey=${API_KEY}`);

@@ -211,7 +211,24 @@ class AwardViewSet(viewsets.ModelViewSet):
 class AircraftViewSet(viewsets.ModelViewSet):
     queryset = Aircraft.objects.all().order_by('name')
     serializer_class = AircraftSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Ou outra permissão, se necessário
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=['get'])
+    def lookup_by_livery(self, request):
+        livery_id = request.query_params.get('livery_id')
+        if not livery_id:
+            return Response({"error": "livery_id is required"}, status=400)
+        
+        try:
+            livery = Livery.objects.select_related('aircraft').get(livery_id=livery_id)
+            return Response({
+                "aircraft_id": str(livery.aircraft.if_id),
+                "aircraft_name": livery.aircraft.name,
+                "livery_name": livery.name,
+                "category": livery.aircraft.category
+            })
+        except Livery.DoesNotExist:
+            return Response({"error": "Livery not found in database"}, status=404)
 
 class FlightLegViewSet(viewsets.ModelViewSet):
     serializer_class = FlightLegSerializer

@@ -7,24 +7,18 @@ import airplaneUserIcon from "../assets/image/airplane_user.png";
 import ApiService from "../components/ApiService";
 import AxiosInstance from "../components/AxiosInstance";
 
-const sessions = {
-  training: { id: "9ed5512e-b6eb-401f-bab8-42bdbdcf2bab", name: "Training Server" },
-  casual: { id: "7e4681bf-9fee-4c68-ba62-eda1f2f0e780", name: "Casual Server" },
-  expert: { id: "9bdfef34-f03b-4413-b8fa-c29949bb18f8", name: "Expert Server" },
-};
 
 const MapWithFlights = () => {
-  const darkMode = true; 
-
+  const [availableSessions, setAvailableSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState(
-    localStorage.getItem("lastSession") || sessions.training.id
+    localStorage.getItem("lastSession") || ""
   );
 
   const [flights, setFlights] = useState([]);
   const [selectedFlight, setSelectedFlight] = useState(null); 
   const [isIdle, setIsIdle] = useState(false);
   const [vaUsernames, setVaUsernames] = useState([]);
-  const [showOnlyVA, setShowOnlyVA] = useState(true);
+  const [showOnlyVA, setShowOnlyVA] = useState(false);
   const mapContainer = useRef(null);
   const map = useRef(null);
   const markersLayer = useRef(null);
@@ -107,11 +101,32 @@ const MapWithFlights = () => {
   }, []);
 
   useEffect(() => {
+    const fetchSessions = async () => {
+        try {
+            const data = await ApiService.getSessions();
+            setAvailableSessions(data);
+            // If no session selected or last session not found, pick the first one (usually Expert)
+            if (!selectedSession || !data.find(s => s.id === selectedSession)) {
+                const expert = data.find(s => s.name.toLowerCase().includes('expert')) || data[0];
+                if (expert) {
+                    setSelectedSession(expert.id);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching sessions:', error);
+        }
+    };
+    fetchSessions();
+  }, []);
+
+  useEffect(() => {
     if (isIdle) return; // Suspende o polling se inativo
 
     const fetchFlights = async () => {
+      if (!selectedSession) return;
       try {
         const data = await ApiService.getFlightData(selectedSession);
+        console.log(`DEBUG MAP: Fetched ${data.length} flights for session ${selectedSession}`);
         if (showOnlyVA) {
           if (vaUsernames.length > 0) {
             const filteredData = data.filter(flight => vaUsernames.includes(flight.username));
@@ -235,7 +250,13 @@ const MapWithFlights = () => {
   };
 
   return (
-    <Box sx={{ width: "100%", height: "calc(100vh - 64px)", position: "relative" }}>
+    <Box sx={{ 
+        width: "calc(100% + 64px)", // Negate Layout padding (md: 4 = 32px each side)
+        height: "calc(100vh - 64px)", 
+        position: "relative",
+        margin: "-32px -32px", // Pull the map to the edges
+        overflow: "hidden"
+    }}>
         
       {/* Floating Control Panel */}
       <Paper 
@@ -266,26 +287,14 @@ const MapWithFlights = () => {
                 }}
                 sx={{ color: 'white', borderColor: 'white', '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}
             >
-             {Object.entries(sessions).map(([key, session]) => (
-                <MenuItem key={key} value={session.id}>
+             {availableSessions.map((session) => (
+                <MenuItem key={session.id} value={session.id}>
                     {session.name}
                 </MenuItem>
               ))}
             </Select>
          </FormControl>
 
-         <FormControlLabel
-            control={
-              <Switch
-                checked={showOnlyVA}
-                onChange={(e) => setShowOnlyVA(e.target.checked)}
-                color="primary"
-                size="small"
-              />
-            }
-            label={<Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>Show VA Pilots Only</Typography>}
-            sx={{ mt: 1, ml: 0 }}
-          />
 
          {isIdle && (
             <Typography variant="caption" sx={{ color: 'red', mt: 2, display: 'block' }}>

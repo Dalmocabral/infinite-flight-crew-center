@@ -1,7 +1,7 @@
 import os
 import requests
 from django.core.management.base import BaseCommand
-from api.models import Aircraft
+from api.models import Aircraft, Livery
 
 # Mapeamento de palavras-chave para categoria
 # ATENCAO: A ORDEM IMPORTA - regras mais especificas devem vir primeiro!
@@ -69,44 +69,55 @@ def get_category(name: str) -> str:
 
 
 class Command(BaseCommand):
-    help = 'Syncs aircraft from Infinite Flight API and assigns categories'
+    help = 'Syncs aircraft and liveries from Infinite Flight API and assigns categories'
 
     def handle(self, *args, **kwargs):
         api_key = os.environ.get("IF_API_KEY", "36d1c8xdt1zvxn9cqqs9pxr7dty8rhm4")
-        url = f"https://api.infiniteflight.com/public/v2/aircraft?apikey={api_key}"
+        base_url = "https://api.infiniteflight.com/public/v2"
 
         self.stdout.write("Fetching aircraft from Infinite Flight API...")
         try:
-            response = requests.get(url, timeout=30)
+            ac_url = f"{base_url}/aircraft?apikey={api_key}"
+            response = requests.get(ac_url, timeout=30)
             response.raise_for_status()
-            data = response.json()
+            ac_data = response.json()
 
-            if data.get("errorCode") == 0:
-                aircraft_list = data.get("result", [])
-                created_count = 0
-                updated_count = 0
-
+            if ac_data.get("errorCode") == 0:
+                aircraft_list = ac_data.get("result", [])
+                
                 for ac in aircraft_list:
                     category = get_category(ac["name"])
-                    obj, created = Aircraft.objects.update_or_create(
+                    aircraft_obj, created = Aircraft.objects.update_or_create(
                         if_id=ac["id"],
                         defaults={
                             "name": ac["name"],
                             "category": category,
                         }
                     )
-                    if created:
-                        created_count += 1
-                        self.stdout.write(f"  + {ac['name']} [{category}]")
-                    else:
-                        updated_count += 1
-                        self.stdout.write(f"  ~ {ac['name']} [{category}]")
+                    action = "+" if created else "~"
+                    self.stdout.write(f"  {action} {ac['name']} [{category}]")
 
-                self.stdout.write(self.style.SUCCESS(
-                    f"Done! Created: {created_count}, Updated: {updated_count}"
-                ))
+                    # Sync Liveries for this aircraft
+                    self.stdout.write(f"    Syncing liveries for {ac['name']}...")
+                    livery_url = f"{base_url}/aircraft/{ac['id']}/liveries?apikey={api_key}"
+                    livery_res = requests.get(livery_url, timeout=30)
+                    if livery_res.status_code == 200:
+                        livery_data = livery_res.json()
+                        if livery_data.get("errorCode") == 0:
+                            liveries = livery_data.get("result", [])
+                            for liv in liveries:
+                                Livery.objects.update_or_create(
+                                    livery_id=liv["id"],
+                                    defaults={
+                                        "aircraft": aircraft_obj,
+                                        "name": liv["liveryName"],
+                                    }
+                                )
+                            self.stdout.write(f"    Found {len(liveries)} liveries.")
+
+                self.stdout.write(self.style.SUCCESS("Synchronization completed successfully!"))
             else:
-                self.stdout.write(self.style.ERROR(f"API error: {data.get('errorCode')}"))
+                self.stdout.write(self.style.ERROR(f"API error: {ac_data.get('errorCode')}"))
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(f"Error: {str(e)}"))

@@ -68,6 +68,14 @@ class Aircraft(models.Model):
     def __str__(self):
         return self.name
 
+class Livery(models.Model):
+    livery_id = models.UUIDField(primary_key=True)
+    aircraft = models.ForeignKey(Aircraft, related_name='liveries', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.aircraft.name} - {self.name}"
+
 
 class Award(models.Model):
     CHOICE_TYPE = [
