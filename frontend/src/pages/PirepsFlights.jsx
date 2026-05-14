@@ -95,33 +95,47 @@ const PirepsFlights = () => {
       );
 
       if (match) {
-        // Validate Aircraft Rules if any
-        if (award?.allowed_aircrafts && award.allowed_aircrafts.length > 0) {
-            const isAircraftAllowed = award.allowed_aircrafts.some(ac => ac.aircraft_id === match.aircraftId);
-            if (!isAircraftAllowed) {
-                setSubmissionType('Manual');
-                setApiMessage({ type: 'error', text: 'Aircraft mismatch! The aircraft used for this flight does not comply with the Award rules. Auto-PIREP blocked.' });
-                return;
-            } else {
-                const matchedAc = award.allowed_aircrafts.find(ac => ac.aircraft_id === match.aircraftId);
-                if (matchedAc) {
-                    setAircraft(matchedAc.aircraft_name);
-                }
+        // Find aircraft info in our internal list to get Name and Category
+        const matchedInternalAc = aircraftList.find(ac => ac.if_id === match.aircraftId);
+        if (matchedInternalAc) {
+            setAircraft(matchedInternalAc.name);
+        }
+
+        // Validate Aircraft Rules
+        let isAllowed = true;
+        let mismatchReason = null;
+
+        const hasAllowedAircrafts = award?.allowed_aircrafts && award.allowed_aircrafts.length > 0;
+        const hasAllowedCategories = award?.allowed_categories && award.allowed_categories.length > 0;
+
+        if (hasAllowedAircrafts || hasAllowedCategories) {
+            const isNameAllowed = hasAllowedAircrafts && award.allowed_aircrafts.some(ac => ac.aircraft_id === match.aircraftId);
+            const isCategoryAllowed = hasAllowedCategories && matchedInternalAc && award.allowed_categories.some(cat => cat.category === matchedInternalAc.category);
+            
+            if (!isNameAllowed && !isCategoryAllowed) {
+                isAllowed = false;
+                mismatchReason = 'Aircraft mismatch! The aircraft used for this flight does not comply with the Award rules.';
             }
         }
 
+        // Fill Flight Duration
+        const hours = Math.floor(match.totalTime / 60);
+        const minutes = Math.floor(match.totalTime % 60);
+        setFlightDuration(dayjs().hour(hours).minute(minutes));
+
+        // Fill Network
         let matchedServer = 'Casual';
         if (match.server && match.server.includes('Training')) matchedServer = 'Training';
         if (match.server && match.server.includes('Expert')) matchedServer = 'Expert';
-
-        // totalTime is in minutes according to IF API docs for logbook
-        const hours = Math.floor(match.totalTime / 60);
-        const minutes = Math.floor(match.totalTime % 60);
-
         setNetwork(matchedServer);
-        setFlightDuration(dayjs().hour(hours).minute(minutes));
-        setSubmissionType('Auto');
-        setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
+
+        if (isAllowed) {
+            setSubmissionType('Auto');
+            setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
+        } else {
+            setSubmissionType('Manual');
+            setApiMessage({ type: 'warning', text: `${mismatchReason} Data has been auto-filled, but submission will be Manual.` });
+        }
       } else {
         setSubmissionType('Manual');
         setApiMessage({ type: 'warning', text: 'Your flight was not found in the Infinite Flight database. Please check if you flew Online (Multiplayer) and if the airports match exactly.' });
@@ -280,6 +294,7 @@ const PirepsFlights = () => {
                   onChange={(e) => setDepartureAirport(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
+                  disabled={submissionType === 'Auto'}
                   placeholder="ICAO Code"
                 />
               </Grid>
@@ -291,6 +306,7 @@ const PirepsFlights = () => {
                   onChange={(e) => setArrivalAirport(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
+                  disabled={submissionType === 'Auto'}
                   placeholder="ICAO Code"
                 />
               </Grid>
@@ -302,6 +318,7 @@ const PirepsFlights = () => {
                     value={aircraft}
                     onChange={(e) => setAircraft(e.target.value)}
                     label="Aircraft"
+                    disabled={submissionType === 'Auto'}
                   >
                     {aircraftList.map((choice) => (
                       <MenuItem key={choice.if_id} value={choice.name}>
@@ -320,6 +337,7 @@ const PirepsFlights = () => {
                   format="HH:mm"
                   fullWidth
                   required
+                  disabled={submissionType === 'Auto'}
                 />
               </Grid>
 
@@ -330,6 +348,7 @@ const PirepsFlights = () => {
                     value={network}
                     onChange={(e) => setNetwork(e.target.value)}
                     label="Network"
+                    disabled={submissionType === 'Auto'}
                   >
                     <MenuItem value="Casual">Casual Server</MenuItem>
                     <MenuItem value="Training">Training Server</MenuItem>
