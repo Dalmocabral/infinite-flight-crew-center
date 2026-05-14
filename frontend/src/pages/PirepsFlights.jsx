@@ -47,6 +47,7 @@ const PirepsFlights = () => {
   const [submissionType, setSubmissionType] = useState('Manual');
   const [isVerifying, setIsVerifying] = useState(false);
   const [apiMessage, setApiMessage] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
   
   const [aircraftList, setAircraftList] = useState([]);
 
@@ -67,6 +68,7 @@ const PirepsFlights = () => {
   const verifyFlightWithApi = async (from, to) => {
     setIsVerifying(true);
     setApiMessage(null);
+    setIsLocked(false);
     try {
       const userRes = await AxiosInstance.get('users/me/');
       const usernameIFC = userRes.data.usernameIFC;
@@ -136,6 +138,7 @@ const PirepsFlights = () => {
             setSubmissionType('Manual');
             setApiMessage({ type: 'warning', text: `${mismatchReason} Data has been auto-filled, but submission will be Manual.` });
         }
+        setIsLocked(true);
       } else {
         setSubmissionType('Manual');
         setApiMessage({ type: 'warning', text: 'Your flight was not found in the Infinite Flight database. Please check if you flew Online (Multiplayer) and if the airports match exactly.' });
@@ -202,6 +205,7 @@ const PirepsFlights = () => {
       setAircraft('');
       setFlightDuration(dayjs('2022-04-17T00:00'));
       setSubmissionType('Manual');
+      setIsLocked(false);
     } catch (error) {
       console.error('Error saving Pireps:', error.response ? error.response.data : error.message);
       setDialogMessage('Error saving Pireps. Please check the data and try again.');
@@ -294,7 +298,7 @@ const PirepsFlights = () => {
                   onChange={(e) => setDepartureAirport(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
-                  disabled={submissionType === 'Auto'}
+                  disabled={isLocked}
                   placeholder="ICAO Code"
                 />
               </Grid>
@@ -306,7 +310,7 @@ const PirepsFlights = () => {
                   onChange={(e) => setArrivalAirport(e.target.value ? e.target.value.toUpperCase() : '')}
                   fullWidth
                   required
-                  disabled={submissionType === 'Auto'}
+                  disabled={isLocked}
                   placeholder="ICAO Code"
                 />
               </Grid>
@@ -318,7 +322,7 @@ const PirepsFlights = () => {
                     value={aircraft}
                     onChange={(e) => setAircraft(e.target.value)}
                     label="Aircraft"
-                    disabled={submissionType === 'Auto'}
+                    disabled={isLocked}
                   >
                     {aircraftList.map((choice) => (
                       <MenuItem key={choice.if_id} value={choice.name}>
@@ -337,7 +341,7 @@ const PirepsFlights = () => {
                   format="HH:mm"
                   fullWidth
                   required
-                  disabled={submissionType === 'Auto'}
+                  disabled={isLocked}
                 />
               </Grid>
 
@@ -348,7 +352,7 @@ const PirepsFlights = () => {
                     value={network}
                     onChange={(e) => setNetwork(e.target.value)}
                     label="Network"
-                    disabled={submissionType === 'Auto'}
+                    disabled={isLocked}
                   >
                     <MenuItem value="Casual">Casual Server</MenuItem>
                     <MenuItem value="Training">Training Server</MenuItem>
