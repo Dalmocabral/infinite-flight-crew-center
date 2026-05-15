@@ -69,6 +69,52 @@ ChartJS.register(
 ChartJS.defaults.color = '#fff';
 ChartJS.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
 
+const renderFlag = (countryCode) => {
+    if (!countryCode) return null;
+    const code = countryCode.toUpperCase();
+    return (
+        <Tooltip title={code}>
+            <img 
+                src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg`} 
+                alt={code} 
+                style={{ width: '20px', marginRight: '8px', verticalAlign: 'middle', borderRadius: '2px', boxShadow: '0 0 5px rgba(0,0,0,0.5)' }} 
+            />
+        </Tooltip>
+    );
+};
+
+const renderLogo = (liveryId, logoData, icao = null) => {
+    if (!logoData || !Array.isArray(logoData)) return null;
+    
+    // Tenta pelo Livery ID primeiro
+    let match = liveryId ? logoData.find(item => item.LiveryId && item.LiveryId.toLowerCase() === liveryId.toLowerCase()) : null;
+    
+    // Se não achou, tenta pelo ICAO
+    if (!match && icao) {
+        match = logoData.find(item => item.Icao && item.Icao.toUpperCase() === icao.toUpperCase());
+    }
+
+    if (match && match.Logo) {
+        return (
+            <img 
+                src={match.Logo} 
+                alt="Airline Logo" 
+                style={{ width: '24px', height: '24px', marginRight: '8px', objectFit: 'contain', verticalAlign: 'middle' }} 
+                onError={(e) => { e.target.style.display = 'none'; }}
+            />
+        );
+    }
+
+    // Logo padrão se não houver correspondência (GA, Business Jets, etc.)
+    return (
+        <img 
+            src="https://cdn.radarbox.com/airlines/sq/NO.png" 
+            alt="Default Logo" 
+            style={{ width: '24px', height: '24px', marginRight: '8px', objectFit: 'contain', verticalAlign: 'middle', opacity: 0.7 }} 
+        />
+    );
+};
+
 const Dashboard = () => {
   const [flights, setFlights] = useState([]); // State for flights data
   const [topDuration, setTopDuration] = useState([]); // State for top duration rankings
@@ -78,6 +124,8 @@ const Dashboard = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" }); // State for table sorting
   const [ifStats, setIfStats] = useState(null);
   const [ifUsername, setIfUsername] = useState(null);
+  const [airportsData, setAirportsData] = useState({});
+  const [logoData, setLogoData] = useState([]);
   const navigate = useNavigate();
 
   // Fetch flights and rankings on component mount
@@ -85,7 +133,30 @@ const Dashboard = () => {
     fetchFlights();
     fetchRankings();
     fetchIfStats();
+    fetchAirports();
+    fetchLogos();
   }, []);
+
+  const fetchLogos = async () => {
+    try {
+        const data = await ApiService.getAirplaneLogoData();
+        setLogoData(data);
+    } catch (err) {
+        console.error('Error fetching logos:', err);
+    }
+  };
+
+  const fetchAirports = async () => {
+    try {
+      const response = await fetch(
+        'https://raw.githubusercontent.com/Dalmocabral/Airport/refs/heads/master/airports.json'
+      );
+      const data = await response.json();
+      setAirportsData(data);
+    } catch (error) {
+      console.error('Erro ao buscar dados dos aeroportos:', error);
+    }
+  };
 
   const fetchIfStats = async () => {
     try {
@@ -442,9 +513,36 @@ const Dashboard = () => {
             <TableBody>
                 {flights.slice(0, 5).map((flight) => (
                 <TableRow key={flight.id} hover>
-                    <TableCell><Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography></TableCell>
-                    <TableCell>{flight.departure_airport}</TableCell>
-                    <TableCell>{flight.arrival_airport}</TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
+                            <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography>
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {airportsData[flight.departure_airport]?.country && (
+                                <img
+                                    src={`https://flagcdn.com/w320/${airportsData[flight.departure_airport].country.toLowerCase()}.png`}
+                                    alt={airportsData[flight.departure_airport].country}
+                                    style={{ width: '20px', borderRadius: '3px' }}
+                                />
+                            )}
+                            {flight.departure_airport}
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {airportsData[flight.arrival_airport]?.country && (
+                                <img
+                                    src={`https://flagcdn.com/w320/${airportsData[flight.arrival_airport].country.toLowerCase()}.png`}
+                                    alt={airportsData[flight.arrival_airport].country}
+                                    style={{ width: '20px', borderRadius: '3px' }}
+                                />
+                            )}
+                            {flight.arrival_airport}
+                        </Box>
+                    </TableCell>
                     <TableCell>{dayjs(flight.registration_date).format("MM/DD/YYYY")}</TableCell>
                     <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }} /></TableCell>
                     <TableCell>{flight.flight_duration}</TableCell>
@@ -567,7 +665,12 @@ const Dashboard = () => {
                                 {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
                            </Box>
                         </TableCell>
-                        <TableCell>{`${user.pilot__first_name} ${user.pilot__last_name}`}</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {renderFlag(user.pilot__country)}
+                            {`${user.pilot__first_name} ${user.pilot__last_name}`}
+                          </Box>
+                        </TableCell>
                         <TableCell align="right" sx={{ fontFamily: 'monospace', color: '#4dabf5' }}>{formatDuration(user.total_duration)}</TableCell>
                       </TableRow>
                     ))}
@@ -606,7 +709,12 @@ const Dashboard = () => {
                                 {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
                            </Box>
                         </TableCell>
-                        <TableCell>{`${user.pilot__first_name} ${user.pilot__last_name}`}</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {renderFlag(user.pilot__country)}
+                            {`${user.pilot__first_name} ${user.pilot__last_name}`}
+                          </Box>
+                        </TableCell>
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>{user.total_flights}</TableCell>
                       </TableRow>
                     ))}

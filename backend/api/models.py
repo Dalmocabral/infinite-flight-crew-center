@@ -234,7 +234,8 @@ class PirepsFlight (models.Model):
     network = models.CharField(max_length=200, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Em análise')
     submission_type = models.CharField(max_length=20, choices=[('Manual', 'Manual'), ('Auto', 'Auto')], default='Manual')
-    observation = models.TextField(max_length=500, null=True, blank=True)  # Permite valores nulos e campos em branco
+    observation = models.TextField(max_length=500, null=True, blank=True)
+    livery_id = models.UUIDField(null=True, blank=True)
     # Outros campos relevantes sobre o voo
 
     def __str__(self):

@@ -8,11 +8,61 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
+import ApiService from '../components/ApiService';
+import { Tooltip } from '@mui/material';
+
+const renderLogo = (liveryId, logoData, icao = null) => {
+    if (!logoData || !Array.isArray(logoData)) return null;
+    
+    // Tenta pelo Livery ID primeiro
+    let match = liveryId ? logoData.find(item => item.LiveryId && item.LiveryId.toLowerCase() === liveryId.toLowerCase()) : null;
+    
+    // Se não achou, tenta pelo ICAO
+    if (!match && icao) {
+        match = logoData.find(item => item.Icao && item.Icao.toUpperCase() === icao.toUpperCase());
+    }
+
+    if (match && match.Logo) {
+        return (
+            <img 
+                src={match.Logo} 
+                alt="Airline Logo" 
+                style={{ width: '32px', height: '32px', marginBottom: '8px', objectFit: 'contain' }} 
+                onError={(e) => { e.target.style.display = 'none'; }}
+            />
+        );
+    }
+
+    // Logo padrão
+    return (
+        <img 
+            src="https://cdn.radarbox.com/airlines/sq/NO.png" 
+            alt="Default Logo" 
+            style={{ width: '32px', height: '32px', marginBottom: '8px', objectFit: 'contain', opacity: 0.7 }} 
+        />
+    );
+};
+
+const renderFlag = (icao, airportsData) => {
+    if (!icao || !airportsData || !airportsData[icao]?.country) return null;
+    const country = airportsData[icao].country;
+    return (
+        <Tooltip title={country}>
+            <img 
+                src={`https://flagcdn.com/w320/${country.toLowerCase()}.png`} 
+                alt={country} 
+                style={{ width: '20px', borderRadius: '3px', verticalAlign: 'middle' }} 
+            />
+        </Tooltip>
+    );
+};
 
 const Briefing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [flightData, setFlightData] = useState(null);
+  const [logoData, setLogoData] = useState([]);
+  const [airportsData, setAirportsData] = useState({});
   const mapContainer = useRef(null);
   const map = useRef(null);
 
@@ -27,7 +77,30 @@ const Briefing = () => {
     };
 
     fetchFlightDetails();
+    fetchLogos();
+    fetchAirports();
   }, [id]);
+
+  const fetchLogos = async () => {
+    try {
+        const data = await ApiService.getAirplaneLogoData();
+        setLogoData(data);
+    } catch (err) {
+        console.error('Error fetching logos:', err);
+    }
+  };
+
+  const fetchAirports = async () => {
+    try {
+      const response = await fetch(
+        'https://raw.githubusercontent.com/Dalmocabral/Airport/refs/heads/master/airports.json'
+      );
+      const data = await response.json();
+      setAirportsData(data);
+    } catch (error) {
+      console.error('Erro ao buscar dados dos aeroportos:', error);
+    }
+  };
 
   useEffect(() => {
     if (flightData && !map.current && mapContainer.current) {
@@ -156,10 +229,11 @@ const Briefing = () => {
 
               <Grid container spacing={2}>
                  <Grid item xs={6}>
-                    <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                     <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        {renderLogo(flightData.livery_id, logoData, flightData.flight_icao)}
                         <Typography variant="caption" color="rgba(255,255,255,0.5)">FLIGHT NUMBER</Typography>
                         <Typography variant="h6" fontWeight="bold">{flightData.flight_icao} {flightData.flight_number}</Typography>
-                    </Box>
+                     </Box>
                  </Grid>
                  <Grid item xs={6}>
                     <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
@@ -171,14 +245,20 @@ const Briefing = () => {
                  <Grid item xs={6}>
                     <Box sx={{ textAlign: 'center', p: 1, border: '1px solid rgba(77, 171, 245, 0.3)', borderRadius: 2 }}>
                         <Typography variant="caption" color="#4dabf5">DEPARTURE</Typography>
-                        <Typography variant="h5" fontWeight="bold">{flightData.departure_airport}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                            {renderFlag(flightData.departure_airport, airportsData)}
+                            <Typography variant="h5" fontWeight="bold">{flightData.departure_airport}</Typography>
+                        </Box>
                          <FlightTakeoffIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.5)' }} />
                     </Box>
                  </Grid>
                  <Grid item xs={6}>
                     <Box sx={{ textAlign: 'center', p: 1, border: '1px solid rgba(245, 0, 87, 0.3)', borderRadius: 2 }}>
                          <Typography variant="caption" color="#f50057">ARRIVAL</Typography>
-                        <Typography variant="h5" fontWeight="bold">{flightData.arrival_airport}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                            {renderFlag(flightData.arrival_airport, airportsData)}
+                            <Typography variant="h5" fontWeight="bold">{flightData.arrival_airport}</Typography>
+                        </Box>
                         <FlightLandIcon sx={{ fontSize: 20, color: 'rgba(255,255,255,0.5)' }} />
                     </Box>
                  </Grid>

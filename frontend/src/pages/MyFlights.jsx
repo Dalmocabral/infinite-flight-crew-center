@@ -26,19 +26,91 @@ import dayjs from 'dayjs';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import AxiosInstance from '../components/AxiosInstance';
+import ApiService from '../components/ApiService';
+
+const renderFlag = (countryCode) => {
+    if (!countryCode) return null;
+    const code = countryCode.toUpperCase();
+    return (
+        <Tooltip title={code}>
+            <img 
+                src={`https://purecatamphetamine.github.io/country-flag-icons/3x2/${code}.svg`} 
+                alt={code} 
+                style={{ width: '20px', marginRight: '8px', verticalAlign: 'middle', borderRadius: '2px', boxShadow: '0 0 5px rgba(0,0,0,0.5)' }} 
+            />
+        </Tooltip>
+    );
+};
+
+const renderLogo = (liveryId, logoData, icao = null) => {
+    if (!logoData || !Array.isArray(logoData)) return null;
+    
+    // Tenta pelo Livery ID primeiro
+    let match = liveryId ? logoData.find(item => item.LiveryId && item.LiveryId.toLowerCase() === liveryId.toLowerCase()) : null;
+    
+    // Se não achou, tenta pelo ICAO
+    if (!match && icao) {
+        match = logoData.find(item => item.Icao && item.Icao.toUpperCase() === icao.toUpperCase());
+    }
+
+    if (match && match.Logo) {
+        return (
+            <img 
+                src={match.Logo} 
+                alt="Airline Logo" 
+                style={{ width: '24px', height: '24px', marginRight: '8px', objectFit: 'contain', verticalAlign: 'middle' }} 
+                onError={(e) => { e.target.style.display = 'none'; }}
+            />
+        );
+    }
+
+    // Logo padrão se não houver correspondência
+    return (
+        <img 
+            src="https://cdn.radarbox.com/airlines/sq/NO.png" 
+            alt="Default Logo" 
+            style={{ width: '24px', height: '24px', marginRight: '8px', objectFit: 'contain', verticalAlign: 'middle', opacity: 0.7 }} 
+        />
+    );
+};
 
 const MyFlights = () => {
   const [flights, setFlights] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [airportsData, setAirportsData] = useState({});
+  const [logoData, setLogoData] = useState([]);
   
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     fetchFlights();
+    fetchAirports();
+    fetchLogos();
   }, []);
+
+  const fetchLogos = async () => {
+    try {
+        const data = await ApiService.getAirplaneLogoData();
+        setLogoData(data);
+    } catch (err) {
+        console.error('Error fetching logos:', err);
+    }
+  };
+
+  const fetchAirports = async () => {
+    try {
+      const response = await fetch(
+        'https://raw.githubusercontent.com/Dalmocabral/Airport/refs/heads/master/airports.json'
+      );
+      const data = await response.json();
+      setAirportsData(data);
+    } catch (error) {
+      console.error('Erro ao buscar dados dos aeroportos:', error);
+    }
+  };
 
   const fetchFlights = async () => {
     try {
@@ -121,9 +193,36 @@ const MyFlights = () => {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((flight) => (
                     <TableRow key={flight.id} hover>
-                    <TableCell><Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography></TableCell>
-                    <TableCell>{flight.departure_airport}</TableCell>
-                    <TableCell>{flight.arrival_airport}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
+                        <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {airportsData[flight.departure_airport]?.country && (
+                          <img
+                            src={`https://flagcdn.com/w320/${airportsData[flight.departure_airport].country.toLowerCase()}.png`}
+                            alt={airportsData[flight.departure_airport].country}
+                            style={{ width: '20px', borderRadius: '3px' }}
+                          />
+                        )}
+                        {flight.departure_airport}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {airportsData[flight.arrival_airport]?.country && (
+                          <img
+                            src={`https://flagcdn.com/w320/${airportsData[flight.arrival_airport].country.toLowerCase()}.png`}
+                            alt={airportsData[flight.arrival_airport].country}
+                            style={{ width: '20px', borderRadius: '3px' }}
+                          />
+                        )}
+                        {flight.arrival_airport}
+                      </Box>
+                    </TableCell>
                     <TableCell>{dayjs(flight.registration_date).format('MM/DD/YYYY')}</TableCell>
                     {!isMobile && <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }} /></TableCell>}
                     {!isMobile && <TableCell>{flight.flight_duration}</TableCell>}

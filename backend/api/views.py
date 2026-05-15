@@ -126,7 +126,7 @@ class DashboardViewSet(viewsets.ViewSet):
         # Top 5 Duração de Voo
         top_duration = (
             PirepsFlight.objects.filter(status="Approved")
-            .values("pilot__first_name", "pilot__last_name")  # Use o campo correto para o nome do piloto
+            .values("pilot__first_name", "pilot__last_name", "pilot__country")
             .annotate(total_duration=Sum("flight_duration"))
             .order_by("-total_duration")[:5]
         )
@@ -134,7 +134,7 @@ class DashboardViewSet(viewsets.ViewSet):
         # Top 5 Total de Voos
         top_flights = (
             PirepsFlight.objects.filter(status="Approved")
-            .values("pilot__first_name", "pilot__last_name")  # Use o campo correto para o nome do piloto
+            .values("pilot__first_name", "pilot__last_name", "pilot__country")
             .annotate(total_flights=Count("id"))
             .order_by("-total_flights")[:5]
         )

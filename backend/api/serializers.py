@@ -46,11 +46,15 @@ class LoginSerializer(serializers.Serializer):
         return data
     
 class PirepsFlightSerializer(serializers.ModelSerializer):
+    pilot_name = serializers.ReadOnlyField(source='pilot.get_full_name')
+    pilot_country = serializers.ReadOnlyField(source='pilot.country')
+
     class Meta:
         model = PirepsFlight
         fields = ('id', 'flight_icao', 'flight_number', 'departure_airport', 'arrival_airport', 
-                  'aircraft', 'flight_duration', 'network', 'registration_date', 'status', 'submission_type', 'observation')
-        read_only_fields = ('pilot',)  # Impede alteração do piloto
+                  'aircraft', 'flight_duration', 'network', 'registration_date', 'status', 
+                  'submission_type', 'observation', 'pilot_name', 'pilot_country', 'livery_id')
+        read_only_fields = ('pilot',)
 
 class AwardsSerializer(serializers.ModelSerializer):
     total_legs = serializers.SerializerMethodField()  # Campo calculado para o total de pernas

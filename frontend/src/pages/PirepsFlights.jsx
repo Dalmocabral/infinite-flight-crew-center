@@ -39,6 +39,7 @@ const PirepsFlights = () => {
   const [aircraft, setAircraft] = useState('');
   const [network, setNetwork] = useState('');
   const [flightDuration, setFlightDuration] = useState(dayjs('2022-04-17T00:00'));
+  const [liveryId, setLiveryId] = useState(null);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
@@ -161,6 +162,9 @@ const PirepsFlights = () => {
         if (match.server && match.server.includes('Expert')) matchedServer = 'Expert';
         setNetwork(matchedServer);
 
+        // Store Livery ID for logo lookup
+        setLiveryId(match.liveryId);
+
         if (isAllowed) {
             setSubmissionType('Auto');
             setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
@@ -205,6 +209,7 @@ const PirepsFlights = () => {
       flight_duration: formattedDuration,
       network: network,
       submission_type: submissionType,
+      livery_id: liveryId,
     };
     
     // Validate manual submission if this is part of an award
