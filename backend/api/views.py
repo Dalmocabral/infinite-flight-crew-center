@@ -75,7 +75,14 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
     queryset = PirepsFlight.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(pilot=self.request.user, status="In Review")
+        pirep = serializer.save(pilot=self.request.user, status="In Review")
+        # Vincula automaticamente o último LandingReport sem PIREP deste piloto
+        latest = LandingReport.objects.filter(
+            pilot=self.request.user, pirep__isnull=True
+        ).order_by('-created_at').first()
+        if latest:
+            latest.pirep = pirep
+            latest.save()
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -471,3 +478,40 @@ class ValidateTokenView(APIView):
 def test_email(request):
     send_welcome_email("destinatario@email.com")
     return HttpResponse("E-mail enviado com sucesso!")
+
+
+# ── LANDING REPORT (Co-Piloto Virtual) ───────────────────────────────────────
+class LandingReportView(APIView):
+    """Recebe dados de pouso do app mobile e salva no banco."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        data = request.data
+        report = LandingReport.objects.create(
+            pilot        = request.user,
+            aircraft     = data.get('aircraft', ''),
+            vs_touchdown = int(data.get('vs_touchdown', 0)),
+            g_force      = float(data.get('g_force', 1.0)),
+            centerline   = float(data.get('centerline_dev', 0.0)),
+            bounce_count = int(data.get('bounce_count', 0)),
+            light_infrac = data.get('light_infractions', []),
+            status       = data.get('status', 'LANDED'),
+            score        = float(data.get('score', 0.0)),
+            fuel_weight_kg      = float(data.get('fuel_weight_kg', 0.0)),
+            landing_lat         = float(data.get('landing_lat', 0.0)),
+            landing_lon         = float(data.get('landing_lon', 0.0)),
+            ias_violations      = int(data.get('ias_violations', 0)),
+            unstable_approaches = int(data.get('unstable_approaches', 0)),
+            flight_path         = data.get('flight_path', []),
+            deductions          = data.get('deductions', []),
+        )
+        return Response(
+            {'id': report.id, 'score': report.score, 'status': report.status},
+            status=status.HTTP_201_CREATED
+        )
+
+    def get(self, request):
+        """Lista os últimos 10 relatórios do piloto autenticado."""
+        reports = LandingReport.objects.filter(pilot=request.user)[:10]
+        serializer = LandingReportSerializer(reports, many=True)
+        return Response(serializer.data)

@@ -45,15 +45,25 @@ class LoginSerializer(serializers.Serializer):
         # Retorne os dados validados
         return data
     
+class LandingReportBriefSerializer(serializers.ModelSerializer):
+    """Resumo do relatório de pouso — incluído no PIREP."""
+    class Meta:
+        model = LandingReport
+        fields = ['score', 'vs_touchdown', 'g_force', 'bounce_count', 'status',
+                  'fuel_weight_kg', 'landing_lat', 'landing_lon',
+                  'ias_violations', 'unstable_approaches', 'deductions', 'flight_path']
+
 class PirepsFlightSerializer(serializers.ModelSerializer):
-    pilot_name = serializers.ReadOnlyField(source='pilot.get_full_name')
+    pilot_name    = serializers.ReadOnlyField(source='pilot.get_full_name')
     pilot_country = serializers.ReadOnlyField(source='pilot.country')
+    landing_report = LandingReportBriefSerializer(read_only=True)
 
     class Meta:
         model = PirepsFlight
-        fields = ('id', 'flight_icao', 'flight_number', 'departure_airport', 'arrival_airport', 
-                  'aircraft', 'flight_duration', 'network', 'registration_date', 'status', 
-                  'submission_type', 'observation', 'pilot_name', 'pilot_country', 'livery_id')
+        fields = ('id', 'flight_icao', 'flight_number', 'departure_airport', 'arrival_airport',
+                  'aircraft', 'flight_duration', 'network', 'registration_date', 'status',
+                  'submission_type', 'observation', 'pilot_name', 'pilot_country', 'livery_id',
+                  'landing_report')
         read_only_fields = ('pilot',)
 
 class AwardsSerializer(serializers.ModelSerializer):
@@ -125,9 +135,15 @@ class UserAwardSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
+    last_landing_score = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC']  # Campos que você quer retornar
+        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'last_landing_score']
+
+    def get_last_landing_score(self, obj):
+        report = LandingReport.objects.filter(pilot=obj).order_by('-created_at').first()
+        return report.score if report else None
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -147,10 +163,24 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         }
 
     def update(self, instance, validated_data):
-        instance.first_name = validated_data.get('first_name', instance.first_name)  # Update first_name
-        instance.last_name = validated_data.get('last_name', instance.last_name)      # Update last_name
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.email = validated_data.get('email', instance.email)
         instance.usernameIFC = validated_data.get('usernameIFC', instance.usernameIFC)
         instance.country = validated_data.get('country', instance.country)
         instance.save()
         return instance
+
+
+class LandingReportSerializer(serializers.ModelSerializer):
+    pilot_name = serializers.ReadOnlyField(source='pilot.usernameIFC')
+
+    class Meta:
+        model = LandingReport
+        fields = [
+            'id', 'pilot', 'pilot_name', 'aircraft',
+            'vs_touchdown', 'g_force', 'centerline',
+            'bounce_count', 'light_infrac', 'status',
+            'score', 'created_at', 'pirep'
+        ]
+        read_only_fields = ['id', 'pilot', 'created_at']

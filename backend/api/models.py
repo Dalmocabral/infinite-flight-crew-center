@@ -236,10 +236,47 @@ class PirepsFlight (models.Model):
     submission_type = models.CharField(max_length=20, choices=[('Manual', 'Manual'), ('Auto', 'Auto')], default='Manual')
     observation = models.TextField(max_length=500, null=True, blank=True)
     livery_id = models.UUIDField(null=True, blank=True)
-    # Outros campos relevantes sobre o voo
 
     def __str__(self):
         return f"{self.flight_number} - {self.pilot.first_name}"
+
+
+class LandingReport(models.Model):
+    """Relatório de pouso capturado pelo IF Virtual Co-Pilot"""
+    pilot         = models.ForeignKey(User, on_delete=models.CASCADE)
+    aircraft      = models.CharField(max_length=100, blank=True)
+    vs_touchdown  = models.IntegerField(default=0)       # FPM no toque
+    g_force       = models.FloatField(default=1.0)       # G no impacto
+    centerline    = models.FloatField(default=0.0)       # Desvio em metros
+    bounce_count  = models.IntegerField(default=0)       # Quiques
+    light_infrac  = models.JSONField(default=list)       # Infrações de luzes
+    status        = models.CharField(max_length=20, default='WAITING')  # LANDED/CRASHED
+    score         = models.FloatField(default=0.0)       # Nota 0-10
+    created_at    = models.DateTimeField(auto_now_add=True)
+
+    # Novos campos de telemetria
+    fuel_weight_kg      = models.FloatField(default=0.0, null=True, blank=True)  # Combustível no toque (kg)
+    landing_lat         = models.FloatField(default=0.0, null=True, blank=True)  # Latitude do toque
+    landing_lon         = models.FloatField(default=0.0, null=True, blank=True)  # Longitude do toque
+    ias_violations      = models.IntegerField(default=0)  # Violações >250 KTS abaixo 10kft
+    unstable_approaches = models.IntegerField(default=0)  # Aproximações instáveis <500ft
+    flight_path         = models.JSONField(default=list, blank=True)  # Lista de coordenadas do voo
+    deductions          = models.JSONField(default=list, blank=True)  # Detalhes das deduções de pontuação
+
+    # Vínculo com o PIREP (preenchido quando o piloto submete o voo)
+    pirep = models.OneToOneField(
+        PirepsFlight,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='landing_report'
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.pilot.email} | {self.aircraft} | {self.score}/10 | {self.created_at.strftime('%d/%m %H:%M')}"
+
     
 class Notification(models.Model):
     recipient = models.ForeignKey(User, on_delete=models.CASCADE)

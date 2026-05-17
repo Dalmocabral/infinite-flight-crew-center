@@ -1,0 +1,5 @@
+mobile_app/
+__pycache__/
+*.pyc
+venv/
+.env

@@ -108,9 +108,51 @@ const Members = () => {
                         </Box>
                     </Box>
                     <CardContent sx={{ p: 1 }}>
-                        <Typography variant="h6" sx={{ fontSize: '1.2rem', fontWeight: 'bold', mb: 1, color: '#fff' }}>
+                        <Typography variant="h6" sx={{ fontSize: '1.2rem', fontWeight: 'bold', mb: 0.5, color: '#fff' }}>
                         {item.first_name} {item.last_name}
                         </Typography>
+                        {(() => {
+                          const score = item.last_landing_score;
+                          let color = '#5b8dd9';
+                          if (score !== null && score !== undefined) {
+                            if (score >= 7.0) color = '#00e676';
+                            else if (score >= 6.0) color = '#4dabf5';
+                            else if (score >= 5.0) color = '#ffc107';
+                            else color = '#ff1744';
+                          }
+                          return score !== null && score !== undefined ? (
+                            <Box sx={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              px: 1.2, 
+                              py: 0.3, 
+                              borderRadius: '8px', 
+                              bgcolor: `${color}15`, 
+                              border: `1px solid ${color}40`,
+                              mb: 1
+                            }}>
+                              <Typography variant="caption" sx={{ color: color, fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                {Number(score).toFixed(2)}
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Box sx={{ 
+                              display: 'inline-flex', 
+                              alignItems: 'center', 
+                              px: 1.2, 
+                              py: 0.3, 
+                              borderRadius: '8px', 
+                              bgcolor: 'rgba(255,255,255,0.05)', 
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              mb: 1
+                            }}>
+                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                                N/A
+                              </Typography>
+                            </Box>
+                          );
+                        })()}
+
                         <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
                          <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>Base:</Typography>

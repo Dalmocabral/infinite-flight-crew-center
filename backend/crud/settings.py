@@ -99,9 +99,8 @@ REST_FRAMEWORK = {
 
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
+# Database — SQLite para desenvolvimento local
+# Para produção, o deployment_settings.py usa DATABASE_URL do .env
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

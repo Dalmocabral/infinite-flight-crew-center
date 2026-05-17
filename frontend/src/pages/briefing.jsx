@@ -124,8 +124,6 @@ const Briefing = () => {
         fetchAirports().then((airportsData) => {
             const depAirport = airportsData[flightData.departure_airport];
             const arrAirport = airportsData[flightData.arrival_airport];
-            
-            // Fix: Clean up layer logic if re-running (though useEffect dependency is flightData)
 
             if (depAirport) {
             L.marker([depAirport.lat, depAirport.lon])
@@ -149,9 +147,35 @@ const Briefing = () => {
             const bounds = L.latLngBounds(latLngs);
             map.current.fitBounds(bounds, { padding: [50, 50] });
 
-             // Calculate distance manually or use simple math
+             // Marcador de toque se disponível
+             const lr = flightData.landing_report;
+             if (lr && lr.landing_lat && lr.landing_lon && (Math.abs(lr.landing_lat) > 0.001 || Math.abs(lr.landing_lon) > 0.001)) {
+               const touchdownIcon = L.divIcon({
+                 className: '',
+                 html: '<div style="background:#00e676;width:14px;height:14px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 8px #00e676"></div>',
+                 iconSize: [14, 14], iconAnchor: [7, 7]
+               });
+               L.marker([lr.landing_lat, lr.landing_lon], { icon: touchdownIcon })
+                 .addTo(map.current)
+                 .bindPopup(`<strong>🛬 TOUCHDOWN</strong><br/>${lr.vs_touchdown} FPM · ${Number(lr.g_force).toFixed(2)}G<br/>Score: ${lr.score}/10`);
+             }
+
+             // Trilha de voo (flight path track) se disponível
+             if (lr && lr.flight_path && lr.flight_path.length > 0) {
+               const flightTrack = lr.flight_path.map(pt => [pt[0], pt[1]]);
+               L.polyline(flightTrack, { color: '#00e5ff', weight: 4, opacity: 0.9 }).addTo(map.current);
+               
+               // Ajusta o zoom do mapa para focar na rota realizada
+               try {
+                 const trackBounds = L.latLngBounds(flightTrack);
+                 map.current.fitBounds(trackBounds, { padding: [50, 50] });
+               } catch (err) {
+                 console.error("Error fitting track bounds", err);
+               }
+             }
+
              const distInfo = document.getElementById('distance-info');
-             if(distInfo) distInfo.innerText = "Calculated in Flight Plan"; // Placeholder
+             if(distInfo) distInfo.innerText = "Calculated in Flight Plan";
             }
         });
       }, 100); // Small delay to ensure container render
@@ -281,7 +305,192 @@ const Briefing = () => {
                         <Typography variant="body1">{flightData.alternate_airport || 'N/A'}</Typography>
                     </Box>
                  </Grid>
+                 {flightData.landing_report?.fuel_weight_kg > 0 && (
+                   <Grid item xs={12}>
+                     <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(77,171,245,0.08)', borderRadius: 2, border: '1px solid rgba(77,171,245,0.2)' }}>
+                       <Typography variant="caption" color="#4dabf5">⛽ FUEL AT TOUCHDOWN</Typography>
+                       <Typography variant="body1" fontWeight="bold">
+                         {(flightData.landing_report.fuel_weight_kg / 1000).toFixed(2)} t
+                         <Typography component="span" sx={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', ml: 1 }}>
+                           ({Math.round(flightData.landing_report.fuel_weight_kg)} kg)
+                         </Typography>
+                       </Typography>
+                     </Box>
+                   </Grid>
+                 )}
               </Grid>
+            </CardContent>
+          </Paper>
+
+          {/* ── LANDING RATING CARD ── */}
+          <Paper sx={{
+              mb: 3,
+              backgroundColor: 'rgba(10, 25, 41, 0.7)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '16px',
+              border: flightData.landing_report
+                ? `1px solid ${flightData.landing_report.score >= 9 ? 'rgba(0,230,118,0.4)' : flightData.landing_report.score >= 7 ? 'rgba(77,171,245,0.4)' : flightData.landing_report.score >= 5 ? 'rgba(255,235,59,0.4)' : 'rgba(244,67,54,0.4)'}`
+                : '1px solid rgba(255,255,255,0.1)',
+              color: 'white'
+          }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4dabf5', fontWeight: 'bold' }}>
+                🛬 LANDING RATING
+              </Typography>
+              <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
+              {flightData.landing_report ? (() => {
+                const r = flightData.landing_report;
+                const scoreColor = r.score >= 7 ? '#00e676' : r.score >= 6 ? '#4dabf5' : r.score >= 5 ? '#ffeb3b' : '#f44336';
+                const scoreLabel = r.score >= 9 ? 'BUTTER' : r.score >= 8 ? 'SMOOTH' : r.score >= 7 ? 'GOOD' : r.score >= 6 ? 'AVERAGE' : r.score >= 5 ? 'BELOW AVG' : r.score >= 3 ? 'HARD' : 'CRASH';
+                return (
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
+                      <Typography sx={{ fontSize: 64, fontWeight: 'bold', color: scoreColor, lineHeight: 1 }}>
+                        {Number(r.score).toFixed(2)}
+                      </Typography>
+                      <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>/10.0</Typography>
+                      <Chip label={scoreLabel} size="small" sx={{ mt: 1, fontWeight: 'bold', bgcolor: `${scoreColor}22`, color: scoreColor, border: `1px solid ${scoreColor}` }} />
+                    </Grid>
+                    <Grid item xs={12} sm={8}>
+                      <Grid container spacing={1.5}>
+                        <Grid item xs={6}>
+                          <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
+                            <Typography variant="caption" color="rgba(255,255,255,0.5)">TOUCHDOWN</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: Math.abs(r.vs_touchdown) < 200 ? '#00e676' : Math.abs(r.vs_touchdown) < 600 ? '#ffeb3b' : '#f44336' }}>
+                              {r.vs_touchdown} FPM
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
+                            <Typography variant="caption" color="rgba(255,255,255,0.5)">G-FORCE</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: r.g_force < 1.4 ? '#00e676' : r.g_force < 1.8 ? '#ffeb3b' : '#f44336' }}>
+                              {Number(r.g_force).toFixed(2)} G
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
+                            <Typography variant="caption" color="rgba(255,255,255,0.5)">BOUNCES</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: r.bounce_count === 0 ? '#00e676' : '#f44336' }}>
+                              {r.bounce_count === 0 ? '✓ NONE' : `${r.bounce_count}x`}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
+                            <Typography variant="caption" color="rgba(255,255,255,0.5)">STATUS</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: r.status === 'LANDED' ? '#00e676' : '#f44336' }}>
+                              {r.status === 'LANDED' ? '✈ LANDED' : '💥 CRASH'}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                          <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>0</Typography>
+                          <Typography sx={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>10</Typography>
+                        </Box>
+                        <Box sx={{ width: '100%', height: 8, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+                          <Box sx={{ width: `${(r.score / 10) * 100}%`, height: '100%', bgcolor: scoreColor, borderRadius: 4 }} />
+                        </Box>
+                      </Box>
+
+                      {/* Tabela de Deduções / Detalhes de Dedução no Estilo Newsky */}
+                      {(() => {
+                        let scoringList = r.deductions;
+                        if (!scoringList || scoringList.length === 0) {
+                          scoringList = [];
+                          
+                          // G Force
+                          if (r.g_force <= 1.20) scoringList.push({ reason: `Pouso perfeito (${Number(r.g_force).toFixed(2)}G) ✓`, penalty: 0.0 });
+                          else if (r.g_force <= 1.50) scoringList.push({ reason: `Pouso firme (${Number(r.g_force).toFixed(2)}G)`, penalty: -1.0 });
+                          else if (r.g_force <= 2.00) scoringList.push({ reason: `Pouso duro (${Number(r.g_force).toFixed(2)}G)`, penalty: -3.0 });
+                          else if (r.g_force <= 3.00) scoringList.push({ reason: `Pouso muito duro (${Number(r.g_force).toFixed(2)}G)`, penalty: -6.0 });
+                          else scoringList.push({ reason: `Força G excessiva (${Number(r.g_force).toFixed(2)}G)`, penalty: -10.0 });
+
+                          // VS Touchdown
+                          const vs = Math.abs(r.vs_touchdown);
+                          if (vs <= 200) scoringList.push({ reason: `Pouso suave (${vs} FPM) ✓`, penalty: 0.0 });
+                          else if (vs <= 400) scoringList.push({ reason: `Pouso normal (${vs} FPM)`, penalty: -1.0 });
+                          else if (vs <= 600) scoringList.push({ reason: `Pouso firme (${vs} FPM)`, penalty: -3.0 });
+                          else if (vs <= 1000) scoringList.push({ reason: `Pouso duro (${vs} FPM)`, penalty: -6.0 });
+                          else scoringList.push({ reason: `Extremamente duro (${vs} FPM)`, penalty: -10.0 });
+
+                          // Bounces
+                          if (r.bounce_count > 0) {
+                            scoringList.push({ reason: `${r.bounce_count} quiques`, penalty: r.bounce_count === 1 ? -4.0 : -10.0 });
+                          }
+
+                          // Centerline
+                          const c = Math.abs(r.centerline);
+                          if (c <= 5) scoringList.push({ reason: `Centralizado (${c.toFixed(1)}m) ✓`, penalty: 0.0 });
+                          else if (c <= 10) scoringList.push({ reason: `Desviado (${c.toFixed(1)}m)`, penalty: -1.0 });
+                          else if (c <= 15) scoringList.push({ reason: `Longe do eixo (${c.toFixed(1)}m)`, penalty: -3.0 });
+                          else if (c <= 25) scoringList.push({ reason: `No limite da pista (${c.toFixed(1)}m)`, penalty: -6.0 });
+                          else scoringList.push({ reason: `Fora da pista (${c.toFixed(1)}m)`, penalty: -10.0 });
+
+                          // Light infractions
+                          if (r.light_infrac && r.light_infrac.length > 0) {
+                            r.light_infrac.forEach(inf => {
+                              scoringList.push({ reason: inf, penalty: -1.0 });
+                            });
+                          }
+
+                          // IAS and Unstable Approaches
+                          if (r.ias_violations > 0) {
+                            scoringList.push({ reason: `Velocidade >250KTS abaixo 10kft (${r.ias_violations}x)`, penalty: -r.ias_violations * 0.5 });
+                          }
+                          if (r.unstable_approaches > 0) {
+                            scoringList.push({ reason: `Aproximação instável abaixo 500ft (${r.unstable_approaches}x)`, penalty: -r.unstable_approaches * 0.5 });
+                          }
+                        }
+
+                        return (
+                          <Box sx={{ mt: 3, pt: 2, borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
+                            <Typography variant="subtitle2" sx={{ color: '#4dabf5', mb: 1.5, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              📊 RATING BREAKDOWN & RULES
+                            </Typography>
+                            <Box sx={{ bgcolor: 'rgba(0,0,0,0.15)', borderRadius: 2, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+                                <thead>
+                                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                                    <th style={{ padding: '8px 12px', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Rule / Telemetry Metric</th>
+                                    <th style={{ padding: '8px 12px', color: 'rgba(255,255,255,0.5)', fontWeight: 600, textAlign: 'right' }}>Score Impact</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {scoringList.map((d, idx) => (
+                                    <tr key={idx} style={{ 
+                                      borderBottom: idx === scoringList.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.04)',
+                                      background: d.penalty < 0 ? 'rgba(244,67,54,0.02)' : 'rgba(0,230,118,0.01)'
+                                    }}>
+                                      <td style={{ padding: '9px 12px', color: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ fontSize: 12 }}>{d.penalty < 0 ? '❌' : '✅'}</span> {d.reason}
+                                      </td>
+                                      <td style={{ padding: '9px 12px', textAlign: 'right', fontWeight: 'bold', color: d.penalty < 0 ? '#ff1744' : '#00e676' }}>
+                                        {d.penalty === 0 ? '0.00' : d.penalty > 0 ? `+${Number(d.penalty).toFixed(2)}` : `${Number(d.penalty).toFixed(2)}`}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </Box>
+                          </Box>
+                        );
+                      })()}
+
+                    </Grid>
+                  </Grid>
+                );
+              })() : (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>
+                    No landing data recorded for this flight.<br/>
+                    <span style={{ fontSize: 12 }}>Use the IF Virtual Co-Pilot app to capture your landing score.</span>
+                  </Typography>
+                </Box>
+              )}
             </CardContent>
           </Paper>
 
