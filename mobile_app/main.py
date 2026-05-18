@@ -6,7 +6,7 @@ import threading
 import time
 import requests
 
-DEFAULT_BACKEND = "http://127.0.0.1:8000"
+DEFAULT_BACKEND = "https://infinite-flight-crew-center.onrender.com"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -676,8 +676,6 @@ def main(page: ft.Page):
         password_field = ft.TextField(label="Senha", password=True, can_reveal_password=True,
                                        text_size=14, border_color=C_ACCENT,
                                        focused_border_color=C_ACCENT, bgcolor=C_CARD, width=320)
-        backend_field  = ft.TextField(label="URL do Servidor", value=DEFAULT_BACKEND,
-                                       text_size=12, border_color="#333", bgcolor=C_CARD, width=320)
         error_text     = ft.Text(error_msg, color=C_RED, size=12, visible=bool(error_msg))
         btn_login      = ft.ElevatedButton("ENTRAR", height=50, width=320)
         loading        = ft.Text("Autenticando...", color=C_ACCENT, size=13, visible=False)
@@ -687,7 +685,7 @@ def main(page: ft.Page):
             loading.visible    = True
             btn_login.disabled = True
             page.update()
-            backend = backend_field.value.rstrip("/")
+            backend = DEFAULT_BACKEND.rstrip("/")
             client.backend_url = backend
             try:
                 url = f"{backend}/login/"
@@ -738,9 +736,6 @@ def main(page: ft.Page):
                     loading,
                     ft.Container(height=16),
                     ft.Divider(color="white10"),
-                    ft.Text("Servidor", size=11, color="white30"),
-                    backend_field,
-                    ft.Container(height=12),
                     ft.Text("Use as mesmas credenciais do site IF Crew Center",
                             size=11, color="white30"),
                 ], horizontal_alignment="center", spacing=4)
