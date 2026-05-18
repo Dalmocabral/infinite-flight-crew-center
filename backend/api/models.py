@@ -260,6 +260,10 @@ class LandingReport(models.Model):
     landing_lon         = models.FloatField(default=0.0, null=True, blank=True)  # Longitude do toque
     ias_violations      = models.IntegerField(default=0)  # Violações >250 KTS abaixo 10kft
     unstable_approaches = models.IntegerField(default=0)  # Aproximações instáveis <500ft
+    distance_from_1kft  = models.FloatField(default=0.0, null=True, blank=True)  # Distância do toque ao aiming point (m)
+    fuel_reserve_minutes = models.FloatField(default=0.0, null=True, blank=True)  # Minutos de reserva restantes
+    has_retractable_gear = models.BooleanField(default=False)  # Se possui trem retrátil
+    gear_retraction_time = models.FloatField(default=0.0, null=True, blank=True)  # Tempo de retração (s)
     flight_path         = models.JSONField(default=list, blank=True)  # Lista de coordenadas do voo
     deductions          = models.JSONField(default=list, blank=True)  # Detalhes das deduções de pontuação
 

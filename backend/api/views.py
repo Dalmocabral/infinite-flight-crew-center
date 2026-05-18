@@ -502,6 +502,10 @@ class LandingReportView(APIView):
             landing_lon         = float(data.get('landing_lon', 0.0)),
             ias_violations      = int(data.get('ias_violations', 0)),
             unstable_approaches = int(data.get('unstable_approaches', 0)),
+            distance_from_1kft  = float(data.get('distance_from_1kft', 0.0)),
+            fuel_reserve_minutes = float(data.get('fuel_reserve_minutes', 0.0)),
+            has_retractable_gear = bool(data.get('has_retractable_gear', False)),
+            gear_retraction_time = float(data.get('gear_retraction_time', 0.0)),
             flight_path         = data.get('flight_path', []),
             deductions          = data.get('deductions', []),
         )
