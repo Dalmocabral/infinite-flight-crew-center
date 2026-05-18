@@ -1,4 +1,6 @@
-mobile_app/
+mobile_app/__pycache__/
+mobile_app/build/
+mobile_app/manifest_log.txt
 __pycache__/
 *.pyc
 venv/
