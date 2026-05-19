@@ -274,8 +274,16 @@ class IFConnectV2:
         try:
             requests.post(f"{self.backend_url}/landing-report/", json=data, headers=headers, timeout=5)
             self.add_event("DADOS ENVIADOS AO SERVIDOR!", "blue")
+            send_system_notification(
+                "🟢 VOO ENVIADO COM SUCESSO!",
+                f"Toque: {int(self.last_report['rate_fpm'])} FPM | G: {self.last_report['g_force']:.2f}G | Pontuação: {score:.1f}/10"
+            )
         except:
             self.add_event("SERVIDOR OFFLINE — DADOS LOCAIS", "orange")
+            send_system_notification(
+                "⚠️ DADOS SALVOS LOCAIS (Offline)",
+                f"Toque: {int(self.last_report['rate_fpm'])} FPM | G: {self.last_report['g_force']:.2f}G | Pontuação: {score:.1f}/10"
+            )
 
     def get_manifest(self):
         try:
@@ -348,6 +356,19 @@ class IFConnectV2:
         print("Monitoramento iniciado.")
         while self.running and self.connected:
             try:
+                # Se não carregou os IDs (ex: conectado no menu principal), tenta carregar continuamente
+                if not any(self.ids.values()):
+                    self.get_manifest()
+                    if any(self.ids.values()):
+                        id_to_key = {v: k for k, v in self.ids.items() if v is not None}
+                        self.add_event("🟢 Telemetria ativada!", "green")
+                        send_system_notification("🟢 TELEMETRIA ATIVADA", "Co-piloto pronto para monitorar seu voo!")
+                    else:
+                        self.add_event("⚠️ Entre no cockpit para iniciar...", "orange")
+                        update_callback()
+                        time.sleep(2)
+                        continue
+
                 for cid in self.ids.values():
                     if cid is not None:
                         self.sock.sendall(struct.pack('<ib', cid, 0))
@@ -599,27 +620,59 @@ def send_system_notification(title, message):
                     is_android = True
 
         if is_android:
-            # Try Chaquopy Toast notification
             try:
                 from java import jclass
-                activity = jclass("com.chaquo.python.android.AndroidPlatform").getActivity()
-                Toast = jclass("android.widget.Toast")
-                activity.runOnUiThread(lambda: Toast.makeText(activity, f"{title}\n{message}", Toast.LENGTH_LONG).show())
+                platform = jclass("com.chaquo.python.android.AndroidPlatform")
+                context = platform.getApplication()
+                
+                # Get NotificationManager
+                Context = jclass("android.content.Context")
+                notification_manager = context.getSystemService(Context.NOTIFICATION_SERVICE)
+                
+                # Create Notification Channel (Android 8.0+)
+                channel_id = "if_crew_center_notifications"
+                Build = jclass("android.os.Build")
+                if Build.VERSION.SDK_INT >= 26:
+                    NotificationChannel = jclass("android.app.NotificationChannel")
+                    importance = 4  # IMPORTANCE_HIGH
+                    channel = NotificationChannel(channel_id, "IF Crew Center", importance)
+                    channel.setDescription("Notificações de status do Co-Piloto")
+                    notification_manager.createNotificationChannel(channel)
+                
+                # Build Notification
+                Builder = jclass("android.app.Notification$Builder")
+                R = jclass("android.R")
+                icon_id = R.drawable.stat_sys_phone_call
+                
+                if Build.VERSION.SDK_INT >= 26:
+                    builder = Builder(context, channel_id)
+                else:
+                    builder = Builder(context)
+                
+                builder.setContentTitle(title) \
+                       .setContentText(message) \
+                       .setSmallIcon(icon_id) \
+                       .setAutoCancel(True)
+                
+                if Build.VERSION.SDK_INT >= 16:
+                    builder.setPriority(2)  # PRIORITY_HIGH
+                
+                notification = builder.build()
+                notification_manager.notify(999, notification)
+                print("Android status notification sent successfully!")
                 return
-            except Exception as e_chaquo:
-                print(f"Chaquopy notification failed: {e_chaquo}")
-            
-            # Try Pyjnius Toast notification (Kivy style)
-            try:
-                from jnius import autoclass
-                PythonActivity = autoclass('org.kivy.android.PythonActivity')
-                context = PythonActivity.mActivity
-                Toast = autoclass('android.widget.Toast')
-                String = autoclass('java.lang.String')
-                Toast.makeText(context, String(f"{title}\n{message}"), Toast.LENGTH_LONG).show()
-                return
-            except Exception as e_jnius:
-                print(f"Jnius notification failed: {e_jnius}")
+            except Exception as e_android:
+                print(f"Android system notification failed: {e_android}")
+                
+                # Fallback to Toast if activity is active
+                try:
+                    activity = platform.getActivity()
+                    if activity:
+                        Toast = jclass("android.widget.Toast")
+                        activity.runOnUiThread(lambda: Toast.makeText(activity, f"{title}\n{message}", Toast.LENGTH_LONG).show())
+                        return
+                except Exception as e_toast:
+                    print(f"Toast fallback failed: {e_toast}")
 
         # Fallback to Windows PowerShell Notification (for PC testing/Windows)
         import subprocess
