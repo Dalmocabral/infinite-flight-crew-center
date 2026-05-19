@@ -5,9 +5,30 @@ import struct
 import threading
 import time
 import requests
+import sys
+
+class LoggerStream:
+    def __init__(self, original_stream, prefix=""):
+        self.original_stream = original_stream
+        self.prefix = prefix
+        self.logs = []
+    def write(self, message):
+        if message.strip():
+            self.logs.append(f"{self.prefix}{message.strip()}")
+            if len(self.logs) > 200:
+                self.logs.pop(0)
+        try: self.original_stream.write(message)
+        except: pass
+    def flush(self):
+        try: self.original_stream.flush()
+        except: pass
+
+global_logger = LoggerStream(sys.stdout)
+sys.stdout = global_logger
+sys.stderr = LoggerStream(sys.stderr, "[ERRO] ")
+sys.stderr.logs = global_logger.logs  # Share the same list
 
 DEFAULT_BACKEND = "https://infinite-flight-crew-center.onrender.com"
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 class IFConnectV2:
@@ -286,20 +307,27 @@ class IFConnectV2:
             )
 
     def get_manifest(self):
+        old_timeout = 2.0
         try:
+            if self.sock:
+                old_timeout = self.sock.gettimeout()
+                self.sock.settimeout(15.0)
             self.sock.sendall(struct.pack('<ib', -1, 0))
             header = b""
             while len(header) < 12:
                 chunk = self.sock.recv(12 - len(header))
                 if not chunk: break
                 header += chunk
-            if len(header) < 12: return
+            if len(header) < 12:
+                if self.sock: self.sock.settimeout(old_timeout)
+                return
             m_len = struct.unpack('<i', header[8:12])[0]
             data = b""
             while len(data) < m_len:
                 packet = self.sock.recv(min(4096, m_len - len(data)))
                 if not packet: break
                 data += packet
+            if self.sock: self.sock.settimeout(old_timeout)
             for line in data.decode('utf-8', errors='ignore').split('\n'):
                 parts = line.split(',')
                 if len(parts) >= 3:
@@ -335,6 +363,9 @@ class IFConnectV2:
             print(f"Manifesto OK: {sum(1 for v in self.ids.values() if v)} IDs")
         except Exception as e:
             print(f"Erro manifesto: {e}")
+            try:
+                if self.sock: self.sock.settimeout(old_timeout)
+            except: pass
 
     def read_response(self):
         try:
@@ -861,24 +892,29 @@ def main(page: ft.Page):
             score_wrap.visible = False
 
             def do_connect():
-                ip = client.discover_ip()
-                if ip and client.connect(ip):
-                    conn_status.value = f"● CONECTADO  {ip}"
-                    conn_status.color = C_GREEN
-                    hud_wrap.visible  = True
+                for attempt in range(1, 6):
+                    conn_status.value  = f"● PROCURANDO SIMULADOR ({attempt}/5)..."
                     page.update()
-                    send_system_notification("🟢 CONECTADO AO SIMULADOR!", "A conexão com o Infinite Flight foi estabelecida com sucesso. Bons voos, comandante!")
-                    client.monitor_loop(on_update)
-                    conn_status.value  = "● DESCONECTADO"
-                    conn_status.color  = C_RED
-                    start_btn.disabled = False
-                    page.update()
-                    send_system_notification("🔴 DESCONECTADO DO SIMULADOR", "A conexão com o Infinite Flight foi finalizada.")
-                else:
-                    conn_status.value  = "● SIMULADOR NÃO ENCONTRADO"
-                    conn_status.color  = C_RED
-                    start_btn.disabled = False
-                    page.update()
+                    ip = client.discover_ip()
+                    if ip and client.connect(ip):
+                        conn_status.value = f"● CONECTADO  {ip}"
+                        conn_status.color = C_GREEN
+                        hud_wrap.visible  = True
+                        page.update()
+                        send_system_notification("🟢 CONECTADO AO SIMULADOR!", "A conexão com o Infinite Flight foi estabelecida com sucesso. Bons voos, comandante!")
+                        client.monitor_loop(on_update)
+                        conn_status.value  = "● DESCONECTADO"
+                        conn_status.color  = C_RED
+                        start_btn.disabled = False
+                        page.update()
+                        send_system_notification("🔴 DESCONECTADO DO SIMULADOR", "A conexão com o Infinite Flight foi finalizada.")
+                        return
+                    time.sleep(1)
+                
+                conn_status.value  = "● SIMULADOR NÃO ENCONTRADO"
+                conn_status.color  = C_RED
+                start_btn.disabled = False
+                page.update()
 
             threading.Thread(target=do_connect, daemon=True).start()
 
@@ -922,6 +958,50 @@ def main(page: ft.Page):
         ifc  = session.get("username_ifc") or "Piloto"
         name = session.get("full_name") or ""
 
+        # Request POST_NOTIFICATIONS on Android 13+
+        try:
+            import os
+            is_android = "ANDROID_ARGUMENT" in os.environ or os.path.exists("/system/app")
+            if is_android:
+                from java import jclass
+                platform = jclass("com.chaquo.python.android.AndroidPlatform")
+                activity = platform.getActivity()
+                if activity:
+                    Build = jclass("android.os.Build")
+                    if Build.VERSION.SDK_INT >= 33: # TIRAMISU
+                        ContextCompat = jclass("androidx.core.content.ContextCompat")
+                        PackageManager = jclass("android.content.pm.PackageManager")
+                        permission = "android.permission.POST_NOTIFICATIONS"
+                        if ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED:
+                            ActivityCompat = jclass("androidx.core.app.ActivityCompat")
+                            String = jclass("java.lang.String")
+                            perms = jclass("java.lang.reflect.Array").newInstance(String, 1)
+                            perms[0] = permission
+                            ActivityCompat.requestPermissions(activity, perms, 1001)
+        except Exception as e:
+            print(f"Failed to request Android permissions: {e}")
+
+        def close_dlg(e):
+            dlg.open = False
+            page.update()
+
+        def show_debug_logs(e):
+            log_text = "\n".join(global_logger.logs) if global_logger.logs else "Nenhum log capturado."
+            dlg.content.controls[0].value = log_text
+            page.dialog = dlg
+            dlg.open = True
+            page.update()
+
+        dlg = ft.AlertDialog(
+            title=ft.Text("Logs do Sistema (Debug)"),
+            content=ft.Column([
+                ft.Text("", size=10, font_family="monospace", selectable=True)
+            ], scroll="always", width=300, height=400),
+            actions=[ft.TextButton("Fechar", on_click=close_dlg)]
+        )
+
+        btn_bug = ft.IconButton(icon=ft.icons.BUG_REPORT, icon_color="white54", on_click=show_debug_logs)
+
         set_view([
             ft.Container(
                 padding=ft.Padding(24, 16, 24, 16),
@@ -932,6 +1012,7 @@ def main(page: ft.Page):
                             ft.Text(ifc,  size=22, weight="bold", color="white"),
                             ft.Text(name, size=12, color="white60"),
                         ], expand=True),
+                        btn_bug,
                         logout_btn,
                     ]),
                     ft.Divider(color="white10"),
