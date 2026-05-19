@@ -1000,7 +1000,7 @@ def main(page: ft.Page):
             actions=[ft.TextButton("Fechar", on_click=close_dlg)]
         )
 
-        btn_bug = ft.IconButton(icon=ft.icons.BUG_REPORT, icon_color="white54", on_click=show_debug_logs)
+        btn_bug = ft.IconButton(icon=ft.Icons.BUG_REPORT, icon_color="white54", on_click=show_debug_logs)
 
         set_view([
             ft.Container(
