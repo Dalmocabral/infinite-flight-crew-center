@@ -57,6 +57,10 @@ class IFConnectV2:
         self.live_centerline = 0.0
         self.live_distance_from_1kft = 0.0
 
+        self.aircraft_ready = False
+        self.connection_time = 0.0
+        self.stable_data_count = 0
+
         self.peak_g_force  = 1.0
         self.bounce_count  = 0
         self.touchdown_count = 0
@@ -281,6 +285,71 @@ class IFConnectV2:
 
         return round(max(0.0, score), 2), deductions
 
+    def is_aircraft_stable(self):
+        if not self.aircraft_id or self.aircraft_id == "Unknown": return False
+        if time.time() - self.connection_time > 3.0:
+            if self.stable_data_count < 3:
+                self.stable_data_count += 1
+            return self.stable_data_count >= 3
+        return False
+
+    def is_aircraft_parked(self):
+        return self.is_grounded and self.engines_off
+
+    def check_all_infractions(self):
+        if not self.aircraft_ready: return
+        if self.is_aircraft_parked(): return
+        
+        # Detect crossing 10,000ft climbing / descending
+        if self.prev_alt > 0.1 and not self.is_grounded:
+            if self.prev_alt < 10000 <= self.alt:
+                self.climb_10k_grace_start = time.time()
+                self.descent_10k_grace_start = 0.0
+                self.add_event("Climbing past 10,000ft: 60s grace period to turn OFF landing lights and seatbelts.", "blue")
+            if self.prev_alt > 10000 >= self.alt:
+                self.descent_10k_grace_start = time.time()
+                self.climb_10k_grace_start = 0.0
+                self.add_event("Descending below 10,000ft: 60s grace period to turn ON landing lights and seatbelts.", "blue")
+
+        if self.alt > 10000:
+            self.has_passed_10k = True
+
+        if self.gs > 2 and not self.nav_on:
+            self.add_light_infraction("NAV lights off in motion")
+        if not self.engines_off and not self.beacon_on:
+            self.add_light_infraction("BEACON lights off with engines running")
+        if not self.is_grounded and not self.strobe_on:
+            self.add_light_infraction("STROBE lights off in flight")
+        
+        # Landing lights check
+        if self.alt > 10000 and self.landing_on:
+            is_grace = self.climb_10k_grace_start > 0.0 and (time.time() - self.climb_10k_grace_start <= 60.0)
+            if not is_grace:
+                self.add_light_infraction("Landing lights on above 10,000ft")
+
+        if not self.is_grounded and self.alt < 10000 and not self.landing_on:
+            if not self.is_ga or self.has_passed_10k:
+                is_grace = self.descent_10k_grace_start > 0.0 and (time.time() - self.descent_10k_grace_start <= 60.0)
+                if not is_grace:
+                    self.add_light_infraction("Landing lights off below 10,000ft")
+
+        # No Smoking sign check
+        if not self.no_smoking_on:
+            if not self.is_ga or self.has_passed_10k:
+                self.add_light_infraction("No Smoking sign is OFF")
+
+        # Seat Belts sign check
+        if self.alt < 10000 and not self.seatbelt_on:
+            if not self.is_ga or self.has_passed_10k:
+                is_grace = self.descent_10k_grace_start > 0.0 and (time.time() - self.descent_10k_grace_start <= 60.0)
+                if not is_grace:
+                    self.add_light_infraction("Seat Belts sign is OFF below 10,000ft")
+
+        if self.alt > 10000 and self.seatbelt_on:
+            if not self.is_ga or self.has_passed_10k:
+                is_grace = self.climb_10k_grace_start > 0.0 and (time.time() - self.climb_10k_grace_start <= 60.0)
+                if not is_grace:
+                    self.add_light_infraction("Seat Belts sign is ON above 10,000ft")
 
     def send_report(self):
         score, deductions = self.calculate_score()
@@ -402,6 +471,7 @@ class IFConnectV2:
 
     def monitor_loop(self, update_callback):
         self.running = True
+        self.connection_time = time.time()
         prev_grounded = True; prev_engines_off = True
         id_to_key = {v: k for k, v in self.ids.items() if v is not None}
         print("Monitoramento iniciado.")
@@ -491,63 +561,20 @@ class IFConnectV2:
                     self.last_report["centerline"] = self.live_centerline
                     self.last_report["distance_from_1kft"] = self.live_distance_from_1kft
 
-                if self.aircraft_id == "Unknown":
-                    # Wait until aircraft type is identified to avoid premature/wrong infractions
-                    pass
-                elif self.engines_off and self.is_grounded:
-                    # Parked on the ground before engines are started: bypass all light & cabin sign checks!
-                    pass
-                else:
-                    # Detect crossing 10,000ft climbing / descending
-                    if self.prev_alt > 0.1 and not self.is_grounded:
-                        if self.prev_alt < 10000 <= self.alt:
-                            self.climb_10k_grace_start = time.time()
-                            self.descent_10k_grace_start = 0.0
-                            self.add_event("Climbing past 10,000ft: 60s grace period to turn OFF landing lights and seatbelts.", "blue")
-                        if self.prev_alt > 10000 >= self.alt:
-                            self.descent_10k_grace_start = time.time()
-                            self.climb_10k_grace_start = 0.0
-                            self.add_event("Descending below 10,000ft: 60s grace period to turn ON landing lights and seatbelts.", "blue")
-
-                    if self.alt > 10000:
-                        self.has_passed_10k = True
-
-                    if self.gs > 2 and not self.nav_on:
-                        self.add_light_infraction("NAV lights off in motion")
-                    if not self.engines_off and not self.beacon_on:
-                        self.add_light_infraction("BEACON lights off with engines running")
-                    if not self.is_grounded and not self.strobe_on:
-                        self.add_light_infraction("STROBE lights off in flight")
-                    
-                    # Landing lights check
-                    if self.alt > 10000 and self.landing_on:
-                        is_grace = self.climb_10k_grace_start > 0.0 and (time.time() - self.climb_10k_grace_start <= 60.0)
-                        if not is_grace:
-                            self.add_light_infraction("Landing lights on above 10,000ft")
-
-                    if not self.is_grounded and self.alt < 10000 and not self.landing_on:
-                        if not self.is_ga or self.has_passed_10k:
-                            is_grace = self.descent_10k_grace_start > 0.0 and (time.time() - self.descent_10k_grace_start <= 60.0)
-                            if not is_grace:
-                                self.add_light_infraction("Landing lights off below 10,000ft")
-
-                    # No Smoking sign check
-                    if not self.no_smoking_on:
-                        if not self.is_ga or self.has_passed_10k:
-                            self.add_light_infraction("No Smoking sign is OFF")
-
-                    # Seat Belts sign check
-                    if self.alt < 10000 and not self.seatbelt_on:
-                        if not self.is_ga or self.has_passed_10k:
-                            is_grace = self.descent_10k_grace_start > 0.0 and (time.time() - self.descent_10k_grace_start <= 60.0)
-                            if not is_grace:
-                                self.add_light_infraction("Seat Belts sign is OFF below 10,000ft")
-
-                    if self.alt > 10000 and self.seatbelt_on:
-                        if not self.is_ga or self.has_passed_10k:
-                            is_grace = self.climb_10k_grace_start > 0.0 and (time.time() - self.climb_10k_grace_start <= 60.0)
-                            if not is_grace:
-                                self.add_light_infraction("Seat Belts sign is ON above 10,000ft")
+                if not self.aircraft_ready:
+                    if self.is_aircraft_stable():
+                        self.aircraft_ready = True
+                        self.add_event("🟢 AERONAVE PRONTA - Monitoramento ativo", "green")
+                        try: send_system_notification("🟢 Aeronave Pronta", "Sistema de monitoramento ativo. Bons voos!")
+                        except: pass
+                        print(f"Aircraft ready after {time.time() - self.connection_time:.1f}s")
+                    else:
+                        update_callback()
+                        time.sleep(0.1)
+                        continue
+                        
+                if self.aircraft_ready:
+                    self.check_all_infractions()
 
 
                 if prev_grounded and not self.is_grounded:
