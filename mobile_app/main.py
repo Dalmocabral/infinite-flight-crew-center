@@ -138,6 +138,22 @@ class IFConnectV2:
         }
 
     def discover_ip(self):
+        lock = None
+        try:
+            import os
+            is_android = "ANDROID_ARGUMENT" in os.environ or os.path.exists("/system/app")
+            if is_android:
+                from java import jclass
+                platform = jclass("com.chaquo.python.android.AndroidPlatform")
+                context = platform.getApplication()
+                Context = jclass("android.content.Context")
+                wifi_manager = context.getSystemService(Context.WIFI_SERVICE)
+                lock = wifi_manager.createMulticastLock("IF_Crew_Center_Multicast_Lock")
+                lock.setReferenceCounted(True)
+                lock.acquire()
+        except Exception as e:
+            print(f"Erro MulticastLock: {e}")
+
         udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             udp.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -148,7 +164,11 @@ class IFConnectV2:
             _, addr = udp.recvfrom(4096)
             return addr[0]
         except: return None
-        finally: udp.close()
+        finally:
+            udp.close()
+            try:
+                if lock: lock.release()
+            except: pass
 
     def connect(self, ip):
         try:
@@ -673,7 +693,7 @@ def send_system_notification(title, message):
                 # Build Notification
                 Builder = jclass("android.app.Notification$Builder")
                 R = jclass("android.R")
-                icon_id = R.drawable.stat_sys_phone_call
+                icon_id = R.drawable.ic_dialog_info
                 
                 if Build.VERSION.SDK_INT >= 26:
                     builder = Builder(context, channel_id)
