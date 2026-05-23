@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, DeviceEventEmitter } from 'react-native';
 import * as Speech from 'expo-speech';
+import * as Notifications from 'expo-notifications';
 import { startBackgroundFlight, stopBackgroundFlight } from '../utils/BackgroundTask';
 
 export default function Dashboard({ session, onLogout }) {
@@ -14,8 +15,11 @@ export default function Dashboard({ session, onLogout }) {
   const isConnectedAudioPlayedRef = useRef(false);
 
   useEffect(() => {
+    // Request notification permissions on mount (Android 13+)
+    Notifications.requestPermissionsAsync().catch(() => {});
+    
     const sub = DeviceEventEmitter.addListener('TELEMETRY_UPDATE', (data) => {
-      // console.log(`[TELEMETRY] ALT: ${Math.round(data.alt)} | GS: ${Math.round(data.gs)} | VS: ${Math.round(data.vs)}`);
+      console.log(`[TELEMETRY] ALT: ${Math.round(data.alt)} | GS: ${Math.round(data.gs)} | VS: ${Math.round(data.vs)}`);
       setTelemetry(data);
     });
     

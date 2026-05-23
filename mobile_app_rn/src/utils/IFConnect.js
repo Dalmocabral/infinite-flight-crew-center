@@ -47,6 +47,7 @@ export class IFConnectV2 {
     this.state = 'WAIT_HEADER'; // WAIT_HEADER | WAIT_PAYLOAD
     this.expectedLength = 0;
     this.currentCommandId = -1;
+    this._expectingManifestClose = false;
   }
 
   connect(ip) {
@@ -67,13 +68,17 @@ export class IFConnectV2 {
           { port: this.port, host: ip, timeout: 5000 },
           () => {
             this.connected = true;
-            DeviceEventEmitter.emit('IFC_STATUS', 'Conexão bem sucedida!');
             
             if (Object.keys(this.manifest).length === 0) {
+              // First connection: request manifest. IF will close the socket after sending it.
               console.log('Connected! Requesting Manifest...');
+              DeviceEventEmitter.emit('IFC_STATUS', 'Conectado! Carregando dados...');
+              this._expectingManifestClose = true;
               this.requestManifest();
             } else {
+              // Second connection: ready for telemetry. THIS is the real "connected" moment.
               console.log('Reconnected for telemetry!');
+              DeviceEventEmitter.emit('IFC_STATUS', 'Conexão bem sucedida!');
             }
             resolve(true);
           }
@@ -106,7 +111,16 @@ export class IFConnectV2 {
              this.client.destroy();
              this.client = null;
           }
-          scheduleReconnect('Connection lost, retrying in 3 seconds...');
+          if (this._expectingManifestClose) {
+            // Normal flow: IF closes socket after sending manifest. Reconnect quickly for telemetry.
+            this._expectingManifestClose = false;
+            console.log('Manifest received. Reconnecting for telemetry...');
+            DeviceEventEmitter.emit('IFC_STATUS', 'Preparando telemetria...');
+            if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = setTimeout(attemptConnection, 1500);
+          } else {
+            scheduleReconnect('Connection lost, retrying in 3 seconds...');
+          }
         });
       };
       
@@ -217,12 +231,23 @@ export class IFConnectV2 {
       console.log(`Manifest loaded: ${Object.keys(this.manifest).length} items`);
       DeviceEventEmitter.emit('MANIFEST_LOADED');
       
-      // Infinite Flight closes the socket after manifest automatically
-      // We rely on the natural on('close') event to trigger the reconnection logic.
+      // Infinite Flight V2 API uses the same socket for telemetry!
+      console.log('Manifest parsed. Ready for telemetry!');
+      DeviceEventEmitter.emit('IFC_STATUS', 'Conexão bem sucedida!');
     } else {
       // It's telemetry data
       this.updateStateFromPayload(commandId, payload);
     }
+  }
+
+  pollTelemetry() {
+      if (!this.connected || !this.client || !this.ids) return;
+      // Request the value of every mapped ID
+      Object.values(this.ids).forEach(id => {
+          if (id !== undefined) {
+              this.sendRequest(id);
+          }
+      });
   }
 
   mapIds() {

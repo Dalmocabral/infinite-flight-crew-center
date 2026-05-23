@@ -84,36 +84,96 @@ export class FlightTracker {
   }
 
   checkPhases(state) {
-    // Basic phase detection simplified for RN version
+    // Detect liftoff / bounce
+    if (!state.is_grounded && this.was_grounded_prev) {
+        if (this.touchdown_count > 0) {
+            this.bounce_count++;
+            this.addEvent(`BOUNCE #${this.bounce_count} (-4.0pt)`, "orange");
+        }
+        this.peak_g_force = 1.0;
+        
+        // Takeoff detection
+        if (this.status === "TAXI" || this.status === "TAKEOFF") {
+            this.status = "CLIMB";
+            this.takeoff_fuel = state.fuel_weight;
+            this.takeoff_time = Date.now();
+            this.addEvent("Decolagem efetuada", "blue");
+            
+            // Gear retraction logic
+            if (state.gear_down !== undefined) {
+                // If it has gear_lever state, assume retractable unless it's a known fixed gear (not implemented full list here, just checking if gear goes up later)
+                this.takeoff_gear_check_active = true;
+                this.takeoff_gear_check_start = Date.now();
+                this.gear_retracted_in_time = true;
+                this.has_retractable_gear = true;
+            }
+        }
+    }
+    
+    // Track airborne VS
+    if (!state.is_grounded) {
+        this.last_airborne_vs = state.vs;
+        
+        if (state.vs > 500) {
+            this.status = state.alt < 10000 ? "CLIMB" : "CRUISE";
+        } else if (state.vs < -500) {
+            this.status = state.alt < 5000 ? "APPROACH" : "DESCENT";
+        } else {
+            this.status = "CRUISE";
+        }
+    }
+    
+    // Exact touchdown moment
+    if (state.is_grounded && !this.was_grounded_prev) {
+        this.touchdown_count = (this.touchdown_count || 0) + 1;
+        
+        const cap_vs = this.last_airborne_vs || state.vs;
+        const cap_g = Math.max(this.peak_g_force, state.g_force);
+        
+        if (this.touchdown_count === 1) {
+            this.status = "LANDING";
+            this.last_report.status = "LANDED";
+            this.last_report.rate_fpm = cap_vs;
+            this.last_report.g_force = cap_g;
+            this.last_report.centerline = state.centerline;
+            this.last_report.distance_from_1kft = state.distance_from_1kft;
+            this.landing_fuel = state.fuel_weight;
+            this.landing_lat = state.lat;
+            this.landing_lon = state.lon;
+            
+            this.addEvent(`Toque #${this.touchdown_count}: ${Math.round(cap_vs)} FPM | ${cap_g.toFixed(2)}G`, "green");
+        } else {
+            this.addEvent(`Toque #${this.touchdown_count}: ${Math.round(cap_vs)} FPM | ${cap_g.toFixed(2)}G`, "orange");
+        }
+    }
+    
+    // Taxi logic
     if (state.is_grounded && state.gs < 30) {
-       if (this.status === "APPROACH" || this.status === "DESCENT") {
-         this.status = "LANDING";
-         this.last_report.status = "LANDED";
-         this.last_report.rate_fpm = state.vs;
-         this.last_report.g_force = this.peak_g_force;
-         this.last_report.centerline = state.centerline;
-         this.last_report.distance_from_1kft = state.distance_from_1kft;
-         this.landing_fuel = state.fuel_weight;
-         this.landing_lat = state.lat;
-         this.landing_lon = state.lon;
-         this.addEvent("Toque na pista registrado!", "green");
-       } else if (this.status !== "LANDING" && this.status !== "FINISHED") {
+       if (this.status !== "LANDING" && this.status !== "FINISHED") {
          this.status = "TAXI";
        }
     } else if (state.is_grounded && state.gs >= 30 && this.status === "TAXI") {
        this.status = "TAKEOFF";
-       this.takeoff_fuel = state.fuel_weight;
-       this.takeoff_time = Date.now();
-       this.addEvent("Iniciando decolagem", "blue");
-    } else if (!state.is_grounded) {
-       if (state.vs > 500) {
-         this.status = state.alt < 10000 ? "CLIMB" : "CRUISE";
-       } else if (state.vs < -500) {
-         this.status = state.alt < 5000 ? "APPROACH" : "DESCENT";
-       } else {
-         this.status = "CRUISE";
-       }
     }
+    
+    // Gear check
+    if (this.takeoff_gear_check_active) {
+        const elapsed = (Date.now() - this.takeoff_gear_check_start) / 1000.0;
+        if (!state.gear_down) {
+            this.gear_retraction_time_sec = elapsed;
+            this.takeoff_gear_check_active = false;
+            this.gear_retracted_in_time = true;
+            this.addEvent(`Trem recolhido: ${elapsed.toFixed(1)}s`, "green");
+        } else if (elapsed > 15.0) {
+            this.takeoff_gear_check_active = false;
+            this.gear_retracted_in_time = false;
+            this.gear_retraction_time_sec = elapsed;
+            this.addEvent("INFRAÇÃO: Trem não recolhido em 15s!", "red");
+        }
+    }
+    
+    this.was_grounded_prev = state.is_grounded;
+    this.prev_vs = state.vs;
   }
 
   checkInfractions(state) {
@@ -124,12 +184,12 @@ export class FlightTracker {
       if (this.prev_alt < 10000 && state.alt >= 10000) {
         this.climb_10k_grace_start = now;
         this.descent_10k_grace_start = 0;
-        this.addEvent("Cruzando 10,000ft (Subida)", "blue");
+        this.addEvent("Subindo 10,000ft: 60s para desligar luzes", "blue");
       }
       if (this.prev_alt > 10000 && state.alt <= 10000) {
         this.descent_10k_grace_start = now;
         this.climb_10k_grace_start = 0;
-        this.addEvent("Cruzando 10,000ft (Descida)", "blue");
+        this.addEvent("Descendo 10,000ft: 60s para ligar luzes", "blue");
       }
     }
 
@@ -151,44 +211,104 @@ export class FlightTracker {
     }
 
     // Speed violation (IAS > 250kts under 10k)
-    if (!state.is_grounded && state.alt < 10000 && state.ias > 260) { // 10kts margin
+    if (!state.is_grounded && state.alt < 10000 && state.ias > 255) {
       if (!this._ias_viol_active) {
          this.ias_violation_count++;
          this._ias_viol_active = true;
-         this.addEvent("Aviso: Velocidade acima de 250kts abaixo de 10,000ft", "red");
+         this.addEvent(`IAS ${Math.round(state.ias)}KTS >250 abaixo 10kft! (-0.5pt)`, "red");
       }
-    } else {
+    } else if (state.ias <= 252) {
       this._ias_viol_active = false;
+    }
+    
+    // Unstable Approach
+    if (!state.is_grounded && state.agl < 500 && state.agl > 10) {
+        // Convert radians to degrees if necessary. If IFConnect already exports degrees, it's fine.
+        // Wait, IFConnect exports raw pitch/bank. They are usually in degrees in V2 API ? No, Python did math.degrees!
+        // We will just do a rough check if it's raw radians.
+        const pitchDeg = Math.abs(state.pitch * (180/Math.PI) > 10 ? state.pitch * (180/Math.PI) : state.pitch);
+        const bankDeg = Math.abs(state.bank * (180/Math.PI) > 20 ? state.bank * (180/Math.PI) : state.bank);
+        
+        if (pitchDeg > 10 || bankDeg > 20) {
+            if (!this._unstable_active) {
+                this.unstable_appr_count++;
+                this._unstable_active = true;
+                this.addEvent(`UNSTABLE: Pitch=${pitchDeg.toFixed(1)}° Bank=${bankDeg.toFixed(1)}° (-0.5pt)`, "red");
+            }
+        } else {
+            this._unstable_active = false;
+        }
     }
   }
 
   calculateScore() {
     if (this.last_report.status === "CRASHED") {
-      return { score: 0.0, deductions: [{ reason: "AIRCRAFT CRASHED", penalty: -10.0 }] };
+      return { score: 0.0, deductions: [{ reason: "AIRCRAFT CRASHED — INVALID FLIGHT", penalty: -10.0 }] };
     }
     
     let score = 10.0;
     const deductions = [];
     
     const g = this.last_report.g_force;
-    if (g > 3.00) { score -= 10; deductions.push({ reason: `Excessive G-force landing (${g.toFixed(2)}G)`, penalty: -10 }); }
-    else if (g > 2.00) { score -= 6; deductions.push({ reason: `Very hard landing (${g.toFixed(2)}G)`, penalty: -6 }); }
-    else if (g > 1.50) { score -= 3; deductions.push({ reason: `Hard landing (${g.toFixed(2)}G)`, penalty: -3 }); }
-    else if (g > 1.20) { score -= 1; deductions.push({ reason: `Firm landing (${g.toFixed(2)}G)`, penalty: -1 }); }
+    if (g <= 1.20) { deductions.push({ reason: `Perfect landing (${g.toFixed(2)}G) ✓`, penalty: 0.0 }); }
+    else if (g <= 1.50) { score -= 1.0; deductions.push({ reason: `Firm landing (${g.toFixed(2)}G)`, penalty: -1.0 }); }
+    else if (g <= 2.00) { score -= 3.0; deductions.push({ reason: `Hard landing (${g.toFixed(2)}G)`, penalty: -3.0 }); }
+    else if (g <= 3.00) { score -= 6.0; deductions.push({ reason: `Very hard landing (${g.toFixed(2)}G)`, penalty: -6.0 }); }
+    else { score -= 10.0; deductions.push({ reason: `Excessive G-force landing (${g.toFixed(2)}G) — INVALID FLIGHT`, penalty: -10.0 }); }
     
     const vs = Math.abs(this.last_report.rate_fpm);
-    if (vs > 1000) { score -= 10; deductions.push({ reason: `Extremely hard landing (${Math.round(vs)} FPM)`, penalty: -10 }); }
-    else if (vs > 600) { score -= 6; deductions.push({ reason: `Hard landing (${Math.round(vs)} FPM)`, penalty: -6 }); }
-    else if (vs > 400) { score -= 3; deductions.push({ reason: `Firm landing (${Math.round(vs)} FPM)`, penalty: -3 }); }
-    else if (vs > 200) { score -= 1; deductions.push({ reason: `Normal landing (${Math.round(vs)} FPM)`, penalty: -1 }); }
+    if (vs <= 200) { deductions.push({ reason: `Smooth landing (${Math.round(vs)} FPM) ✓`, penalty: 0.0 }); }
+    else if (vs <= 400) { score -= 1.0; deductions.push({ reason: `Normal landing (${Math.round(vs)} FPM)`, penalty: -1.0 }); }
+    else if (vs <= 600) { score -= 3.0; deductions.push({ reason: `Firm landing (${Math.round(vs)} FPM)`, penalty: -3.0 }); }
+    else if (vs <= 1000) { score -= 6.0; deductions.push({ reason: `Hard landing (${Math.round(vs)} FPM)`, penalty: -6.0 }); }
+    else { score -= 10.0; deductions.push({ reason: `Extremely hard landing (${Math.round(vs)} FPM) — INVALID FLIGHT`, penalty: -10.0 }); }
+    
+    if (this.bounce_count > 0) {
+        if (this.bounce_count === 1) { score -= 4.0; deductions.push({ reason: `1 bounce (-4.0pt)`, penalty: -4.0 }); }
+        else { score -= 10.0; deductions.push({ reason: `${this.bounce_count} bounces — INVALID FLIGHT`, penalty: -10.0 }); }
+    }
     
     const c = Math.abs(this.last_report.centerline);
-    if (c > 25) { score -= 10; deductions.push({ reason: `Off runway (${c.toFixed(1)}m)`, penalty: -10 }); }
-    else if (c > 15) { score -= 6; deductions.push({ reason: `Severe centerline dev (${c.toFixed(1)}m)`, penalty: -6 }); }
-    else if (c > 10) { score -= 3; deductions.push({ reason: `Moderate centerline dev (${c.toFixed(1)}m)`, penalty: -3 }); }
-    else if (c > 5) { score -= 1; deductions.push({ reason: `Slight centerline dev (${c.toFixed(1)}m)`, penalty: -1 }); }
+    if (c <= 5) { deductions.push({ reason: `On centerline (${c.toFixed(1)}m) ✓`, penalty: 0.0 }); }
+    else if (c <= 10) { score -= 1.0; deductions.push({ reason: `Slight centerline deviation (${c.toFixed(1)}m)`, penalty: -1.0 }); }
+    else if (c <= 15) { score -= 3.0; deductions.push({ reason: `Moderate centerline deviation (${c.toFixed(1)}m)`, penalty: -3.0 }); }
+    else if (c <= 25) { score -= 6.0; deductions.push({ reason: `Severe centerline deviation (${c.toFixed(1)}m)`, penalty: -6.0 }); }
+    else { score -= 10.0; deductions.push({ reason: `Off runway (${c.toFixed(1)}m) — INVALID FLIGHT`, penalty: -10.0 }); }
     
-    return { score: Math.max(0, score), deductions };
+    const dist = this.last_report.distance_from_1kft || 0.0;
+    if (dist < -250.0) { score -= 10.0; deductions.push({ reason: `Undershoot landing (${dist.toFixed(1)}m) — INVALID FLIGHT`, penalty: -10.0 }); }
+    else if (dist < -100.0) { score -= 1.5; deductions.push({ reason: `Short landing (${dist.toFixed(1)}m)`, penalty: -1.5 }); }
+    else if (dist <= 200.0) { deductions.push({ reason: `On TDZ core / Aiming Point (${dist.toFixed(1)}m) ✓`, penalty: 0.0 }); }
+    else if (dist <= 500.0) { score -= 3.0; deductions.push({ reason: `Long landing (${dist.toFixed(1)}m)`, penalty: -3.0 }); }
+    else { score -= 6.0; deductions.push({ reason: `Deep long landing (${dist.toFixed(1)}m)`, penalty: -6.0 }); }
+    
+    if (this.has_retractable_gear && !this.gear_retracted_in_time) {
+        score -= 1.5;
+        deductions.push({ reason: `Landing gear not retracted within 15s after takeoff`, penalty: -1.5 });
+    }
+    
+    this.light_infractions.forEach(inf => {
+        score -= 1.0;
+        deductions.push({ reason: inf, penalty: -1.0 });
+    });
+    
+    if (deductions.some(d => d.penalty <= -10.0)) {
+        return { score: 0.0, deductions };
+    }
+    
+    const n_ias = Math.min(this.ias_violation_count, 4);
+    if (n_ias > 0) {
+        score -= (n_ias * 0.5);
+        deductions.push({ reason: `IAS >250KTS below 10,000ft (${n_ias}x)`, penalty: -(n_ias * 0.5) });
+    }
+    
+    const n_ua = Math.min(this.unstable_appr_count, 4);
+    if (n_ua > 0) {
+        score -= (n_ua * 0.5);
+        deductions.push({ reason: `Unstable approach below 500ft (${n_ua}x)`, penalty: -(n_ua * 0.5) });
+    }
+    
+    return { score: parseFloat(Math.max(0, score).toFixed(2)), deductions };
   }
 
   async finalizeFlight() {
@@ -197,12 +317,23 @@ export class FlightTracker {
     this.last_report.score = score;
     this.last_report.deductions = deductions;
     
+    const is_severe_g_force = this.last_report.g_force > 3.0;
+    const is_severe_vs = Math.abs(this.last_report.rate_fpm) > 1000;
+    const is_severe_centerline = Math.abs(this.last_report.centerline) > 25;
+    const is_severe_bounce = this.bounce_count >= 2;
+
+    if (this.has_crashed || is_severe_g_force || is_severe_vs || is_severe_centerline || is_severe_bounce) {
+        this.last_report.status = "CRASHED";
+    } else {
+        this.last_report.status = "LANDED";
+    }
+
     const payload = {
-      aircraft: this.ifc.aircraft_id,
+      aircraft: this.ifc.aircraft_id || "Unknown",
       vs_touchdown: Math.round(this.last_report.rate_fpm),
       g_force: parseFloat(this.last_report.g_force.toFixed(2)),
       centerline_dev: parseFloat(this.last_report.centerline.toFixed(2)),
-      bounce_count: this.bounce_count,
+      bounce_count: this.bounce_count || 0,
       light_infractions: this.light_infractions,
       status: this.last_report.status,
       score: score,
@@ -212,6 +343,8 @@ export class FlightTracker {
       ias_violations: this.ias_violation_count,
       unstable_approaches: this.unstable_appr_count,
       distance_from_1kft: parseFloat(this.last_report.distance_from_1kft.toFixed(2)),
+      has_retractable_gear: this.has_retractable_gear || false,
+      gear_retraction_time: parseFloat((this.gear_retraction_time_sec || 0).toFixed(1)),
       deductions: deductions
     };
     
