@@ -236,6 +236,7 @@ class PirepsFlight (models.Model):
     submission_type = models.CharField(max_length=20, choices=[('Manual', 'Manual'), ('Auto', 'Auto')], default='Manual')
     observation = models.TextField(max_length=500, null=True, blank=True)
     livery_id = models.UUIDField(null=True, blank=True)
+    telemetry_log = models.JSONField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.flight_number} - {self.pilot.first_name}"
@@ -262,10 +263,11 @@ class LandingReport(models.Model):
     unstable_approaches = models.IntegerField(default=0)  # Aproximações instáveis <500ft
     distance_from_1kft  = models.FloatField(default=0.0, null=True, blank=True)  # Distância do toque ao aiming point (m)
     fuel_reserve_minutes = models.FloatField(default=0.0, null=True, blank=True)  # Minutos de reserva restantes
-    has_retractable_gear = models.BooleanField(default=False)  # Se possui trem retrátil
-    gear_retraction_time = models.FloatField(default=0.0, null=True, blank=True)  # Tempo de retração (s)
-    flight_path         = models.JSONField(default=list, blank=True)  # Lista de coordenadas do voo
-    deductions          = models.JSONField(default=list, blank=True)  # Detalhes das deduções de pontuação
+    has_retractable_gear = models.BooleanField(default=False)  # Indica se a aeronave possui trem de pouso retrátil
+    gear_retraction_time = models.FloatField(default=0.0, null=True, blank=True)  # Tempo em segundos para recolher o trem após decolagem
+    flight_path         = models.JSONField(default=list, blank=True)  # Trajeto do voo (lista de {lat, lon})
+    telemetry_log       = models.JSONField(default=list, blank=True)  # Histórico de altitude e velocidade
+    deductions          = models.JSONField(default=list, blank=True)  # Lista detalhada de penalidades aplicadas no cálculoação
 
     # Vínculo com o PIREP (preenchido quando o piloto submete o voo)
     pirep = models.OneToOneField(

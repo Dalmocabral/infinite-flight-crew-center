@@ -13,6 +13,9 @@ export class FlightTracker {
     this.bounce_count = 0;
     this.flight_reported = false;
     
+    this.telemetry_log = [];
+    this.last_telemetry_time = 0;
+    
     this.has_passed_10k = false;
     this.prev_alt = 0.0;
     this.climb_10k_grace_start = 0.0;
@@ -83,6 +86,17 @@ export class FlightTracker {
     // Tracking Peak G
     if (!state.is_grounded && state.g_force > this.peak_g_force) {
       this.peak_g_force = state.g_force;
+    }
+    
+    // Telemetry Logging for Web Graph (every 60 seconds)
+    const now = Date.now();
+    if (this.status !== "FINISHED" && (now - this.last_telemetry_time) >= 60000) {
+      this.telemetry_log.push({
+        time: Math.round(now / 1000), // UNIX timestamp in seconds
+        alt: Math.round(state.alt),
+        gs: Math.round(state.gs)
+      });
+      this.last_telemetry_time = now;
     }
 
     this.checkPhases(state);
@@ -353,7 +367,8 @@ export class FlightTracker {
       distance_from_1kft: parseFloat(this.last_report.distance_from_1kft.toFixed(2)),
       has_retractable_gear: this.has_retractable_gear || false,
       gear_retraction_time: parseFloat((this.gear_retraction_time_sec || 0).toFixed(1)),
-      deductions: deductions
+      deductions: deductions,
+      telemetry_log: this.telemetry_log
     };
     
     console.log('[FLIGHT TRACKER] Finalizing Flight. Payload:', JSON.stringify(payload));

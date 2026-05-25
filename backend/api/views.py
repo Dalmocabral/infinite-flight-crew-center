@@ -507,6 +507,7 @@ class LandingReportView(APIView):
             has_retractable_gear = bool(data.get('has_retractable_gear', False)),
             gear_retraction_time = float(data.get('gear_retraction_time', 0.0)),
             flight_path         = data.get('flight_path', []),
+            telemetry_log       = data.get('telemetry_log', []),
             deductions          = data.get('deductions', []),
         )
         return Response(

@@ -51,7 +51,7 @@ class LandingReportBriefSerializer(serializers.ModelSerializer):
         model = LandingReport
         fields = ['score', 'vs_touchdown', 'g_force', 'bounce_count', 'status',
                   'fuel_weight_kg', 'landing_lat', 'landing_lon',
-                  'ias_violations', 'unstable_approaches', 'deductions', 'flight_path',
+                  'ias_violations', 'unstable_approaches', 'deductions', 'flight_path', 'telemetry_log',
                   'distance_from_1kft', 'fuel_reserve_minutes', 'has_retractable_gear', 'gear_retraction_time']
 
 class PirepsFlightSerializer(serializers.ModelSerializer):
@@ -185,7 +185,7 @@ class LandingReportSerializer(serializers.ModelSerializer):
             'score', 'created_at', 'pirep',
             'fuel_weight_kg', 'landing_lat', 'landing_lon',
             'ias_violations', 'unstable_approaches',
-            'distance_from_1kft', 'flight_path', 'deductions',
+            'distance_from_1kft', 'flight_path', 'telemetry_log', 'deductions',
             'fuel_reserve_minutes', 'has_retractable_gear', 'gear_retraction_time'
         ]
         read_only_fields = ['id', 'pilot', 'created_at']

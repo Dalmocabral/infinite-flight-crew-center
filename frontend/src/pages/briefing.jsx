@@ -11,6 +11,30 @@ import AxiosInstance from '../components/AxiosInstance';
 import ApiService from '../components/ApiService';
 import { Tooltip } from '@mui/material';
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  ChartTooltip,
+  Legend,
+  Filler
+);
+
 const renderLogo = (liveryId, logoData, icao = null) => {
     if (!logoData || !Array.isArray(logoData)) return null;
     
@@ -594,6 +618,94 @@ const Briefing = () => {
               )}
             </CardContent>
           </Paper>
+
+          {/* ── TELEMETRY CHART ── */}
+          {flightData.landing_report?.telemetry_log && flightData.landing_report.telemetry_log.length > 0 && (
+            <Paper sx={{
+                mb: 3,
+                backgroundColor: 'rgba(10, 25, 41, 0.7)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white',
+                p: 2
+            }}>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4dabf5', fontWeight: 'bold' }}>
+                📊 FLIGHT TELEMETRY
+              </Typography>
+              <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
+              <Box sx={{ height: 300, width: '100%' }}>
+                <Line 
+                  data={{
+                    labels: flightData.landing_report.telemetry_log.map((_, index) => `${index} min`),
+                    datasets: [
+                      {
+                        label: 'Altitude (ft)',
+                        data: flightData.landing_report.telemetry_log.map(t => t.alt),
+                        borderColor: '#4dabf5',
+                        backgroundColor: 'rgba(77,171,245,0.1)',
+                        yAxisID: 'y',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                      },
+                      {
+                        label: 'Speed (GS)',
+                        data: flightData.landing_report.telemetry_log.map(t => t.gs),
+                        borderColor: '#00e676',
+                        backgroundColor: 'transparent',
+                        yAxisID: 'y1',
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                      }
+                    ]
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                      mode: 'index',
+                      intersect: false,
+                    },
+                    scales: {
+                      x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: 'rgba(255,255,255,0.5)', maxTicksLimit: 15 }
+                      },
+                      y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#4dabf5' },
+                        title: { display: true, text: 'Altitude (ft)', color: '#4dabf5' }
+                      },
+                      y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        ticks: { color: '#00e676' },
+                        title: { display: true, text: 'Ground Speed (kt)', color: '#00e676' }
+                      }
+                    },
+                    plugins: {
+                      legend: { labels: { color: 'white' } },
+                      tooltip: {
+                        backgroundColor: 'rgba(10, 25, 41, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1
+                      }
+                    }
+                  }}
+                />
+              </Box>
+            </Paper>
+          )}
 
           <Paper sx={{ 
               mb: 3, 
