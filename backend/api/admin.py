@@ -34,6 +34,9 @@ class PirepsFlightAdmin(admin.ModelAdmin):
     readonly_fields = ('if_live_flights',)
     
     def if_live_flights(self, obj):
+        import json
+        from django.utils.safestring import mark_safe
+        
         if not obj or not obj.pilot or not obj.pilot.usernameIFC:
             return format_html("<span style='color:red;'>Nenhum usuário do Infinite Flight (usernameIFC) associado a este piloto.</span>")
             
@@ -41,6 +44,14 @@ class PirepsFlightAdmin(admin.ModelAdmin):
         api_key = '36d1c8xdt1zvxn9cqqs9pxr7dty8rhm4'
         origin = getattr(obj, 'departure_airport', '')
         destination = getattr(obj, 'arrival_airport', '')
+        
+        # Build mapping dictionary for Aircraft UUIDs to Names
+        aircrafts = {str(a.if_id): a.name for a in Aircraft.objects.all()}
+        aircrafts_json = mark_safe(json.dumps(aircrafts))
+        
+        # Build mapping for Livery UUIDs to Aircraft Names
+        liveries = {str(l.livery_id): l.aircraft.name for l in Livery.objects.select_related('aircraft').all()}
+        liveries_json = mark_safe(json.dumps(liveries))
         
         return format_html("""
         <div id="if-flights-loader" style="padding: 10px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
@@ -69,6 +80,8 @@ class PirepsFlightAdmin(admin.ModelAdmin):
                 const apiKey = "{api_key}";
                 const targetOrigin = "{origin}";
                 const targetDest = "{destination}";
+                const aircraftMap = {aircrafts_json};
+                const liveryMap = {liveries_json};
                 
                 async function fetchFlights() {{
                     try {{
@@ -105,7 +118,12 @@ class PirepsFlightAdmin(admin.ModelAdmin):
                             
                             const dateObj = new Date(f.created);
                             const dateStr = dateObj.toLocaleDateString('pt-BR') + ' ' + dateObj.toLocaleTimeString('pt-BR');
-                            const duration = (f.flightTime / 60).toFixed(1) + " min";
+                            
+                            // Format Duration (f.totalTime is in minutes)
+                            const totalMinutes = f.totalTime || 0;
+                            const hours = Math.floor(totalMinutes / 60);
+                            const mins = Math.floor(totalMinutes % 60);
+                            const duration = hours > 0 ? `${{hours}}h ${{mins}}m` : `${{mins}}m`;
                             
                             // Highlight if it matches the current Pirep
                             const isMatch = (f.originAirport === targetOrigin && f.destinationAirport === targetDest);
@@ -117,13 +135,19 @@ class PirepsFlightAdmin(admin.ModelAdmin):
                             
                             const matchBadge = isMatch ? '<br><span style="background-color: #22c55e; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold;">VOO REPORTADO</span>' : '';
                             
+                            // Get Aircraft Name
+                            let aircraftName = aircraftMap[f.aircraftId];
+                            if (!aircraftName || f.aircraftId === '00000000-0000-0000-0000-000000000000') {{
+                                aircraftName = liveryMap[f.liveryId] || f.aircraftId || '-';
+                            }}
+                            
                             tr.innerHTML = `
                                 <td style="padding: 12px 16px;">${{dateStr}}${{matchBadge}}</td>
                                 <td style="padding: 12px 16px; font-weight: bold;">${{f.originAirport || '-'}}</td>
                                 <td style="padding: 12px 16px; font-weight: bold;">${{f.destinationAirport || '-'}}</td>
                                 <td style="padding: 12px 16px;">${{duration}}</td>
                                 <td style="padding: 12px 16px;">+${{f.xp || 0}} XP</td>
-                                <td style="padding: 12px 16px; font-size: 12px; color: #6b7280;">${{f.aircraftId || '-'}}</td>
+                                <td style="padding: 12px 16px; font-size: 12px; color: #4b5563; font-weight: 500;">${{aircraftName}}</td>
                             `;
                             tbody.appendChild(tr);
                         }});
@@ -140,7 +164,7 @@ class PirepsFlightAdmin(admin.ModelAdmin):
                 setTimeout(fetchFlights, 300);
             }})();
         </script>
-        """, username=username, api_key=api_key, origin=origin, destination=destination)
+        """, username=username, api_key=api_key, origin=origin, destination=destination, aircrafts_json=aircrafts_json, liveries_json=liveries_json)
     if_live_flights.short_description = 'Últimos 10 Voos no Infinite Flight (API Real)'
     
     def get_queryset(self, request):

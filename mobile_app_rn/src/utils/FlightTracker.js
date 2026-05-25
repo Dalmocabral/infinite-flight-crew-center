@@ -58,6 +58,14 @@ export class FlightTracker {
   }
 
   onTelemetryUpdate(state) {
+    if (this.was_grounded_prev === undefined) {
+      this.was_grounded_prev = state.is_grounded;
+      this.prev_alt = state.alt;
+      this.prev_vs = state.vs;
+      // Do not process logic on the very first tick to prevent false touchdowns
+      return;
+    }
+    
     if (state.has_crashed) {
       this.last_report.status = "CRASHED";
       if (!this.flight_reported) this.finalizeFlight();

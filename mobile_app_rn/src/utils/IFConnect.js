@@ -213,22 +213,22 @@ export class IFConnectV2 {
 
   processPayload(commandId, payload) {
     if (commandId === -1) {
-      // Decode Uint8Array to string manually
-      let manifestStr = '';
-      for (let i = 0; i < payload.length; i++) {
-        manifestStr += String.fromCharCode(payload[i]);
-      }
+      const manifestStr = Buffer.from(payload).toString('utf8');
       
       const lines = manifestStr.split('\n');
       lines.forEach(line => {
         const parts = line.split(',');
         if (parts.length >= 3) {
-          this.manifest[parts[2].trim()] = parseInt(parts[0].trim(), 10);
+          const rawKey = parts[2];
+          // Remove all invisible characters, leaving only letters, numbers, slashes, and underscores
+          const key = rawKey.replace(/[^a-zA-Z0-9_/-]/g, '');
+          this.manifest[key] = parseInt(parts[0].trim(), 10);
         }
       });
       
       this.mapIds();
       console.log(`Manifest loaded: ${Object.keys(this.manifest).length} items`);
+      console.log('Sample keys:', Object.keys(this.manifest).slice(0, 5));
       DeviceEventEmitter.emit('MANIFEST_LOADED');
       
       // Infinite Flight V2 API uses the same socket for telemetry!
