@@ -68,12 +68,17 @@ const backgroundTask = async (taskDataArguments) => {
                 
                 isConnectedAudioPlayed = true;
             }
-        } else if (statusStr.includes('Conexão Perdida') || statusStr.includes('Encerrado')) {
+        } else if (statusStr.includes('Perdida') || statusStr.includes('Encerrado')) {
+            if (flightTrackerInstance && !flightTrackerInstance.flight_reported && flightTrackerInstance.touchdown_count > 0 && (flightTrackerInstance.status === "LANDING" || flightTrackerInstance.status === "TAXI")) {
+                console.log("[BG] Conexão perdida após pouso. Forçando finalização do voo.");
+                flightTrackerInstance.status = "FINISHED";
+                flightTrackerInstance.finalizeFlight();
+            }
             if (isConnectedAudioPlayed) {
                 await Notifications.scheduleNotificationAsync({
                     content: {
                         title: 'IF Crew Center',
-                        body: '⚠️ Infinite Flight Desconectado',
+                        body: '🔌 Infinite Flight Desconectado',
                         sound: true,
                         priority: Notifications.AndroidNotificationPriority.HIGH,
                     },
@@ -115,6 +120,9 @@ const backgroundTask = async (taskDataArguments) => {
                 body: JSON.stringify(payload)
             });
             if (response.ok) {
+                console.log('\n=========================================');
+                console.log('✅ NOTA ENVIADA PARA O SITE COM SUCESSO! ✅');
+                console.log('=========================================\n');
                 const successMsg = `Report successfully sent to Crew Center!`;
                 await BackgroundActions.updateNotification({
                     taskDesc: successMsg,
@@ -132,6 +140,14 @@ const backgroundTask = async (taskDataArguments) => {
         }
         
         setTimeout(() => stopBackgroundFlight(), 10000); // auto stop after 10s
+    });
+
+    const subForceSend = DeviceEventEmitter.addListener('FORCE_SEND_REAL_SCORE', () => {
+        if (flightTrackerInstance) {
+            console.log('[BACKGROUND] Forçando envio do score real...');
+            flightTrackerInstance.flight_reported = false; // Reset to allow sending
+            flightTrackerInstance.finalizeFlight();
+        }
     });
 
     // Request notification permission (Android 13+)

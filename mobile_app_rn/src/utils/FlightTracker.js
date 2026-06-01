@@ -99,6 +99,8 @@ export class FlightTracker {
       this.last_telemetry_time = now;
     }
 
+    console.log(`[TELEMETRY] ALT: ${Math.round(state.alt)} | GS: ${Math.round(state.gs)} | VS: ${Math.round(state.vs)} | GND: ${state.is_grounded} | ENG_OFF: ${state.engines_off}`);
+
     this.checkPhases(state);
     this.checkInfractions(state);
     

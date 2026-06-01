@@ -163,6 +163,9 @@ export class IFConnectV2 {
   readFloatLE(buf, offset = 0) {
     return new DataView(buf.buffer, buf.byteOffset, buf.length).getFloat32(offset, true);
   }
+  readDoubleLE(buf, offset = 0) {
+    return new DataView(buf.buffer, buf.byteOffset, buf.length).getFloat64(offset, true);
+  }
   readInt8(buf, offset = 0) {
     return new DataView(buf.buffer, buf.byteOffset, buf.length).getInt8(offset);
   }
@@ -240,23 +243,13 @@ export class IFConnectV2 {
     }
   }
 
-  pollTelemetry() {
-      if (!this.connected || !this.client || !this.ids) return;
-      // Request the value of every mapped ID
-      Object.values(this.ids).forEach(id => {
-          if (id !== undefined) {
-              this.sendRequest(id);
-          }
-      });
-  }
-
   mapIds() {
     this.ids = {
       vs: this.manifest['aircraft/0/vertical_speed'],
       gs: this.manifest['aircraft/0/groundspeed'],
       grounded: this.manifest['aircraft/0/is_on_ground'],
       g_force: this.manifest['aircraft/0/g_force_y'],
-      engines_off: this.manifest['aircraft/0/systems/engines/are_all_engines_off'],
+      engine_state: this.manifest['aircraft/0/systems/engines/0/state'],
       alt: this.manifest['aircraft/0/altitude_msl'],
       lat: this.manifest['aircraft/0/latitude'],
       lon: this.manifest['aircraft/0/longitude'],
@@ -289,10 +282,10 @@ export class IFConnectV2 {
         this.alt = this.readFloatLE(payload, 0); // already in feet
       } else if (commandId === this.ids.g_force && payload.length >= 4) {
         this.g_force = Math.abs(this.readFloatLE(payload, 0));
-      } else if (commandId === this.ids.lat && payload.length >= 4) {
-        this.lat = this.readFloatLE(payload, 0);
-      } else if (commandId === this.ids.lon && payload.length >= 4) {
-        this.lon = this.readFloatLE(payload, 0);
+      } else if (commandId === this.ids.lat && payload.length >= 8) {
+        this.lat = this.readDoubleLE(payload, 0);
+      } else if (commandId === this.ids.lon && payload.length >= 8) {
+        this.lon = this.readDoubleLE(payload, 0);
       } else if (commandId === this.ids.ias && payload.length >= 4) {
         this.ias = this.readFloatLE(payload, 0) * 1.94384; // m/s to knots
       } else if (commandId === this.ids.pitch && payload.length >= 4) {
@@ -300,8 +293,10 @@ export class IFConnectV2 {
       } else if (commandId === this.ids.bank && payload.length >= 4) {
         this.bank = this.readFloatLE(payload, 0);
       } else if (commandId === this.ids.agl && payload.length >= 4) {
-        this.agl = this.readFloatLE(payload, 0) * 3.28084; // meters to feet (assume agl needs conversion if msl didn't? wait, msl didn't. let's just leave agl raw or check later. Actually I will leave it raw for now to match python)
         this.agl = this.readFloatLE(payload, 0);
+        // Failsafe: Native is_on_ground API property can be unreliable in V2. We calculate it using AGL.
+        // In Infinite Flight, AGL is returned in meters. When touching down, gear compresses to < 2m.
+        this.is_grounded = (this.agl < 3.0);
       } else if (commandId === this.ids.fuel_weight && payload.length >= 4) {
         this.fuel_weight = this.readFloatLE(payload, 0);
       } else if (commandId === this.ids.centerline && payload.length >= 4) {
@@ -309,27 +304,28 @@ export class IFConnectV2 {
       } else if (commandId === this.ids.distance_from_1kft && payload.length >= 4) {
         this.distance_from_1kft = this.readFloatLE(payload, 0);
         
-      // Booleans (Int32)
-      } else if (commandId === this.ids.grounded && payload.length >= 4) {
-        this.is_grounded = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.engines_off && payload.length >= 4) {
-        this.engines_off = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.nav && payload.length >= 4) {
-        this.nav_on = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.beacon && payload.length >= 4) {
-        this.beacon_on = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.strobe && payload.length >= 4) {
-        this.strobe_on = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.landing && payload.length >= 4) {
-        this.landing_on = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.no_smoking && payload.length >= 4) {
-        this.no_smoking_on = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.seatbelt && payload.length >= 4) {
-        this.seatbelt_on = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.crash && payload.length >= 4) {
-        this.has_crashed = this.readInt32LE(payload, 0) !== 0;
-      } else if (commandId === this.ids.gear_lever && payload.length >= 4) {
-        this.gear_down = this.readInt32LE(payload, 0) !== 0;
+      // Booleans and 1-byte states
+      } else if (commandId === this.ids.grounded && payload.length >= 1) {
+        this.is_grounded = payload[0] !== 0;
+      } else if (commandId === this.ids.engine_state && payload.length >= 4) {
+        const engine_state = this.readInt32LE(payload, 0);
+        this.engines_off = (engine_state === 0); // 0 = Off, >0 = Running/Starting
+      } else if (commandId === this.ids.nav && payload.length >= 1) {
+        this.nav_on = payload[0] !== 0;
+      } else if (commandId === this.ids.beacon && payload.length >= 1) {
+        this.beacon_on = payload[0] !== 0;
+      } else if (commandId === this.ids.strobe && payload.length >= 1) {
+        this.strobe_on = payload[0] !== 0;
+      } else if (commandId === this.ids.landing && payload.length >= 1) {
+        this.landing_on = payload[0] !== 0;
+      } else if (commandId === this.ids.no_smoking && payload.length >= 1) {
+        this.no_smoking_on = payload[0] !== 0;
+      } else if (commandId === this.ids.seatbelt && payload.length >= 1) {
+        this.seatbelt_on = payload[0] !== 0;
+      } else if (commandId === this.ids.crash && payload.length >= 1) {
+        this.has_crashed = payload[0] !== 0;
+      } else if (commandId === this.ids.gear_lever && payload.length >= 1) {
+        this.gear_down = payload[0] !== 0;
       }
       
       // Emit event for UI to update (we send the entire state)
@@ -341,12 +337,19 @@ export class IFConnectV2 {
 
   pollTelemetry() {
     if (!this.connected) {
-      console.log('pollTelemetry skipped: not connected');
+      // console.log('pollTelemetry skipped: not connected');
       return;
     }
     
+    if (!this.ids) return;
+
     const validIds = Object.values(this.ids).filter(id => id !== undefined);
-    if (validIds.length === 0) return;
+    if (validIds.length === 0) {
+      // User is likely in Main Menu. We need to re-request the manifest so we catch when the plane spawns!
+      DeviceEventEmitter.emit('IFC_STATUS', 'Aguardando o avião...');
+      this.requestManifest();
+      return;
+    }
     
     // We must send requests one by one with a small delay so we don't flood IF Connect
     let index = 0;

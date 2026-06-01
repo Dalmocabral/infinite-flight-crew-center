@@ -6,7 +6,7 @@ import { startBackgroundFlight, stopBackgroundFlight } from '../utils/Background
 
 export default function Dashboard({ session, onLogout }) {
   const [isConnected, setIsConnected] = useState(false);
-  const [telemetry, setTelemetry] = useState({ vs: 0, gs: 0, alt: 0, g_force: 1 });
+  const [telemetry, setTelemetry] = useState({ vs: 0, gs: 0, alt: 0, g_force: 1, engines_off: true });
   const [ipAddress, setIpAddress] = useState('127.0.0.1');
   const [ifcStatus, setIfcStatus] = useState('Aguardando...');
   
@@ -19,7 +19,7 @@ export default function Dashboard({ session, onLogout }) {
     Notifications.requestPermissionsAsync().catch(() => {});
     
     const sub = DeviceEventEmitter.addListener('TELEMETRY_UPDATE', (data) => {
-      console.log(`[TELEMETRY] ALT: ${Math.round(data.alt)} | GS: ${Math.round(data.gs)} | VS: ${Math.round(data.vs)}`);
+      console.log(`[TELEMETRY] ALT: ${Math.round(data.alt)} | GS: ${Math.round(data.gs)} | VS: ${Math.round(data.vs)} | ENG_OFF: ${data.engines_off}`);
       setTelemetry(data);
     });
     
@@ -53,6 +53,15 @@ export default function Dashboard({ session, onLogout }) {
       } catch (e) {
         alert('Erro ao iniciar background: ' + e.message);
       }
+    }
+  };
+
+  const handleForceSend = async () => {
+    try {
+      DeviceEventEmitter.emit('FORCE_SEND_REAL_SCORE');
+      alert('Comando de envio real disparado!');
+    } catch (e) {
+      alert('Erro: ' + e.message);
     }
   };
 
@@ -100,6 +109,17 @@ export default function Dashboard({ session, onLogout }) {
         </Text>
       </TouchableOpacity>
       
+      {!isConnected && (
+        <TouchableOpacity 
+          style={[styles.startButton, { backgroundColor: '#ff9800' }]} 
+          onPress={handleForceSend}
+        >
+          <Text style={styles.startButtonText}>
+            - RECUPERAR NOTA REAL DO VOO
+          </Text>
+        </TouchableOpacity>
+      )}
+      
       <Text style={styles.helperText}>
         Digite o IP do aparelho rodando o Infinite Flight (127.0.0.1 se for no mesmo).
       </Text>
@@ -111,6 +131,9 @@ export default function Dashboard({ session, onLogout }) {
           <Text style={styles.hudItem}>ALT: {Math.round(telemetry.alt)} FT</Text>
           <Text style={styles.hudItem}>G: {telemetry.g_force.toFixed(2)}</Text>
         </View>
+        <Text style={[styles.hudItem, { marginTop: 10, fontWeight: 'bold', color: telemetry.engines_off ? '#f44336' : '#4caf50' }]}>
+          MOTORES: {telemetry.engines_off ? 'DESLIGADOS' : 'LIGADOS'}
+        </Text>
       </View>
     </View>
   );
