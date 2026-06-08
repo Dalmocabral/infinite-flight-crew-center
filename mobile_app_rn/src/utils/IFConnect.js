@@ -244,30 +244,36 @@ export class IFConnectV2 {
   }
 
   mapIds() {
+    const findId = (keywords) => {
+      const key = Object.keys(this.manifest).find(k => keywords.every(kw => k.toLowerCase().includes(kw.toLowerCase())));
+      return key ? this.manifest[key] : undefined;
+    };
+
     this.ids = {
       vs: this.manifest['aircraft/0/vertical_speed'],
       gs: this.manifest['aircraft/0/groundspeed'],
       grounded: this.manifest['aircraft/0/is_on_ground'],
-      g_force: this.manifest['aircraft/0/g_force_y'],
-      engine_state: this.manifest['aircraft/0/systems/engines/0/state'],
+      g_force: this.manifest['aircraft/0/g_force_y'] || findId(['gforce']),
+      engine_state: this.manifest['aircraft/0/systems/engines/0/state'] || findId(['engines', '0', 'state']),
+      engine_rpm: this.manifest['aircraft/0/systems/engines/0/rpm'] || findId(['engines', '0', 'rpm']) || findId(['engines', '0', 'n1']),
       alt: this.manifest['aircraft/0/altitude_msl'],
       lat: this.manifest['aircraft/0/latitude'],
       lon: this.manifest['aircraft/0/longitude'],
       ias: this.manifest['aircraft/0/indicated_airspeed'],
-      fuel_weight: this.manifest['aircraft/0/systems/fuel/weight'],
+      fuel_weight: this.manifest['aircraft/0/systems/fuel/weight'] || findId(['fuel', 'weight']),
       pitch: this.manifest['aircraft/0/pitch'],
       bank: this.manifest['aircraft/0/bank'],
       agl: this.manifest['aircraft/0/altitude_agl'],
-      nav: this.manifest['aircraft/0/systems/nav_lights_switch'],
-      beacon: this.manifest['aircraft/0/systems/beacon_lights_switch'],
-      strobe: this.manifest['aircraft/0/systems/strobe_lights_switch'],
-      landing: this.manifest['aircraft/0/systems/landing_lights_switch'],
-      no_smoking: this.manifest['aircraft/0/systems/signs/no_smoking'],
-      seatbelt: this.manifest['aircraft/0/systems/signs/seatbelt'],
-      gear_lever: this.manifest['aircraft/0/systems/landing_gear/lever_state'],
-      crash: this.manifest['aircraft/0/has_crashed'],
-      centerline: this.manifest['simulator/statistics/last_landing/distance_from_centerline'],
-      distance_from_1kft: this.manifest['simulator/statistics/last_landing/distance_from_1kft_marker'],
+      nav: this.manifest['aircraft/0/systems/electrical_switch/nav_lights_state'] || findId(['nav', 'light', 'state']) || findId(['nav', 'light', 'switch']),
+      beacon: this.manifest['aircraft/0/systems/electrical_switch/beacon_lights_state'] || findId(['beacon', 'light', 'state']) || findId(['beacon', 'light', 'switch']),
+      strobe: this.manifest['aircraft/0/systems/electrical_switch/strobe_lights_state'] || findId(['strobe', 'light', 'state']) || findId(['strobe', 'light', 'switch']),
+      landing: this.manifest['aircraft/0/systems/electrical_switch/landing_lights_state'] || findId(['landing', 'light', 'state']) || findId(['landing', 'light', 'switch']),
+      no_smoking: this.manifest['aircraft/0/systems/signs/no_smoking'] || findId(['signs', 'no_smoking']),
+      seatbelt: this.manifest['aircraft/0/systems/signs/seatbelt'] || findId(['signs', 'seatbelt']),
+      gear_lever: this.manifest['aircraft/0/systems/landing_gear/lever_state'] || findId(['landing_gear', 'lever']),
+      crash: this.manifest['aircraft/0/has_crashed'] || findId(['crashed']),
+      centerline: this.manifest['simulator/statistics/last_landing/distance_from_centerline'] || findId(['statistics', 'centerline']),
+      distance_from_1kft: this.manifest['simulator/statistics/last_landing/distance_from_1kft_marker'] || findId(['statistics', '1kft']),
     };
     console.log('Mapped IDs:', this.ids);
   }
@@ -310,6 +316,9 @@ export class IFConnectV2 {
       } else if (commandId === this.ids.engine_state && payload.length >= 4) {
         const engine_state = this.readInt32LE(payload, 0);
         this.engines_off = (engine_state === 0); // 0 = Off, >0 = Running/Starting
+      } else if (commandId === this.ids.engine_rpm && payload.length >= 4) {
+        const rpm = this.readFloatLE(payload, 0);
+        if (rpm < 5.0) this.engines_off = true; // Fallback se state falhar
       } else if (commandId === this.ids.nav && payload.length >= 1) {
         this.nav_on = payload[0] !== 0;
       } else if (commandId === this.ids.beacon && payload.length >= 1) {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import axios from 'axios';
 
-const DEFAULT_BACKEND = 'https://infinite-flight-crew-center.onrender.com';
+const DEFAULT_BACKEND = 'http://localhost:8000';
 
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');

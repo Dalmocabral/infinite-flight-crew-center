@@ -1,0 +1,33 @@
+Para rodar todo o sistema do Crew Center sozinho no seu computador, você precisa abrir 3 janelas do terminal (uma para cada "pedaço" do sistema).
+
+Aqui está o passo a passo exato do que você precisa digitar em cada janela:
+
+⚙️ Janela 1: O Servidor Backend (Banco de Dados)
+Abra um terminal na pasta raiz do seu projeto e digite:
+
+powershell
+cd backend
+.\venv\Scripts\activate
+python manage.py runserver
+Deixe essa janela aberta minimizada.
+
+🌐 Janela 2: O Site (Frontend)
+Abra uma nova janela de terminal na pasta raiz do projeto e digite:
+
+powershell
+cd frontend
+npm run dev
+Deixe essa janela minimizada também.
+
+📱 Janela 3: O Aplicativo de Celular (Mobile App)
+Abra a terceira janela de terminal na pasta raiz e digite:
+
+powershell
+cd mobile_app_rn
+npm start -- --clear
+⚠️ Detalhe Mágico do Cabo USB: Lembre-se que o aplicativo do celular precisa se comunicar com o computador pelo cabo. Se der "Tela Vermelha" no aplicativo, abra uma quarta janela rapidinho e rode esse comando para reabrir o túnel do cabo:
+
+powershell
+C:\Users\DalmoCabral\AppData\Local\Android\Sdk\platform-tools\adb.exe reverse tcp:8000 tcp:8000
+Pronto! Fazendo isso, todo o seu sistema estará online, respirando e funcionando 100% sem mim! Salve esses comandos em um bloquinho de notas na sua Área de Trabalho para você sempre ter em mãos. Se precisar de mim para construir mais alguma coisa no futuro, é só chamar! 🚀
+

@@ -111,7 +111,7 @@ const backgroundTask = async (taskDataArguments) => {
         
         try {
             const token = session.token || session.auth_token || session.key; 
-            const response = await fetch('https://infinite-flight-crew-center.onrender.com/landing-report/', {
+            const response = await fetch('http://localhost:8000/landing-report/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
