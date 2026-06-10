@@ -1,7 +1,5 @@
 import BackgroundActions from 'react-native-background-actions';
 import { DeviceEventEmitter } from 'react-native';
-import { Audio } from 'expo-av';
-import * as Speech from 'expo-speech';
 import * as Notifications from 'expo-notifications';
 import { IFConnectV2 } from './IFConnect';
 import { FlightTracker } from './FlightTracker';
@@ -20,16 +18,7 @@ let ifConnectInstance = null;
 let flightTrackerInstance = null;
 let isRunning = false;
 
-// Audio player function for background thread
-const playAudioAlert = async (text) => {
-    try {
-        const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=en&client=tw-ob`;
-        const { sound } = await Audio.Sound.createAsync({ uri: url });
-        await sound.playAsync();
-    } catch (e) {
-        console.log('Erro ao tocar audio:', e);
-    }
-};
+// Áudio removido a pedido do usuário
 
 const backgroundTask = async (taskDataArguments) => {
     const { ipAddress, session } = taskDataArguments;
@@ -43,7 +32,7 @@ const backgroundTask = async (taskDataArguments) => {
         progressBar: { max: 100, value: 0 },
     });
     
-    let isConnectedAudioPlayed = false;
+    let hasNotifiedConnected = false;
     
     const subStatus = DeviceEventEmitter.addListener('IFC_STATUS', async (statusStr) => {
         await BackgroundActions.updateNotification({
@@ -51,40 +40,23 @@ const backgroundTask = async (taskDataArguments) => {
         });
         
         if (statusStr === 'Conexão bem sucedida!') {
-            if (!isConnectedAudioPlayed) {
-                // Tenta notificação (pode falhar se não tiver permissão)
+            if (!hasNotifiedConnected) {
                 await Notifications.scheduleNotificationAsync({
                     content: {
                         title: 'IF Crew Center',
-                        body: '✈️ Infinite Flight Conectado!',
+                        body: '✈️ Infinite Flight Conectado! Tenha um ótimo voo.',
                         sound: true,
                         priority: Notifications.AndroidNotificationPriority.MAX,
                     },
                     trigger: null,
                 });
-                
-                // Toca áudio de voz forçado (funciona mesmo com notificações bloqueadas)
-                await playAudioAlert('Infinite Flight Connected. Have a nice flight.');
-                
-                isConnectedAudioPlayed = true;
+                hasNotifiedConnected = true; // Garante que avisa apenas UMA vez por voo!
             }
         } else if (statusStr.includes('Perdida') || statusStr.includes('Encerrado')) {
             if (flightTrackerInstance && !flightTrackerInstance.flight_reported && flightTrackerInstance.touchdown_count > 0 && (flightTrackerInstance.status === "LANDING" || flightTrackerInstance.status === "TAXI")) {
                 console.log("[BG] Conexão perdida após pouso. Forçando finalização do voo.");
                 flightTrackerInstance.status = "FINISHED";
                 flightTrackerInstance.finalizeFlight();
-            }
-            if (isConnectedAudioPlayed) {
-                await Notifications.scheduleNotificationAsync({
-                    content: {
-                        title: 'IF Crew Center',
-                        body: '🔌 Infinite Flight Desconectado',
-                        sound: true,
-                        priority: Notifications.AndroidNotificationPriority.HIGH,
-                    },
-                    trigger: null,
-                });
-                isConnectedAudioPlayed = false;
             }
         }
     });
@@ -106,12 +78,11 @@ const backgroundTask = async (taskDataArguments) => {
             trigger: null,
         });
         
-        // Voice alert in English
-        await playAudioAlert(`Flight completed. Your landing score is ${payload.score} out of 10.`);
-        
+        // URL do servidor local para onde o aplicativo deve enviar os dados do voo
+        const baseUrl = 'http://localhost:8000';
         try {
             const token = session.token || session.auth_token || session.key; 
-            const response = await fetch('http://localhost:8000/landing-report/', {
+            const response = await fetch(`${baseUrl}/landing-report/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,7 +98,6 @@ const backgroundTask = async (taskDataArguments) => {
                 await BackgroundActions.updateNotification({
                     taskDesc: successMsg,
                 });
-                await playAudioAlert('Report successfully sent.');
             } else {
                 await BackgroundActions.updateNotification({
                     taskDesc: `Error sending report. Saved locally.`,
@@ -142,11 +112,13 @@ const backgroundTask = async (taskDataArguments) => {
         setTimeout(() => stopBackgroundFlight(), 10000); // auto stop after 10s
     });
 
-    const subForceSend = DeviceEventEmitter.addListener('FORCE_SEND_REAL_SCORE', () => {
+    const subForceSend = DeviceEventEmitter.addListener('FORCE_FINALIZE_FLIGHT', () => {
         if (flightTrackerInstance) {
-            console.log('[BACKGROUND] Forçando envio do score real...');
-            flightTrackerInstance.flight_reported = false; // Reset to allow sending
-            flightTrackerInstance.finalizeFlight();
+            console.log('[BACKGROUND] Forçando encerramento manual do voo...');
+            if (!flightTrackerInstance.flight_reported) {
+                flightTrackerInstance.status = "FINISHED";
+                flightTrackerInstance.finalizeFlight();
+            }
         }
     });
 
@@ -158,25 +130,15 @@ const backgroundTask = async (taskDataArguments) => {
     }
     
     try {
-        // Await TCP connection to Infinite Flight
-        await ifConnectInstance.connect(ipAddress);
+        // Conexão assíncrona NÃO BLOQUEANTE para que o loop continue rodando automaticamente
+        ifConnectInstance.connect(ipAddress).catch(e => console.warn('Connection error:', e));
         
-        // Wait for manifest to be loaded (IF sends manifest then closes socket)
-        if (Object.keys(ifConnectInstance.manifest).length === 0) {
-            await new Promise((resolve) => {
-                const manifestSub = DeviceEventEmitter.addListener('MANIFEST_LOADED', () => {
-                    manifestSub.remove();
-                    resolve();
-                });
-                // Timeout after 30s to avoid hanging forever
-                setTimeout(() => { manifestSub.remove(); resolve(); }, 30000);
-            });
-        }
-        
-        // Main telemetry polling loop
+        // Loop principal de telemetria
         while (isRunning && BackgroundActions.isRunning()) {
-            ifConnectInstance.pollTelemetry();
-            await sleep(1000);
+            if (ifConnectInstance && ifConnectInstance.connected) {
+                ifConnectInstance.pollTelemetry();
+            }
+            await sleep(200); // Polling 5 vezes mais rápido (5Hz) para não perder o pico de Força G
         }
     } catch (e) {
         console.warn('Background task error:', e);
@@ -184,6 +146,7 @@ const backgroundTask = async (taskDataArguments) => {
     
     subStatus.remove();
     subFinish.remove();
+    subForceSend.remove();
     if (ifConnectInstance) ifConnectInstance.disconnect();
     isRunning = false;
 };
@@ -197,7 +160,7 @@ const options = {
         type: 'mipmap',
     },
     color: '#060d18',
-    linkingURI: 'ifcrewcenter://flight', 
+    linkingURI: 'com.dalmocabral.ifcrewcenter://', // Deve bater EXATAMENTE com o scheme do AndroidManifest.xml
     parameters: {
         ipAddress: '127.0.0.1',
         session: null

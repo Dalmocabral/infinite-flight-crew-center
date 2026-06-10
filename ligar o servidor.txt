@@ -27,7 +27,7 @@ cd mobile_app_rn
 npm start -- --clear
 ⚠️ Detalhe Mágico do Cabo USB: Lembre-se que o aplicativo do celular precisa se comunicar com o computador pelo cabo. Se der "Tela Vermelha" no aplicativo, abra uma quarta janela rapidinho e rode esse comando para reabrir o túnel do cabo:
 
-powershell
-C:\Users\DalmoCabral\AppData\Local\Android\Sdk\platform-tools\adb.exe reverse tcp:8000 tcp:8000
+powershellC:\Users\DalmoCabral\AppData\Local\Android\Sdk\platform-tools\adb.exe reverse tcp:8000 tcp:8000
+
 Pronto! Fazendo isso, todo o seu sistema estará online, respirando e funcionando 100% sem mim! Salve esses comandos em um bloquinho de notas na sua Área de Trabalho para você sempre ter em mãos. Se precisar de mim para construir mais alguma coisa no futuro, é só chamar! 🚀
 

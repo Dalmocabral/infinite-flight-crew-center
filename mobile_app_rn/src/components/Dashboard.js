@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, DeviceEventEmitter } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, DeviceEventEmitter, Alert } from 'react-native';
 import * as Speech from 'expo-speech';
 import * as Notifications from 'expo-notifications';
 import { startBackgroundFlight, stopBackgroundFlight } from '../utils/BackgroundTask';
@@ -12,19 +12,15 @@ export default function Dashboard({ session, onLogout }) {
   
   const ifConnectRef = useRef(null);
   const timerRef = useRef(null);
-  const isConnectedAudioPlayedRef = useRef(false);
 
   useEffect(() => {
-    // Request notification permissions on mount (Android 13+)
     Notifications.requestPermissionsAsync().catch(() => {});
     
     const sub = DeviceEventEmitter.addListener('TELEMETRY_UPDATE', (data) => {
-      console.log(`[TELEMETRY] ALT: ${Math.round(data.alt)} | GS: ${Math.round(data.gs)} | VS: ${Math.round(data.vs)} | ENG_OFF: ${data.engines_off}`);
       setTelemetry(data);
     });
     
     const subStatus = DeviceEventEmitter.addListener('IFC_STATUS', (statusStr) => {
-        console.log(`[DASHBOARD] Recebeu status: ${statusStr}`);
         setIfcStatus(statusStr);
     });
 
@@ -51,18 +47,26 @@ export default function Dashboard({ session, onLogout }) {
         setIsConnected(true);
         setIfcStatus('Procurando Simulador...');
       } catch (e) {
-        alert('Erro ao iniciar background: ' + e.message);
+        Alert.alert('Erro', 'Erro ao iniciar background: ' + e.message);
       }
     }
   };
 
-  const handleForceSend = async () => {
-    try {
-      DeviceEventEmitter.emit('FORCE_SEND_REAL_SCORE');
-      alert('Comando de envio real disparado!');
-    } catch (e) {
-      alert('Erro: ' + e.message);
-    }
+  const handleForceSend = () => {
+    Alert.alert(
+      "Finalizar Voo",
+      "Deseja realmente forçar o encerramento e envio do relatório agora?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Sim, Finalizar", 
+          onPress: () => {
+            DeviceEventEmitter.emit('FORCE_FINALIZE_FLIGHT');
+            Alert.alert("Sucesso", "Comando de finalização enviado!");
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -109,13 +113,13 @@ export default function Dashboard({ session, onLogout }) {
         </Text>
       </TouchableOpacity>
       
-      {!isConnected && (
+      {isConnected && (
         <TouchableOpacity 
           style={[styles.startButton, { backgroundColor: '#ff9800' }]} 
           onPress={handleForceSend}
         >
           <Text style={styles.startButtonText}>
-            - RECUPERAR NOTA REAL DO VOO
+            🏁 ENCERRAR VOO MANUALMENTE
           </Text>
         </TouchableOpacity>
       )}
