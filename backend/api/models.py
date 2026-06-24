@@ -1,4 +1,5 @@
 from django.db import models
+import os
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth import get_user_model
@@ -298,7 +299,10 @@ class Notification(models.Model):
     
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
-    site_link = "http://localhost:5173/"
+    # Defaulting to the new Vercel domain if FRONTEND_URL is not provided
+    site_link = os.environ.get('FRONTEND_URL', 'https://worldtourinfinte.vercel.app/')
+    if not site_link.endswith('/'):
+        site_link += '/'
     full_link = f"{site_link}password_reset?token={reset_password_token.key}"
 
     context = {

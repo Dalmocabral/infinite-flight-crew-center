@@ -520,7 +520,10 @@ class RequestReactivationEmailView(APIView):
             user.reactivation_token = token
             user.save()
 
-            site_link = "http://localhost:5173/"
+            import os
+            site_link = os.environ.get('FRONTEND_URL', 'https://worldtourinfinte.vercel.app/')
+            if not site_link.endswith('/'):
+                site_link += '/'
             full_link = f"{site_link}reactivate-account?token={token}"
 
             html_message = f"<p>Hello {user.first_name},</p><p>We received your reactivation request! Click the link below to take the controls again:</p><p><a href='{full_link}'>Reactivate Account</a></p>"
