@@ -1,19 +1,63 @@
-import React, { useState } from 'react';
-import { Box, Typography, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Collapse, AppBar, Toolbar, InputBase, Divider } from '@mui/material';
+import React from 'react';
+import { Box, Typography, Drawer, List, ListItem, ListItemButton, ListItemText, AppBar, Toolbar, InputBase, Divider, IconButton } from '@mui/material';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
 import SearchIcon from '@mui/icons-material/Search';
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 
 const drawerWidth = 260;
 
 const WikiLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    
-    const [openFlight, setOpenFlight] = useState(true);
+
+    // Helper to render the links just like Newsky
+    const renderNavItem = (title, path, IconComponent = ChevronRightIcon) => {
+        const isActive = location.pathname.includes(path);
+        return (
+            <ListItem disablePadding key={title}>
+                <ListItemButton 
+                    onClick={() => navigate(`/wiki/${path}`)}
+                    sx={{ 
+                        pl: 3, 
+                        py: 0.8,
+                        backgroundColor: isActive ? 'rgba(0,0,0,0.15)' : 'transparent',
+                        '&:hover': { backgroundColor: 'rgba(255,255,255,0.08)' }
+                    }}
+                >
+                    <IconComponent sx={{ fontSize: 20, mr: 2, color: isActive ? '#fff' : 'rgba(255,255,255,0.8)' }} />
+                    <ListItemText 
+                        primary={title} 
+                        sx={{ 
+                            '& .MuiTypography-root': { 
+                                fontSize: '0.9rem', 
+                                fontWeight: isActive ? 'bold' : 'normal',
+                                color: isActive ? '#fff' : 'rgba(255,255,255,0.9)'
+                            } 
+                        }} 
+                    />
+                </ListItemButton>
+            </ListItem>
+        );
+    };
+
+    const renderSubheader = (title) => (
+        <Typography 
+            sx={{ 
+                px: 3, 
+                py: 1, 
+                mt: 1, 
+                fontSize: '0.8rem', 
+                fontWeight: 'bold', 
+                color: 'rgba(255,255,255,0.6)', 
+                textTransform: 'capitalize' 
+            }}
+        >
+            {title}
+        </Typography>
+    );
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
@@ -43,7 +87,7 @@ const WikiLayout = () => {
                 </Toolbar>
             </AppBar>
 
-            {/* Left Blue Sidebar */}
+            {/* Left Blue Sidebar - Newsky Style */}
             <Drawer
                 variant="permanent"
                 sx={{
@@ -52,60 +96,33 @@ const WikiLayout = () => {
                     [`& .MuiDrawer-paper`]: { 
                         width: drawerWidth, 
                         boxSizing: 'border-box', 
-                        backgroundColor: '#255a9e', // Newsky blue
+                        backgroundColor: '#255a9e', // Identical to Newsky Blue
                         color: 'white',
                         borderRight: 'none'
                     },
                 }}
             >
                 <Toolbar /> {/* Spacer for AppBar */}
-                <Box sx={{ overflow: 'auto', mt: 2 }}>
+                <Box sx={{ overflow: 'auto', mt: 2, pb: 4 }}>
                     
-                    <List subheader={<Typography sx={{ px: 2, py: 1, fontSize: '0.75rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>Basics</Typography>}>
-                        <ListItem disablePadding>
-                            <ListItemButton>
-                                <ListItemText primary="FAQ" sx={{ '& .MuiTypography-root': { fontSize: '0.9rem', fontWeight: 'bold' } }} />
-                            </ListItemButton>
-                        </ListItem>
-                        <ListItem disablePadding>
-                            <ListItemButton>
-                                <ListItemText primary="Supported Simulators" sx={{ '& .MuiTypography-root': { fontSize: '0.9rem', fontWeight: 'bold' } }} />
-                            </ListItemButton>
-                        </ListItem>
+                    <List subheader={renderSubheader('Basics')}>
+                        {renderNavItem('FAQ', 'faq', LiveHelpIcon)}
                     </List>
 
-                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 1 }} />
 
-                    <List subheader={<Typography sx={{ px: 2, py: 1, mt: 1, fontSize: '0.75rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>Flight</Typography>}>
-                        <ListItem disablePadding>
-                            <ListItemButton onClick={() => setOpenFlight(!openFlight)}>
-                                <ListItemText primary="Flight Rules" sx={{ '& .MuiTypography-root': { fontSize: '0.9rem', fontWeight: 'bold' } }} />
-                                {openFlight ? <ExpandLess /> : <ExpandMore />}
-                            </ListItemButton>
-                        </ListItem>
-                        <Collapse in={openFlight} timeout="auto" unmountOnExit>
-                            <List component="div" disablePadding>
-                                <ListItemButton 
-                                    sx={{ pl: 4, backgroundColor: location.pathname.includes('rating-system') ? 'rgba(0,0,0,0.15)' : 'transparent' }}
-                                    onClick={() => navigate('/wiki/rating-system')}
-                                >
-                                    <ListItemText primary="Rating system" sx={{ '& .MuiTypography-root': { fontSize: '0.85rem' } }} />
-                                </ListItemButton>
-                                <ListItemButton sx={{ pl: 4 }}>
-                                    <ListItemText primary="Delete a flight" sx={{ '& .MuiTypography-root': { fontSize: '0.85rem' } }} />
-                                </ListItemButton>
-                            </List>
-                        </Collapse>
+                    <List subheader={renderSubheader('Dashboard')}>
+                        {renderNavItem('Overview', 'dashboard')}
+                        {renderNavItem('World Tours', 'world-tours')}
+                        {renderNavItem('My Flights', 'my-flights')}
+                        {renderNavItem('Live Map', 'live-map')}
+                        {renderNavItem('Members', 'members')}
                     </List>
 
-                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 1 }} />
 
-                    <List subheader={<Typography sx={{ px: 2, py: 1, mt: 1, fontSize: '0.75rem', fontWeight: 'bold', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase' }}>Aircraft</Typography>}>
-                        <ListItem disablePadding>
-                            <ListItemButton>
-                                <ListItemText primary="Airframes" sx={{ '& .MuiTypography-root': { fontSize: '0.9rem', fontWeight: 'bold' } }} />
-                            </ListItemButton>
-                        </ListItem>
+                    <List subheader={renderSubheader('Rating System')}>
+                        {renderNavItem('Rating system', 'rating-system')}
                     </List>
                 </Box>
             </Drawer>

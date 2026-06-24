@@ -14,6 +14,9 @@ from django.utils import timezone
 
 from knox.models import AuthToken
 from datetime import timedelta
+import secrets
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 
 from .serializers import *
 from .models import *  # Explicitly import models if needed, though * is often discouraged.
@@ -45,6 +48,14 @@ class LoginViewset(viewsets.ViewSet):
             user = authenticate(request, email=email, password=password)
 
             if user:
+                # Verificar inatividade (30 dias)
+                if user.last_login and (timezone.now() - user.last_login) > timedelta(days=30):
+                    user.is_active_pilot = False
+                    user.save()
+
+                if not getattr(user, 'is_active_pilot', True):
+                    return Response({'error': 'INACTIVE_ACCOUNT', 'message': 'Account is inactive.'}, status=403)
+
                 _, token = AuthToken.objects.create(user)
 
                 return Response(
@@ -54,7 +65,7 @@ class LoginViewset(viewsets.ViewSet):
                     }
                 )
             else:
-                return Response({'error': 'Invalid credentia'}, status=401)
+                return Response({'error': 'Invalid credentials'}, status=401)
         
         else:
             return Response(serializer.errors, status=400)
@@ -473,6 +484,61 @@ class ValidateTokenView(APIView):
     def get(self, request):
         # Se o token for válido, o usuário já está autenticado
         return Response({"message": "Token válido"}, status=status.HTTP_200_OK)
+
+class ReactivateAccountView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token = request.data.get('token')
+        if not token:
+            return Response({'error': 'Token is required'}, status=400)
+            
+        try:
+            user = User.objects.get(reactivation_token=token)
+            user.is_active_pilot = True
+            user.reactivation_token = None
+            user.save()
+            return Response({'message': 'Account reactivated successfully'}, status=200)
+        except User.DoesNotExist:
+            return Response({'error': 'Invalid or expired token'}, status=400)
+
+class RequestReactivationEmailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required'}, status=400)
+            
+        try:
+            user = User.objects.get(email=email)
+            if user.is_active_pilot:
+                return Response({'error': 'This user is not inactive.'}, status=400)
+                
+            # Generates token and sends email
+            token = secrets.token_urlsafe(32)
+            user.reactivation_token = token
+            user.save()
+
+            site_link = "http://localhost:5173/"
+            full_link = f"{site_link}reactivate-account?token={token}"
+
+            html_message = f"<p>Hello {user.first_name},</p><p>We received your reactivation request! Click the link below to take the controls again:</p><p><a href='{full_link}'>Reactivate Account</a></p>"
+            plain_message = strip_tags(html_message)
+
+            msg = EmailMultiAlternatives(
+                subject="Account Reactivation - System Infinite World Tour",
+                body=plain_message,
+                from_email="sysinfiniteworldtour@gmail.com",
+                to=[user.email],
+            )
+            msg.attach_alternative(html_message, "text/html")
+            msg.send()
+            
+            return Response({'message': 'Email sent successfully'}, status=200)
+            
+        except User.DoesNotExist:
+            return Response({'error': 'User not found.'}, status=404)
 
 
 def test_email(request):

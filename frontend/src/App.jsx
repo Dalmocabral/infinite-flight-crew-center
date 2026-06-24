@@ -24,7 +24,16 @@ import UserDetail from './pages/UserDetail';
 import Briefing from './pages/briefing';
 import AppManual from './pages/AppManual';
 import WikiLayout from './layouts/WikiLayout';
+import ComingSoon from './pages/wiki/ComingSoon';
+import FaqWiki from './pages/wiki/FaqWiki';
+import WorldToursWiki from './pages/wiki/WorldToursWiki';
 import RatingSystem from './pages/wiki/RatingSystem';
+import PirepsWiki from './pages/wiki/PirepsWiki';
+import LiveMapWiki from './pages/wiki/LiveMapWiki';
+import DashboardWiki from './pages/wiki/DashboardWiki';
+import MembersWiki from './pages/wiki/MembersWiki';
+import ReactivateAccount from './pages/ReactivateAccount';
+import InactiveProfile from './pages/InactiveProfile';
 
 function App() {
   return (
@@ -36,13 +45,24 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/request/passworld_reset" element={<PassworldResetRequest />} />
         <Route path="/password_reset" element={<PasswordResetConfirm />} />
+        <Route path="/reactivate-account" element={<ReactivateAccount />} />
+        <Route path="/inactive-profile" element={<InactiveProfile />} />
         
         {/* Redirect /admin to Django Admin */}
         <Route path="/admin" element={<AdminRedirect />} />
         
         {/* Wiki Layout (Completely detached from dashboard) */}
         <Route path="/wiki" element={<WikiLayout />}>
+            <Route index element={<DashboardWiki />} />
+            <Route path="faq" element={<FaqWiki />} />
+            <Route path="world-tours" element={<WorldToursWiki />} />
             <Route path="rating-system" element={<RatingSystem />} />
+            <Route path="my-flights" element={<PirepsWiki />} />
+            <Route path="live-map" element={<LiveMapWiki />} />
+            <Route path="dashboard" element={<DashboardWiki />} />
+            <Route path="members" element={<MembersWiki />} />
+            {/* Catch-all for other unimplemented pages */}
+            <Route path="*" element={<ComingSoon />} />
         </Route>
         
         {/* Protected Application Routes - Wrapped in Layout */}

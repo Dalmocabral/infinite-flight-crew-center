@@ -38,6 +38,8 @@ class CustomUser(AbstractUser):
     usernameIFC = models.CharField(max_length=200, blank=True, null=True)
     country = models.CharField(max_length=200, blank=True)
     username = models.CharField(max_length=200, null=True, blank=True)
+    is_active_pilot = models.BooleanField(default=True)
+    reactivation_token = models.CharField(max_length=64, null=True, blank=True)
 
     objects = CustomUserManager()
 

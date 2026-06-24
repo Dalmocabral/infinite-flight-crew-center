@@ -191,3 +191,14 @@ class AwardAdmin(admin.ModelAdmin):
 
 # Remove the old registration for Award and PirepsFlight if they exist (Award is handled by decorator, but we'll ensure clean file)
 
+@admin.register(CustomUser)
+class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ('email', 'first_name', 'last_name', 'usernameIFC', 'is_active_pilot', 'last_login')
+    search_fields = ('email', 'first_name', 'last_name', 'usernameIFC')
+    list_filter = ('is_active_pilot', 'is_staff', 'is_superuser')
+    readonly_fields = ('last_login', 'date_joined')
+    fieldsets = (
+        ('Personal Info', {'fields': ('email', 'first_name', 'last_name', 'usernameIFC', 'country')}),
+        ('Permissions', {'fields': ('is_active_pilot', 'is_active', 'is_staff', 'is_superuser')}),
+        ('Important Dates', {'fields': ('last_login', 'date_joined')}),
+    )

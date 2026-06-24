@@ -75,11 +75,16 @@ const Login = () => {
         navigate('/app/dashboard');
       }, 1500);
     } catch (error) {
-      const msg = error.response
-        ? 'Login failed. Please check your credentials.'
-        : 'Server is starting up, please try again in a few seconds...';
-      setSnackbarMessage(msg);
-      setSnackbarSeverity('warning');
+      if (error.response?.data?.error === 'INACTIVE_ACCOUNT') {
+        navigate(`/inactive-profile?email=${encodeURIComponent(data.email)}`);
+        return;
+      } else {
+        const msg = error.response
+          ? 'Login failed. Please check your credentials.'
+          : 'Server is starting up, please try again in a few seconds...';
+        setSnackbarMessage(msg);
+        setSnackbarSeverity('warning');
+      }
       setSnackbarOpen(true);
       setServerStatus('online');
       console.error('Login failed:', error.response ? error.response.data : error.message);

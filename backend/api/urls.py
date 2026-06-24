@@ -28,6 +28,8 @@ urlpatterns = [
     path("flight-stats/", FlightStatsView.as_view(), name="flight-stats"),
     path('api/validate-token/', ValidateTokenView.as_view(), name='validate-token'),
     path('landing-report/', LandingReportView.as_view(), name='landing-report'),
+    path('reactivate-account/', ReactivateAccountView.as_view(), name='reactivate-account'),
+    path('request-reactivation-email/', RequestReactivationEmailView.as_view(), name='request-reactivation-email'),
 ]
 
 # Inclua as rotas do router

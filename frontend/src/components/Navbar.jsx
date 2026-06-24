@@ -49,7 +49,7 @@ const menuItems = [
   { text: 'My World Tour', icon: <PublicIcon />, path: '/app/my-awards' },
   { text: 'Map', icon: <MapIcon />, path: '/app/map' },
   { text: 'App Manual', icon: <PhoneAndroidIcon />, path: '/app/manual' },
-  { text: 'SkyScore Wiki', icon: <MenuBookIcon />, path: '/wiki/rating-system' },
+  { text: 'SkyScore Wiki', icon: <MenuBookIcon />, path: '/wiki/official-guide' },
 ];
 
 const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handleLogout }) => (
