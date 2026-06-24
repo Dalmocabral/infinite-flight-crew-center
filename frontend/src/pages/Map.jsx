@@ -8,6 +8,24 @@ import ApiService from "../components/ApiService";
 import AxiosInstance from "../components/AxiosInstance";
 
 
+const fixAntimeridian = (latlngs) => {
+  if (!latlngs || latlngs.length < 2) return latlngs;
+  const fixed = [[latlngs[0][0], latlngs[0][1]]];
+  for (let i = 1; i < latlngs.length; i++) {
+    let prevLon = fixed[i-1][1];
+    let currLon = latlngs[i][1];
+    let diff = currLon - prevLon;
+    
+    if (diff > 180) {
+      currLon -= 360;
+    } else if (diff < -180) {
+      currLon += 360;
+    }
+    fixed.push([latlngs[i][0], currLon]);
+  }
+  return fixed;
+};
+
 const MapWithFlights = () => {
   const [availableSessions, setAvailableSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState(
@@ -165,7 +183,8 @@ const MapWithFlights = () => {
 
         const route = await ApiService.getRoute(selectedSession, flight.flightId);
         if (route) {
-          const coordinates = route.map((point) => [point.latitude, point.longitude]);
+          let coordinates = route.map((point) => [point.latitude, point.longitude]);
+          coordinates = fixAntimeridian(coordinates);
 
           if (routeLayer.current) {
             routeLayer.current.clearLayers();
@@ -179,14 +198,13 @@ const MapWithFlights = () => {
 
         const flightPlan = await fetchFlightPlan(flight.flightId);
         if (flightPlan) {
-          const polyline = L.polyline(
-            [
-              [flightPlan.origin.lat, flightPlan.origin.lon], 
-              [flight.latitude, flight.longitude], 
-              [flightPlan.destination.lat, flightPlan.destination.lon], 
-            ],
-            { color: "#f50057", weight: 2 } 
-          );
+          let fpCoordinates = [
+            [flightPlan.origin.lat, flightPlan.origin.lon], 
+            [flight.latitude, flight.longitude], 
+            [flightPlan.destination.lat, flightPlan.destination.lon], 
+          ];
+          fpCoordinates = fixAntimeridian(fpCoordinates);
+          const polyline = L.polyline(fpCoordinates, { color: "#f50057", weight: 2 });
           if (polylineLayer.current) {
             polylineLayer.current.clearLayers();
             polyline.addTo(polylineLayer.current);
@@ -298,7 +316,7 @@ const MapWithFlights = () => {
 
          {isIdle && (
             <Typography variant="caption" sx={{ color: 'red', mt: 2, display: 'block' }}>
-              Inativo. Atualizações pausadas. Mexa o mouse para retomar.
+              Inactive. Updates paused. Move the mouse to resume.
             </Typography>
          )}
       </Paper>

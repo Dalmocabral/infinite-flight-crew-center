@@ -134,7 +134,7 @@ const Navbar = () => {
         setUserData(res.data);
       })
       .catch((error) => {
-        console.error('Erro ao buscar os dados do usuário:', error);
+        console.error('Error fetching user data:', error);
       });
   };
 
@@ -211,7 +211,7 @@ const Navbar = () => {
                 <Gravatar
                   email={userData?.email || 'user@example.com'}
                   size={40}
-                  alt={`Imagem de perfil de ${userData?.first_name || 'Usuário'}`}
+                  alt={`Profile image of ${userData?.first_name || 'User'}`}
                   style={{ borderRadius: '50%' }}
                 />
               </IconButton>
@@ -264,7 +264,7 @@ const Navbar = () => {
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={() => navigate('/app/profile/edit')}>
-                  Editar
+                  Edit
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout}>
