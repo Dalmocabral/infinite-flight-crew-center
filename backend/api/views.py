@@ -163,7 +163,7 @@ class DashboardViewSet(viewsets.ViewSet):
         })
     
 class AwardViewSet(viewsets.ModelViewSet):
-    queryset = Award.objects.all()
+    queryset = Award.objects.all().order_by('-id')
     serializer_class = AwardsSerializer
     permission_classes = [permissions.IsAuthenticated]
 

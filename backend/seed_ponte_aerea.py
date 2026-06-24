@@ -1,7 +1,14 @@
 import os
+import sys
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crud.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crud.deployment_settings')
+
+db_url = "postgresql://postgres.tyufrbywqtgqgcelaszd:L%40naLu%40n160491@aws-1-us-east-1.pooler.supabase.com:6543/postgres"
+os.environ['DATABASE_URL'] = db_url
+os.environ['RENDER_EXTERNAL_HOSTNAME'] = 'localhost'
+os.environ['SECRET_KEY'] = 'fake_secret_key_just_for_this_script'
+
 django.setup()
 
 from api.models import Award, FlightLeg, AllowedCategory
@@ -12,12 +19,7 @@ def seed_tour():
     # Informações do Tour
     name = "King of the Bridge SBRJ-SBSP Tour"
     image_url = "https://i.ibb.co/Rk5yYJWC/Gemini-Generated-Image-8778k8778k8778k8.png"
-    description = """<p><strong>A História da Famosa Ponte Aérea Rio-São Paulo</strong></p>
-<p>A Ponte Aérea Rio-São Paulo é uma das rotas comerciais mais movimentadas e famosas do mundo. Inaugurada em 5 de julho de 1959 pelas companhias aéreas Varig, Cruzeiro do Sul e VASP, ela nasceu de uma necessidade de interligar as duas principais metrópoles do Brasil (Rio de Janeiro e São Paulo) com voos regulares, rápidos e sem burocracia. O nome "Ponte Aérea" reflete exatamente o seu propósito: um fluxo contínuo de voos, decolando a cada 30 minutos ou 1 hora, conectando os icônicos aeroportos Santos Dumont (SBRJ) e Congonhas (SBSP).</p>
-<p>No início, os lendários Lockheed Constellation, Convair 340 e Scandia faziam o trajeto, mas foi o icônico <strong>Lockheed L-188 Electra II</strong> que dominou a Ponte Aérea por quase 30 anos, tornando-se o símbolo desta rota graças à sua segurança, conforto e confiabilidade, mesmo em dias de tempo ruim nas pistas curtas de ambos os aeroportos.</p>
-<p>Hoje, a rota é operada por jatos modernos como os Boeing 737, Airbus A320, Embraer E-Jets e também turboélices avançados como os ATRs. A ponte aérea continua sendo vital para a economia e a cultura brasileira, transportando milhões de passageiros todos os anos num trajeto de apenas 45 a 55 minutos de voo.</p>
-<p>Neste World Tour, <strong>você será testado em 7 pernas desafiadoras</strong>, alternando entre as aproximações curtas e deslumbrantes de Congonhas no meio dos prédios e de Santos Dumont com a vista da Baía de Guanabara e do Pão de Açúcar!</p>
-"""
+    description = "The Rio-São Paulo Air Bridge is one of the most famous flight routes in Brazil. Inaugurated in 1959, it connects Santos Dumont (SBRJ) and Congonhas (SBSP) airports with fast, continuous flights. Historically operated by the legendary Electra, today it is dominated by modern narrow-body jets and advanced turboprops. In this tour, face 7 challenging legs alternating between the beautiful, short approaches in Rio and the stunning urban scenery of São Paulo!"
 
     award, created = Award.objects.get_or_create(
         name=name,
