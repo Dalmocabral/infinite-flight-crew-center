@@ -23,7 +23,7 @@ const RatingSystem = () => {
                 Flight Rating System
             </Typography>
             <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
-                SkyScore includes an advanced auto-rating system covering all telemetry phases of the flight. On this page, we discuss how each flight phase is rated, possible penalties, and how to avoid them.
+                System Infinite World Tour includes an advanced auto-rating system covering all telemetry phases of the flight. On this page, we discuss how each flight phase is rated, possible penalties, and how to avoid them.
             </Typography>
 
             <Divider sx={{ mb: 4 }} />

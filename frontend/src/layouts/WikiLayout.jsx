@@ -67,7 +67,7 @@ const WikiLayout = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
                         <FlightTakeoffIcon sx={{ color: '#4dabf5', mr: 1 }} />
                         <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
-                            SkyScore Wiki
+                            Wiki World Tour
                         </Typography>
                     </Box>
                     

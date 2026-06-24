@@ -21,7 +21,7 @@ const FaqWiki = () => {
         },
         {
             id: 'simuladores',
-            question: 'Which simulators does SkyScore support?',
+            question: 'Which simulators does System Infinite World Tour support?',
             answer: 'Currently, our system and our Co-Pilot app are developed exclusively for Infinite Flight.'
         },
         {
