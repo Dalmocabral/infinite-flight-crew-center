@@ -24,7 +24,14 @@ const Home = () => {
   // Refs to DOM elements
   const planeElementsRef = useRef([]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
+    // If token exists, redirect to dashboard
+    if (localStorage.getItem('Token')) {
+      navigate('/app/dashboard');
+    }
+
     AxiosInstance.get("/flight-stats/")
       .then((response) => {
         console.log("Flight Stats Data:", response.data);

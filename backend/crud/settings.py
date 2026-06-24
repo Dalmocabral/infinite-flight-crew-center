@@ -148,6 +148,10 @@ EMAIL_HOST_USER = "sysinfiniteworldtour@gmail.com"
 EMAIL_HOST_PASSWORD = "niue xgss ojke gwrk"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+from datetime import timedelta
+REST_KNOX = {
+    'TOKEN_TTL': timedelta(days=10),
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

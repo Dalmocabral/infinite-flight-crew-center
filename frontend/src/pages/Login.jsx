@@ -29,6 +29,11 @@ const Login = () => {
 
   // Ping the server when the login page loads to wake up Render
   useEffect(() => {
+    // If token exists, redirect to dashboard
+    if (localStorage.getItem('Token')) {
+      navigate('/app/dashboard');
+    }
+
     const wakeServer = async () => {
       try {
         await AxiosInstance.get('flight-stats/');
@@ -39,7 +44,7 @@ const Login = () => {
       }
     };
     wakeServer();
-  }, []);
+  }, [navigate]);
 
   const {
     control,
