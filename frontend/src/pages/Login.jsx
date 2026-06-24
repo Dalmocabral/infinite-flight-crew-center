@@ -12,11 +12,12 @@ import {
     Snackbar,
     TextField,
     Typography,
+    Link,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -258,10 +259,10 @@ const Login = () => {
                 </motion.div>
 
                 <Box sx={{ textAlign: 'center', mt: 2 }}>
-                  <Link href="/register" variant="body2" sx={{ display: 'block', mb: 1, color: '#4dabf5', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                  <Link component={RouterLink} to="/register" variant="body2" sx={{ display: 'block', mb: 1, color: '#4dabf5', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                     Request Clearance (Sign Up)
                   </Link>
-                  <Link href="/request/passworld_reset" variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}>
+                  <Link component={RouterLink} to="/request/passworld_reset" variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', '&:hover': { color: '#fff' } }}>
                     Lost Comms? (Reset Password)
                   </Link>
                 </Box>

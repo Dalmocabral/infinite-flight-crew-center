@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 
 const PasswordResetRequest = () => {
@@ -148,7 +148,7 @@ const PasswordResetRequest = () => {
                 </motion.div>
 
                 <Box sx={{ textAlign: 'center', mt: 2 }}>
-                  <Link href="/login" variant="body2" sx={{ color: '#4dabf5', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
+                  <Link component={RouterLink} to="/login" variant="body2" sx={{ color: '#4dabf5', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>
                     Back to Login
                   </Link>
                 </Box>
