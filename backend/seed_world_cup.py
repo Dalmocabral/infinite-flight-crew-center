@@ -22,7 +22,7 @@ def seed_world_cup_tour():
     image_url = "https://i.ibb.co/qVt4rdX/Gemini-Generated-Image-l42bj0l42bj0l42b.png"
     
     # Description in English
-    description = "Celebrate the greatest football tournament on Earth! The 2026 World Cup unites the globe in a spectacular display of passion and skill. In this epic 15-leg intercontinental journey, you will fly across the world, connecting major participating nations and legendary former champions. Starting in Los Angeles, you'll cross the Pacific to Asia and Oceania, head over to the Middle East and Africa, soar through Europe's football capitals, and sweep down to South America before heading back north. Your ultimate destination is Newark, New Jersey—the very stadium where the grand final will take place. Fire up your long-haul jets and let the games begin!"
+    description = "Celebrate the greatest football tournament on Earth! The 2026 World Cup unites the globe in a spectacular display of passion and skill. In this epic 48-leg intercontinental journey, you will fly across the world, connecting all major participating nations and legendary former champions. Starting in Los Angeles, you'll cross the Pacific to Asia and Oceania, head over to the Middle East and Africa, soar through Europe's football capitals, and sweep down to South America before heading back north. Your ultimate destination is Newark, New Jersey—the very stadium where the grand final will take place. Fire up your long-haul jets and let the games begin!"
 
     award, created = Award.objects.get_or_create(
         name=name,
