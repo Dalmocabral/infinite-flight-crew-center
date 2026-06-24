@@ -22,6 +22,9 @@ import ProfileEdit from './pages/ProfileEdit';
 import Register from './pages/Register';
 import UserDetail from './pages/UserDetail';
 import Briefing from './pages/briefing';
+import AppManual from './pages/AppManual';
+import WikiLayout from './layouts/WikiLayout';
+import RatingSystem from './pages/wiki/RatingSystem';
 
 function App() {
   return (
@@ -37,6 +40,11 @@ function App() {
         {/* Redirect /admin to Django Admin */}
         <Route path="/admin" element={<AdminRedirect />} />
         
+        {/* Wiki Layout (Completely detached from dashboard) */}
+        <Route path="/wiki" element={<WikiLayout />}>
+            <Route path="rating-system" element={<RatingSystem />} />
+        </Route>
+        
         {/* Protected Application Routes - Wrapped in Layout */}
         <Route path="/app" element={<Layout />}>
           <Route element={<ProtectedRoutes />}>
@@ -45,6 +53,7 @@ function App() {
             <Route path="my-flights" element={<MyFlights />} />
             <Route path="my-awards" element={<MyAwards />} />
             <Route path="map" element={<Map />} />
+            <Route path="manual" element={<AppManual />} />
             <Route path="members" element={<Members />} />
             <Route path="pirepsflights" element={<PirepsFlights />} />
             <Route path="edit-pirep/:id" element={<EditPirep />} />

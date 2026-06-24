@@ -16,6 +16,10 @@ export class FlightTracker {
     this.telemetry_log = [];
     this.last_telemetry_time = 0;
     
+    this.flight_path = [];
+    this.fuel_history = [];
+    this.last_path_record_time = 0;
+    
     this.has_passed_10k = false;
     this.prev_alt = 0.0;
     this.climb_10k_grace_start = 0.0;
@@ -131,6 +135,24 @@ export class FlightTracker {
         gs: Math.round(state.gs)
       });
       this.last_telemetry_time = now;
+    }
+
+    // Path and Fuel Logging (every 10 seconds)
+    if (this.status !== "FINISHED" && (now - this.last_path_record_time) >= 10000) {
+      if (state.fuel_weight > 0) {
+        this.fuel_history.push([now / 1000, state.fuel_weight]);
+        this.fuel_history = this.fuel_history.filter(x => (now / 1000) - x[0] <= 300);
+      }
+      if (!state.is_grounded && Math.abs(state.lat) > 0.001 && Math.abs(state.lon) > 0.001) {
+        const rounded_lat = parseFloat(state.lat.toFixed(6));
+        const rounded_lon = parseFloat(state.lon.toFixed(6));
+        if (this.flight_path.length === 0 || 
+            this.flight_path[this.flight_path.length - 1][0] !== rounded_lat || 
+            this.flight_path[this.flight_path.length - 1][1] !== rounded_lon) {
+          this.flight_path.push([rounded_lat, rounded_lon]);
+        }
+      }
+      this.last_path_record_time = now;
     }
 
     this.checkPhases(state);
@@ -409,10 +431,12 @@ export class FlightTracker {
       ias_violations: this.ias_violation_count,
       unstable_approaches: this.unstable_appr_count,
       distance_from_1kft: parseFloat((this.last_report.distance_from_1kft || 0).toFixed(2)),
+      centerline_dev: parseFloat((this.last_report.centerline || 0).toFixed(2)),
       has_retractable_gear: this.has_retractable_gear || false,
       gear_retraction_time: parseFloat((this.gear_retraction_time_sec || 0).toFixed(1)),
       deductions: deductions,
-      telemetry_log: this.telemetry_log
+      telemetry_log: this.telemetry_log,
+      flight_path: this.flight_path
     };
     
     console.log('[FLIGHT TRACKER] Finalizing Flight. Payload:', JSON.stringify(payload));

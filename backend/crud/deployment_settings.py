@@ -6,7 +6,10 @@ from .settings import BASE_DIR
 
 ALLOWED_HOSTS = [os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
 
-CSRF_TRUSTED_ORIGINS = ['https://' + os.environ.get('RENDER_EXTERNAL_HOSTNAME')]
+CSRF_TRUSTED_ORIGINS = [
+    'https://' + str(os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')),
+    'https://infinite-flight-crew-center.vercel.app'
+]
 
 DEBUG = False
 SECRET_KEY = os.environ.get('SECRET_KEY')
@@ -26,6 +29,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    'https://infinite-flight-crew-center.vercel.app',
     'https://render-deploy-world-tour.onrender.com'
 ]
 

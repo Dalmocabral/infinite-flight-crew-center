@@ -8,7 +8,9 @@ import {
     Logout as LogoutIcon,
     Map as MapIcon,
     Menu as MenuIcon,
-    Public as PublicIcon
+    Public as PublicIcon,
+    PhoneAndroid as PhoneAndroidIcon,
+    MenuBook as MenuBookIcon
 } from '@mui/icons-material';
 import {
     AppBar,
@@ -46,6 +48,8 @@ const menuItems = [
   { text: 'My Flights', icon: <FlightsIcon />, path: '/app/my-flights' },
   { text: 'My World Tour', icon: <PublicIcon />, path: '/app/my-awards' },
   { text: 'Map', icon: <MapIcon />, path: '/app/map' },
+  { text: 'App Manual', icon: <PhoneAndroidIcon />, path: '/app/manual' },
+  { text: 'SkyScore Wiki', icon: <MenuBookIcon />, path: '/wiki/rating-system' },
 ];
 
 const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handleLogout }) => (

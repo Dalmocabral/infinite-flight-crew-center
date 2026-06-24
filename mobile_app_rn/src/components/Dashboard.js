@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, DeviceEventEmitter
 import * as Speech from 'expo-speech';
 import * as Notifications from 'expo-notifications';
 import { startBackgroundFlight, stopBackgroundFlight } from '../utils/BackgroundTask';
+import dgram from 'react-native-udp';
 
 export default function Dashboard({ session, onLogout }) {
   const [isConnected, setIsConnected] = useState(false);
@@ -15,6 +16,23 @@ export default function Dashboard({ session, onLogout }) {
 
   useEffect(() => {
     Notifications.requestPermissionsAsync().catch(() => {});
+    
+    // UDP Auto-discovery
+    let socket;
+    try {
+      socket = dgram.createSocket('udp4');
+      socket.bind(15000);
+      socket.once('listening', function() {
+        console.log('[UDP] Escutando porta 15000 (Buscando Simulador)...');
+      });
+      socket.on('message', function(msg, rinfo) {
+        if (rinfo && rinfo.address) {
+          setIpAddress(rinfo.address);
+        }
+      });
+    } catch (e) {
+      console.warn('Erro ao configurar UDP:', e);
+    }
     
     const sub = DeviceEventEmitter.addListener('TELEMETRY_UPDATE', (data) => {
       setTelemetry(data);
@@ -33,6 +51,7 @@ export default function Dashboard({ session, onLogout }) {
       subStatus.remove();
       subFinish.remove();
       if (timerRef.current) clearInterval(timerRef.current);
+      if (socket) socket.close();
     };
   }, []);
 
