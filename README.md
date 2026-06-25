@@ -1,100 +1,151 @@
-# Infinite Flight Crew Center
+<div align="center">
+  <img src="https://i.ibb.co/qVt4rdX/Gemini-Generated-Image-l42bj0l42bj0l42b.png" alt="Infinite Flight Crew Center Banner" width="100%">
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![Material-UI](https://img.shields.io/badge/Material--UI-007FFF?style=for-the-badge&logo=mui&logoColor=white)
+  # 🌍 System Infinite World Tour
+  **A experiência definitiva para pilotos virtuais do Infinite Flight**
+
+  [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![Django](https://img.shields.io/badge/Django-DRF-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+  [![React](https://img.shields.io/badge/React-Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+  [![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+  [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://worldtourinfinte.vercel.app/)
+
+  ---
+
+  ### 🛫 [Explore o Sistema Ao Vivo Aqui!](https://worldtourinfinte.vercel.app/) 🛬
+  *Entre, cadastre-se e veja a magia acontecer.*
+</div>
+
+---
 
 ## 🚀 Sobre o Projeto
 
-O **Infinite Flight Crew Center** é um sistema completo desenvolvido para entusiastas do simulador de voo mobile *Infinite Flight*. Este projeto full-stack, construído com **Django** no backend e **React** no frontend, oferece uma plataforma robusta para gerenciar voos virtuais, acompanhar o progresso dos pilotos e promover a interação da comunidade. Ele foi concebido como um projeto educacional para aprimorar habilidades em desenvolvimento web full-stack, integrando tecnologias modernas e práticas de desenvolvimento.
+O **System Infinite World Tour** (anteriormente conhecido como Infinite Flight Crew Center) é uma plataforma de aviação virtual de ponta, projetada especificamente para revolucionar a forma como as *Virtual Airlines (VAs)* e pilotos operam dentro do **Infinite Flight**.
 
-## ✨ Funcionalidades
+Nós unimos a paixão pela simulação de voo à engenharia de software avançada. Através de um *Tracker* no dispositivo mobile, capturamos a telemetria do piloto em tempo real, enviamos para uma API construída em **Django REST Framework** e exibimos os resultados num painel incrivelmente rico construído em **React**.
 
-O sistema oferece uma gama de funcionalidades projetadas para enriquecer a experiência de voo virtual (VAs):
+Se você gosta de aviação, desafios globais (como o épico World Cup Tour de 48 pernas) e rastreamento hiper-realista, você está no lugar certo!
 
-*   **Rastreamento de Voos (PIREPs)** ✈️: Permite aos usuários registrar e gerenciar seus voos manuais e automáticos, mantendo um histórico detalhado do Logbook.
-*   **Infinite World Tours (Awards)** 🌍: Sistema robusto de criação de Tours/Prêmios com múltiplas pernas (legs). O sistema checa automaticamente se o voo do piloto bate com as regras do Tour (Origem, Destino, CIA Aérea/ICAO e Categoria da Aeronave).
-*   **Validação de Aeronaves Dinâmica** 🛫: Sincronização direta com a API do Infinite Flight. As restrições de aeronaves nos Tours podem ser feitas por modelo exato (Ex: Boeing 737-800) ou por Categoria Global (GA, Bizjet, M, L, XL, Cargo, Military).
-*   **Painel de Progresso de Pilotos** 📊: Inspirado nas melhores plataformas de tracker (como o Newsky), um dashboard visual dinâmico que rastreia perna-a-perna o progresso dos pilotos inscritos nos Tours, com *tooltips* detalhados de data e hora.
-*   **Sistema Interativo de Briefing** 🗺️: Prepare-se para seus voos com briefings detalhados em mapas interativos (MapTiler/Leaflet), desenhando rotas de origem ao destino e informando notas de despacho.
-*   **Autenticação de Usuários** 🔒: Implementa um sistema de login seguro com autenticação JWT (JSON Web Token), garantindo a privacidade e a segurança dos dados dos usuários.
+---
 
-## 🛠️ Tecnologias Utilizadas
+## 🧠 Arquitetura do Sistema
 
-Este projeto demonstra proficiência em uma variedade de tecnologias modernas de desenvolvimento web:
+O projeto é dividido em um ecossistema full-stack resiliente e escalável. Abaixo está o **Fluxograma de Arquitetura** que ilustra como cada parte do sistema conversa entre si:
 
-### Backend (Django & Django REST Framework)
+```mermaid
+graph TD
+    %% Cores e Estilos
+    classDef frontend fill:#61DAFB,stroke:#fff,stroke-width:2px,color:#000;
+    classDef backend fill:#092E20,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef mobile fill:#00b4e6,stroke:#fff,stroke-width:2px,color:#000;
+    classDef db fill:#3ECF8E,stroke:#fff,stroke-width:2px,color:#000;
+    classDef external fill:#FF9900,stroke:#fff,stroke-width:2px,color:#000;
 
-*   **Python**: Linguagem de programação principal.
-*   **Django**: Framework web de alto nível para desenvolvimento rápido e seguro.
-*   **Django REST Framework**: Toolkit poderoso para construir APIs web flexíveis.
-*   **SQLite / PostgreSQL**: Banco de dados utilizado para armazenamento de informações de voos, usuários e conquistas.
-*   **JWT Authentication**: Padrão para autenticação segura de usuários.
+    subgraph "A Interface de Bordo (Client-Side)"
+        WEB[("🌐 Web App (React / Vite)")]:::frontend
+        MOBILE[("📱 Juiz Virtual (React Native)")]:::mobile
+    end
 
-### Frontend (React & Material-UI)
+    subgraph "A Torre de Controle (Server-Side)"
+        API[("⚙️ API Rest (Django DRF)")]:::backend
+        AUTH[("🔐 Autenticação (Knox JWT)")]:::backend
+    end
 
-*   **JavaScript**: Linguagem de programação principal para o desenvolvimento da interface.
-*   **React**: Biblioteca JavaScript para construção de interfaces de usuário interativas e reativas.
-*   **Material-UI**: Biblioteca de componentes React que implementa o Material Design do Google, garantindo uma interface moderna e responsiva.
-*   **Axios**: Cliente HTTP baseado em Promises para fazer requisições a APIs, facilitando a comunicação com o backend.
+    subgraph "Armazenamento & Nuvem"
+        DB[("🗄️ PostgreSQL (Supabase)")]:::db
+    end
 
-## ⚙️ Instalação e Configuração
+    subgraph "APIs Externas"
+        IF_API[("🛫 Infinite Flight API")]:::external
+    end
 
-Para configurar e executar o projeto localmente, siga os passos abaixo:
+    %% Relações
+    MOBILE -- "Envia Telemetria (PIREPs)" --> API
+    MOBILE -- "Busca Dados ao Vivo" --> IF_API
+    WEB -- "Solicita Tours, Logs e Ranking" --> API
+    API <--> AUTH
+    API <--> DB
+    API -- "Valida Aeronaves" --> IF_API
+```
 
-### 1️⃣ Configuração do Backend (Django)
+---
 
+## 🧩 O Sistema Parte a Parte
+
+Para garantir escalabilidade, segurança e uma UI/UX impressionante, nós dividimos as responsabilidades tecnológicas:
+
+### 1️⃣ A Interface de Bordo (Frontend)
+Construído com **React** e impulsionado pelo **Vite** para máxima velocidade.
+- **Material-UI (MUI)**: Fornece um design system limpo, responsivo e temático (Light/Dark mode) focado na aviação.
+- **Painel Dinâmico**: Os pilotos têm acesso imediato ao seu Logbook, progresso nas pernas do Tour e estatísticas de voo.
+- **Mapas Interativos**: Integração visual para despachos e rotas de voo.
+
+### 2️⃣ A Torre de Controle (Backend)
+Desenvolvido em **Python** usando **Django & Django REST Framework**.
+- **Validação de Tours Lógica**: O sistema possui algoritmos inteligentes que checam aeroportos de partida, destino, companhias aéreas e a categoria de restrição das aeronaves para garantir que o piloto não trapaceie.
+- **Gerenciador de Inatividade**: Rotinas automáticas gerenciam usuários inativos e em reserva, com tokens de reativação via e-mail.
+- **Autenticação**: Sessões persistentes e seguras garantidas pela biblioteca JWT Knox.
+
+### 3️⃣ O "Juiz Virtual" (Mobile App / Tracker)
+Uma aplicação silenciosa (React Native) que roda no dispositivo do piloto em background enquanto ele voa no Infinite Flight.
+- **Rastreamento de Telemetria**: Coleta em tempo real Força G no pouso, Desvio da Linha Central, Vertical Speed (VS) e muito mais.
+- O Juiz Virtual é implacável! Ele pontua a estabilidade da sua aproximação e envia os *PIREPs* diretamente para o Backend.
+
+### 4️⃣ O Banco de Dados na Nuvem (PostgreSQL)
+- Tudo fica armazenado e protegido na poderosa infraestrutura do **Supabase**, garantindo que seus logs de voo nunca se percam na nuvem.
+
+---
+
+## ⚙️ Como Rodar Localmente (Desenvolvimento)
+
+Quer contribuir ou dar uma olhada no código? Siga as instruções:
+
+### 1. Backend (Django)
 ```bash
 # Clone o repositório
-git clone https://github.com/Dalmocabral/crew_center_djnago_react.git
-cd crew_center_djnago_react/backend
+git clone https://github.com/Dalmocabral/infinite-flight-crew-center.git
+cd infinite-flight-crew-center/backend
 
 # Crie e ative um ambiente virtual
 python -m venv venv
-source venv/bin/activate  # No Windows: .\venv\Scripts\activate
+# No Windows: .\venv\Scripts\activate
+# No Mac/Linux: source venv/bin/activate
 
 # Instale as dependências
 pip install -r requirements.txt
 
-# Execute as migrações do banco de dados
+# Faça as migrações (Criação das tabelas)
 python manage.py migrate
 
-# Inicie o servidor Django
+# Inicie o servidor
 python manage.py runserver
 ```
 
-### 2️⃣ Configuração do Frontend (React)
-
+### 2. Frontend (React)
 ```bash
-cd ../frontend
+# Em um novo terminal, abra a pasta do frontend
+cd infinite-flight-crew-center/frontend
 
-# Instale as dependências
-yarn install  # ou npm install
+# Instale os pacotes Node
+npm install
 
-# Inicie o servidor de desenvolvimento do React
-yarn start  # ou npm start
+# Suba a interface do usuário
+npm run dev
 ```
-
-## 📜 Exemplos de Endpoints da API
-
-Alguns exemplos de endpoints disponíveis na API:
-
-*   `GET /api/flights/`: Recupera todos os voos registrados.
-*   `POST /api/flights/`: Envia um novo registro de voo.
-*   `GET /api/awards/`: Lista todas as conquistas disponíveis.
-*   `POST /api/token/`: Obtém um token JWT para autenticação.
-*   `POST /api/token/refresh/`: Renova um token JWT expirado.
-
-## 📌 Melhorias Futuras
-
-O projeto está em constante evolução, e as seguintes melhorias estão planejadas:
-
-*   Integração com dados de voo em tempo real para maior precisão e dinamismo.
-*   Desenvolvimento de um painel de controle (dashboard) com análises e estatísticas avançadas para pilotos.
-*   Implementação de eventos multiplayer e desafios comunitários para fortalecer a interação entre os usuários.
-
-## 📧 Contato
-
-Para dúvidas, sugestões ou colaborações, sinta-se à vontade para entrar em contato através do meu perfil no GitHub ou outras redes sociais. Estou sempre aberto a novas ideias e aprendizados!
+*(O frontend geralmente roda em `http://localhost:5173`)*
 
 ---
 
-*Desenvolvido com paixão por Dalmo dos Santos Cabral.*
+## 🌟 Convite à Comunidade
+
+Este projeto foi construído **de pilotos para pilotos**. Se você achou as soluções de engenharia interessantes, dê uma **Estrela (⭐)** no nosso repositório! 
+
+Você está convidado a abrir _Issues_, sugerir melhorias na lógica do Tracker ou até submeter *Pull Requests* de novos Tours.
+
+**Quer ver tudo isso em ação?**  
+🔗 [Clique aqui e acesse o nosso painel oficial!](https://worldtourinfinte.vercel.app/)
+
+---
+<div align="center">
+  <i>Desenvolvido com ☕, código e querosene de aviação. Bons voos!</i>
+</div>
