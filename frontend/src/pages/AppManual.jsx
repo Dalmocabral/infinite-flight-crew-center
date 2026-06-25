@@ -17,7 +17,7 @@ const AppManual = () => {
           Bem-vindo ao manual do **System Infinite World Tour**, nosso aplicativo oficial focado em analisar e avaliar a qualidade do seu voo em simuladores para dispositivos móveis.
         </Typography>
         <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
-          A principal função do System Infinite World Tour é atuar como um "Juiz Virtual", fornecendo uma **Taxa de Pontuação de Pouso** rigorosa. Ele funciona em segundo plano no seu celular ou tablet enquanto você voa, avaliando silenciosamente sua telemetria — como a força G no toque na pista, o desvio da linha central, a estabilidade na aproximação final e sua velocidade vertical (VS).
+          A principal função do System Infinite World Tour é atuar como um "WorldTour Co-Pilot", fornecendo uma **Taxa de Pontuação de Pouso** rigorosa. Ele funciona em segundo plano no seu celular ou tablet enquanto você voa, avaliando silenciosamente sua telemetria — como a força G no toque na pista, o desvio da linha central, a estabilidade na aproximação final e sua velocidade vertical (VS).
         </Typography>
         
         <Divider sx={{ my: 3 }} />

@@ -43,7 +43,7 @@ graph TD
 
     subgraph "A Interface de Bordo (Client-Side)"
         WEB[("🌐 Web App (React / Vite)")]:::frontend
-        MOBILE[("📱 Juiz Virtual (React Native)")]:::mobile
+        MOBILE[("📱 WorldTour Co-Pilot (React Native)")]:::mobile
     end
 
     subgraph "A Torre de Controle (Server-Side)"
@@ -86,10 +86,10 @@ Desenvolvido em **Python** usando **Django & Django REST Framework**.
 - **Gerenciador de Inatividade**: Rotinas automáticas gerenciam usuários inativos e em reserva, com tokens de reativação via e-mail.
 - **Autenticação**: Sessões persistentes e seguras garantidas pela biblioteca JWT Knox.
 
-### 3️⃣ O "Juiz Virtual" (Mobile App / Tracker)
+### 3️⃣ O "WorldTour Co-Pilot" (Mobile App / Tracker)
 Uma aplicação silenciosa (React Native) que roda no dispositivo do piloto em background enquanto ele voa no Infinite Flight.
 - **Rastreamento de Telemetria**: Coleta em tempo real Força G no pouso, Desvio da Linha Central, Vertical Speed (VS) e muito mais.
-- O Juiz Virtual é implacável! Ele pontua a estabilidade da sua aproximação e envia os *PIREPs* diretamente para o Backend.
+- O WorldTour Co-Pilot é implacável! Ele pontua a estabilidade da sua aproximação e envia os *PIREPs* diretamente para o Backend.
 
 ### 4️⃣ O Banco de Dados na Nuvem (PostgreSQL)
 - Tudo fica armazenado e protegido na poderosa infraestrutura do **Supabase**, garantindo que seus logs de voo nunca se percam na nuvem.

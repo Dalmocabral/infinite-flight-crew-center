@@ -338,7 +338,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification = self.get_object()
         notification.is_read = True
         notification.save()
-        return Response({"status": "Notificação marcada como lida"}, status=status.HTTP_200_OK)
+        return Response({"status": "Notification marked as read"}, status=status.HTTP_200_OK)
     
 class UserDetailViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]  # Apenas usuários autenticados podem acessar
@@ -349,7 +349,7 @@ class UserDetailViewSet(viewsets.ViewSet):
             serializer = UserSerializer(user)  # Serializa os dados do usuário
             return Response(serializer.data, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
-            return Response({"error": "Usuário não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
         
 class UserMetricsViewSet(ViewSet):
     def retrieve(self, request, pk=None):
@@ -483,7 +483,7 @@ class ValidateTokenView(APIView):
 
     def get(self, request):
         # Se o token for válido, o usuário já está autenticado
-        return Response({"message": "Token válido"}, status=status.HTTP_200_OK)
+        return Response({"message": "Valid token"}, status=status.HTTP_200_OK)
 
 class ReactivateAccountView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -546,7 +546,7 @@ class RequestReactivationEmailView(APIView):
 
 def test_email(request):
     send_welcome_email("destinatario@email.com")
-    return HttpResponse("E-mail enviado com sucesso!")
+    return HttpResponse("Email sent successfully!")
 
 
 # ── LANDING REPORT (Co-Piloto Virtual) ───────────────────────────────────────
