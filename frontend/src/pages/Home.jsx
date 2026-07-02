@@ -111,7 +111,7 @@ const Home = () => {
     };
   }, []);
 
-  const navigate = useNavigate();
+
   const isAuthenticated = localStorage.getItem("token"); // Verifica se o usuário está logado
 
   const handleLoginClick = (e) => {
