@@ -14,10 +14,10 @@ const AppManual = () => {
           What is the App for?
         </Typography>
         <Typography variant="body1" paragraph color="text.secondary">
-          Bem-vindo ao manual do **System Infinite World Tour**, nosso aplicativo oficial focado em analisar e avaliar a qualidade do seu voo em simuladores para dispositivos móveis.
+          Welcome to the **System Infinite World Tour** manual, our official application focused on analyzing and evaluating the quality of your flight in mobile simulators.
         </Typography>
         <Typography variant="body1" paragraph sx={{ lineHeight: 1.8, fontSize: '1.1rem' }}>
-          A principal função do System Infinite World Tour é atuar como um "WorldTour Co-Pilot", fornecendo uma **Taxa de Pontuação de Pouso** rigorosa. Ele funciona em segundo plano no seu celular ou tablet enquanto você voa, avaliando silenciosamente sua telemetria — como a força G no toque na pista, o desvio da linha central, a estabilidade na aproximação final e sua velocidade vertical (VS).
+          The main function of System Infinite World Tour is to act as a "WorldTour Co-Pilot", providing a strict **Landing Score Rate**. It runs in the background on your phone or tablet while you fly, silently evaluating your telemetry — such as G-force at touchdown, centerline deviation, stability on final approach, and your vertical speed (VS).
         </Typography>
         
         <Divider sx={{ my: 3 }} />
