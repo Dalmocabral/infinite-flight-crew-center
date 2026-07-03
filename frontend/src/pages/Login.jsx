@@ -27,6 +27,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [serverStatus, setServerStatus] = useState('checking'); // 'checking' | 'online' | 'waking'
 
+  const navigate = useNavigate();
+
   // Ping the server when the login page loads to wake up Render
   useEffect(() => {
     // If token exists, redirect to dashboard
@@ -57,7 +59,6 @@ const Login = () => {
     },
   });
 
-  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     setIsLoading(true);
