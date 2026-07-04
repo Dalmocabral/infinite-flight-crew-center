@@ -50,9 +50,9 @@ def notify_pilot_on_status_change(sender, instance, **kwargs):
     message = None  # Inicializa a variável para evitar erro
 
     if instance.status == "Approved":
-        message = f"🥳🎉🛬 Seu voo {instance.flight_icao} {instance.flight_number} foi aprovado!"
+        message = f"🥳🎉🛬 Your flight {instance.flight_icao} {instance.flight_number} has been approved!"
     elif instance.status == "Rejected":
-        message = f"❌ Seu voo {instance.flight_icao} {instance.flight_number} foi rejeitado."
+        message = f"❌ Your flight {instance.flight_icao} {instance.flight_number} has been rejected."
 
     if message:  # Apenas cria notificação se 'message' foi definido
         if not Notification.objects.filter(recipient=instance.pilot, message=message).exists():
@@ -66,7 +66,7 @@ def notify_all_users_on_award_creation(sender, instance, **kwargs):
     users = User.objects.all()  # Pega todos os usuários do sistema
 
     for user in users:
-        message = f"🏆 Um novo World Tour foi criado: '{instance.name}'!"
+        message = f"🏆 A new World Tour has been created: '{instance.name}'!"
 
         # Evita criar notificações duplicadas do mesmo Award para o mesmo usuário
         if not Notification.objects.filter(recipient=user, message=message).exists():
