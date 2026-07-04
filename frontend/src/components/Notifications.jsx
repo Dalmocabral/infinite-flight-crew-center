@@ -75,7 +75,7 @@ const Notifications = () => {
         }}
       >
         {notifications.length === 0 ? (
-          <MenuItem>Sem notificações</MenuItem>
+          <MenuItem>No notifications</MenuItem>
         ) : (
           notifications.map((notif, index) => (
             <Box key={notif.id}>
