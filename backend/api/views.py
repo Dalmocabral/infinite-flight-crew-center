@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 
 from django.contrib.auth import get_user_model, authenticate
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Avg
 from django.http import HttpResponse
 from django.utils import timezone
 
