@@ -424,8 +424,8 @@ const Dashboard = () => {
             </Box>
             <CardContent>
               <Typography variant="subtitle2" color="textSecondary">AVERAGE RATING</Typography>
-              <Typography variant="h5" sx={{ fontWeight: 'bold', color: (averageRating !== null && averageRating >= 8.0) ? "#00e676" : (averageRating !== null && averageRating >= 6.0) ? "#ffeb3b" : "#f44336" }}>
-                {averageRating !== null ? Number(averageRating).toFixed(2).replace('.', ',') : "N/A"}
+              <Typography variant="h5" sx={{ fontWeight: 'bold', color: (averageRating != null && averageRating >= 8.0) ? "#00e676" : (averageRating != null && averageRating >= 6.0) ? "#ffeb3b" : "#f44336" }}>
+                {averageRating != null ? Number(averageRating).toFixed(2).replace('.', ',') : "N/A"}
               </Typography>
             </CardContent>
           </Card>
