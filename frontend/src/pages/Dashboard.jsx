@@ -119,11 +119,13 @@ const Dashboard = () => {
   const [flights, setFlights] = useState([]); // State for flights data
   const [topDuration, setTopDuration] = useState([]); // State for top duration rankings
   const [topFlights, setTopFlights] = useState([]); // State for top flights rankings
+  const [topRatings, setTopRatings] = useState([]); // State for top ratings
   const [openDialog, setOpenDialog] = useState(false); // State for delete confirmation dialog
   const [selectedFlightId, setSelectedFlightId] = useState(null); // State for selected flight ID
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" }); // State for table sorting
   const [ifStats, setIfStats] = useState(null);
   const [ifUsername, setIfUsername] = useState(null);
+  const [averageRating, setAverageRating] = useState(null);
   const [airportsData, setAirportsData] = useState({});
   const [logoData, setLogoData] = useState([]);
   const navigate = useNavigate();
@@ -162,6 +164,7 @@ const Dashboard = () => {
     try {
       const userRes = await AxiosInstance.get('/users/me/');
       const username = userRes.data.usernameIFC;
+      setAverageRating(userRes.data.average_landing_score);
       if (username) {
         setIfUsername(username);
         const stats = await ApiService.userStatusByUsername(username);
@@ -191,10 +194,11 @@ const Dashboard = () => {
   const fetchRankings = async () => {
     try {
       const response = await AxiosInstance.get("/dashboard/rankings/");
-      setTopDuration(response.data.top_duration);
-      setTopFlights(response.data.top_flights);
+      setTopDuration(response.data.top_duration || []);
+      setTopFlights(response.data.top_flights || []);
+      setTopRatings(response.data.top_ratings || []);
     } catch (error) {
-      console.error("Error fetching rankings:", error);
+      console.error("Failed to fetch rankings:", error);
     }
   };
 
@@ -370,7 +374,7 @@ const Dashboard = () => {
       {/* Info Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Latest Flight Card */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
             <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(33, 150, 243, 0.1)', mr: 2, ml: 1 }}>
                 <AirplanemodeActiveIcon sx={{ fontSize: 40, color: "#4dabf5" }} />
@@ -387,7 +391,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Total Hours Card */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
             <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(245, 0, 87, 0.1)', mr: 2, ml: 1 }}>
                 <AccessTimeIcon sx={{ fontSize: 40, color: "#f50057" }} />
@@ -400,7 +404,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Total Flights Card */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
             <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(46, 204, 113, 0.1)', mr: 2, ml: 1 }}>
                 <FlightIcon sx={{ fontSize: 40, color: "#2ecc71" }} />
@@ -408,6 +412,21 @@ const Dashboard = () => {
             <CardContent>
               <Typography variant="subtitle2" color="textSecondary">COMPLETED FLIGHTS</Typography>
               <Typography variant="h5" sx={{ fontWeight: 'bold' }}>{totalFlights}</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        
+        {/* Average Rating Card */}
+        <Grid item xs={12} md={3}>
+          <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', p: 1 }}>
+            <Box sx={{ p: 2, borderRadius: '50%', backgroundColor: 'rgba(255, 193, 7, 0.1)', mr: 2, ml: 1 }}>
+                <StarRateIcon sx={{ fontSize: 40, color: (averageRating !== null && averageRating >= 8.0) ? "#00e676" : (averageRating !== null && averageRating >= 6.0) ? "#ffeb3b" : "#f44336" }} />
+            </Box>
+            <CardContent>
+              <Typography variant="subtitle2" color="textSecondary">AVERAGE RATING</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', color: (averageRating !== null && averageRating >= 8.0) ? "#00e676" : (averageRating !== null && averageRating >= 6.0) ? "#ffeb3b" : "#f44336" }}>
+                {averageRating !== null ? Number(averageRating).toFixed(2).replace('.', ',') : "N/A"}
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -663,7 +682,7 @@ const Dashboard = () => {
       {/* Rankings Cards */}
       <Grid container spacing={3}>
         {/* Top 5 Flight Duration */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <Card sx={{ p: 2 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -707,7 +726,7 @@ const Dashboard = () => {
         </Grid>
 
         {/* Top 5 Total Flights */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <Card sx={{ p: 2 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -741,6 +760,52 @@ const Dashboard = () => {
                           </Box>
                         </TableCell>
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>{user.total_flights}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Top 5 Ratings */}
+        <Grid item xs={12} md={4}>
+          <Card sx={{ p: 2 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <StarRateIcon sx={{ color: "#ffc107", mr: 1 }} />
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Top Pilots (Rating)</Typography>
+              </Box>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Rank</TableCell>
+                      <TableCell>Pilot</TableCell>
+                      <TableCell align="right">Rating</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {topRatings.map((user, index) => (
+                      <TableRow key={user.pilot__first_name}>
+                        <TableCell>
+                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {index === 0 && <span style={{fontSize:'1.2em'}}>🥇</span>}
+                                {index === 1 && <span style={{fontSize:'1.2em'}}>🥈</span>}
+                                {index === 2 && <span style={{fontSize:'1.2em'}}>🥉</span>}
+                                {index > 2 && <Typography variant="body2" sx={{ ml: 1 }}>{index + 1}</Typography>}
+                           </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {renderFlag(user.pilot__country)}
+                            {`${user.pilot__first_name} ${user.pilot__last_name}`}
+                          </Box>
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', color: user.avg_score >= 8.0 ? "#00e676" : user.avg_score >= 6.0 ? "#ffeb3b" : "#f44336" }}>
+                          {user.avg_score ? Number(user.avg_score).toFixed(2).replace('.', ',') : "0,00"}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

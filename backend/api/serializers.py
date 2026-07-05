@@ -137,14 +137,20 @@ class UserAwardSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     last_landing_score = serializers.SerializerMethodField()
+    average_landing_score = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'last_landing_score']
+        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'last_landing_score', 'average_landing_score']
 
     def get_last_landing_score(self, obj):
         report = LandingReport.objects.filter(pilot=obj).order_by('-created_at').first()
         return report.score if report else None
+
+    def get_average_landing_score(self, obj):
+        from django.db.models import Avg
+        avg_score = LandingReport.objects.filter(pilot=obj).aggregate(Avg('score'))['score__avg']
+        return round(avg_score, 2) if avg_score is not None else None
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:

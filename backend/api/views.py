@@ -259,9 +259,17 @@ class DashboardViewSet(viewsets.ViewSet):
             .order_by("-total_flights")[:5]
         )
 
+        # Top 5 Média de Rating (Usando a tabela LandingReport)
+        top_ratings = (
+            LandingReport.objects.values("pilot__first_name", "pilot__last_name", "pilot__country")
+            .annotate(avg_score=Avg("score"))
+            .order_by("-avg_score")[:5]
+        )
+
         return Response({
             "top_duration": list(top_duration),
             "top_flights": list(top_flights),
+            "top_ratings": list(top_ratings),
         })
     
 class AwardViewSet(viewsets.ModelViewSet):
