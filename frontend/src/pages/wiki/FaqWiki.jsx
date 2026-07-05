@@ -22,12 +22,7 @@ const FaqWiki = () => {
         {
             id: 'simuladores',
             question: 'Which simulators does System Infinite World Tour support?',
-            answer: 'Currently, our system and our Co-Pilot app are developed exclusively for Infinite Flight.'
-        },
-        {
-            id: 'compatibilidade',
-            question: 'Does the Co-Pilot app have a version for iOS, Mac, or PC?',
-            answer: 'Not yet. For now, the app that monitors and sends your flight telemetry is only available for Android devices. Expanding to other platforms like iOS is definitely in our future plans!'
+            answer: 'Currently, our system is developed exclusively for Infinite Flight.'
         },
         {
             id: 'world-tour-cost',
@@ -53,7 +48,7 @@ const FaqWiki = () => {
                 Frequently Asked Questions
             </Typography>
             <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
-                Quick answers to the most common questions about using our Crew Center and the app.
+                Quick answers to the most common questions about using our Crew Center.
             </Typography>
 
             <Divider sx={{ mb: 4 }} />

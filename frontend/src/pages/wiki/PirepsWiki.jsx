@@ -43,7 +43,7 @@ const PirepsWiki = () => {
 
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>Flight Briefing & Telemetry</Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
-                By clicking on a flight, you can open the detailed Flight Briefing. This modal shows the complete telemetry captured by the Infinite Flight Co-Pilot app, including touchdown G-Force, Vertical Speed, Centerline deviation, and any penalties applied.
+                By clicking on a flight, you can open the detailed Flight Briefing. This modal shows the complete telemetry captured directly from the Infinite Flight Logbook, including touchdown G-Force, Vertical Speed, Centerline deviation, and any penalties applied.
             </Typography>
             <Box sx={{ mb: 4, borderRadius: 2, overflow: 'hidden', border: '1px solid #ddd' }}>
                 <img src="/wiki_images/flight_briefing.png" alt="Flight Briefing" style={{ width: '100%', display: 'block' }} />

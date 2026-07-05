@@ -48,7 +48,7 @@ const menuItems = [
   { text: 'My Flights', icon: <FlightsIcon />, path: '/app/my-flights' },
   { text: 'My World Tour', icon: <PublicIcon />, path: '/app/my-awards' },
   { text: 'Map', icon: <MapIcon />, path: '/app/map' },
-  { text: 'App Manual', icon: <PhoneAndroidIcon />, path: '/app/manual' },
+
   { text: 'Wiki World Tour', icon: <MenuBookIcon />, path: '/wiki/faq' },
 ];
 

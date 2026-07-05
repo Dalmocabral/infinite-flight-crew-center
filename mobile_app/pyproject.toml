@@ -1,9 +1,0 @@
-[tool.flet.app]
-
-[tool.flet.android.permission]
-"android.permission.POST_NOTIFICATIONS" = true
-"android.permission.INTERNET" = true
-"android.permission.ACCESS_NETWORK_STATE" = true
-"android.permission.ACCESS_WIFI_STATE" = true
-"android.permission.CHANGE_WIFI_MULTICAST_STATE" = true
-"android.permission.SYSTEM_ALERT_WINDOW" = true

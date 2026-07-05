@@ -61,10 +61,11 @@ const Members = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
+                    style={{ height: '100%' }}
                 >
                 <Link 
                     to={`/app/userdetail/${item.id}`} 
-                    style={{ textDecoration: 'none' }} 
+                    style={{ textDecoration: 'none', height: '100%', display: 'block' }} 
                 >
                     <Card 
                     sx={{ 
@@ -97,7 +98,10 @@ const Members = () => {
                             p: 0.5, 
                             borderRadius: '50%', 
                             border: '2px solid #4dabf5', 
-                            boxShadow: '0 0 15px rgba(77, 171, 245, 0.5)' 
+                            boxShadow: '0 0 15px rgba(77, 171, 245, 0.5)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
                         }}>
                              <Gravatar
                                 email={item.email} 
@@ -156,11 +160,15 @@ const Members = () => {
                         <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
                          <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>Base:</Typography>
-                            <img
-                                src={`https://flagcdn.com/w320/${item.country ? item.country.toLowerCase() : ''}.png`}
-                                alt={item.country || 'Country'}
-                                style={{ width: '24px', borderRadius: '4px' }}
-                            />
+                             {item.country ? (
+                                <img
+                                    src={`https://flagcdn.com/w320/${item.country.toLowerCase()}.png`}
+                                    alt={item.country}
+                                    style={{ width: '24px', borderRadius: '4px' }}
+                                />
+                             ) : (
+                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 'bold' }}>N/A</Typography>
+                             )}
                         </Box>
                     </CardContent>
                     </Card>

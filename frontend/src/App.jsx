@@ -22,7 +22,7 @@ import ProfileEdit from './pages/ProfileEdit';
 import Register from './pages/Register';
 import UserDetail from './pages/UserDetail';
 import Briefing from './pages/briefing';
-import AppManual from './pages/AppManual';
+
 import WikiLayout from './layouts/WikiLayout';
 import ComingSoon from './pages/wiki/ComingSoon';
 import FaqWiki from './pages/wiki/FaqWiki';
@@ -73,7 +73,7 @@ function App() {
             <Route path="my-flights" element={<MyFlights />} />
             <Route path="my-awards" element={<MyAwards />} />
             <Route path="map" element={<Map />} />
-            <Route path="manual" element={<AppManual />} />
+
             <Route path="members" element={<Members />} />
             <Route path="pirepsflights" element={<PirepsFlights />} />
             <Route path="edit-pirep/:id" element={<EditPirep />} />

@@ -17,6 +17,8 @@ from datetime import timedelta
 import secrets
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+import requests
+import os
 
 from .serializers import *
 from .models import *  # Explicitly import models if needed, though * is often discouraged.
@@ -87,13 +89,113 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         pirep = serializer.save(pilot=self.request.user, status="In Review")
-        # Vincula automaticamente o último LandingReport sem PIREP deste piloto
-        latest = LandingReport.objects.filter(
-            pilot=self.request.user, pirep__isnull=True
-        ).order_by('-created_at').first()
-        if latest:
-            latest.pirep = pirep
-            latest.save()
+        
+        # Tentaremos buscar os dados no Logbook do Infinite Flight se não for um submission Manual (ou mesmo se for, podemos tentar)
+        if pirep.submission_type == "Auto" and self.request.user.usernameIFC:
+            api_key = os.environ.get('VITE_API_KEY', '36d1c8xdt1zvxn9cqqs9pxr7dty8rhm4')
+            
+            try:
+                # 1. Obter o userId do Infinite Flight
+                url_users = "https://api.infiniteflight.com/public/v2/users"
+                headers = {'Authorization': f'Bearer {api_key}'}
+                payload = {'discourseNames': [self.request.user.usernameIFC]}
+                
+                user_res = requests.post(url_users, json=payload, headers=headers, timeout=10)
+                if user_res.status_code == 200:
+                    user_data = user_res.json()
+                    if user_data.get('errorCode') == 0 and user_data.get('result') and len(user_data['result']) > 0:
+                        if_user_id = user_data['result'][0].get('userId')
+                        
+                        if if_user_id:
+                            # 2. Obter o Logbook do usuário
+                            url_flights = f"https://api.infiniteflight.com/public/v2/users/{if_user_id}/flights"
+                            flights_res = requests.get(url_flights, headers=headers, timeout=10)
+                            
+                            if flights_res.status_code == 200:
+                                flights_data = flights_res.json()
+                                if flights_data.get('errorCode') == 0 and flights_data.get('result'):
+                                    flight_list = flights_data['result'].get('data', [])
+                                    
+                                    # 3. Procurar o voo correspondente
+                                    matched_flight = None
+                                    for f in flight_list:
+                                        if (f.get('originAirport') == pirep.departure_airport or f.get('departureAirport') == pirep.departure_airport) and \
+                                           (f.get('destinationAirport') == pirep.arrival_airport or f.get('arrivalAirport') == pirep.arrival_airport):
+                                            matched_flight = f
+                                            break
+                                            
+                                    if matched_flight:
+                                        # 4. Criar o LandingReport com as físicas e violações
+                                        landing_stats = matched_flight.get('landingStats', [])
+                                        violations = matched_flight.get('violations', [])
+                                        
+                                        report = LandingReport(
+                                            pilot=self.request.user,
+                                            pirep=pirep,
+                                            aircraft=pirep.aircraft,
+                                            if_flight_id=matched_flight.get('id'),
+                                            if_user_id=if_user_id,
+                                            status='COMPLETED'
+                                        )
+                                        
+                                        penalty = 0
+                                        base_score = 10.0
+                                        
+                                        # Aplicar penalidade por violações do Infinite Flight (ex: Overspeed, ATC)
+                                        if violations:
+                                            report.ias_violations = len(violations) # Usamos o campo ias_violations para guardar o num de IF violations
+                                            penalty += len(violations) * 3.0
+                                        
+                                        if landing_stats:
+                                            best_landing = landing_stats[0] # Pegamos o primeiro toque ou o mais suave
+                                            
+                                            # Converter verticalSpeed (m/s) para FPM (1 m/s = 196.85 fpm)
+                                            vs_ms = best_landing.get('verticalSpeed', 0)
+                                            report.vs_touchdown = int(vs_ms * 196.85)
+                                            report.g_force = best_landing.get('maxGForce', 1.0)
+                                            report.centerline = best_landing.get('centerlineDistance', 0.0)
+                                            report.distance_from_1kft = best_landing.get('distanceFrom1kftMarker', 0.0)
+                                            
+                                            # Custom Mixed Penalty Logic (FPM + Smoothed G-Force)
+                                            # FPM (Vertical Speed)
+                                            vs_abs = abs(report.vs_touchdown)
+                                            if vs_abs > 200:
+                                                if vs_abs <= 400:
+                                                    penalty += 1.0 # Normal
+                                                elif vs_abs <= 600:
+                                                    penalty += 3.0 # Firm
+                                                elif vs_abs <= 1000:
+                                                    penalty += 6.0 # Hard
+                                                else:
+                                                    penalty += 10.0 # Extremely Hard
+                                                    
+                                            # Smoothed G-Force
+                                            if report.g_force < 1.05:
+                                                penalty += 0.5 # Greased penalty
+                                            elif report.g_force > 1.40:
+                                                if report.g_force <= 2.00:
+                                                    penalty += (report.g_force - 1.40) * 3.0
+                                                else:
+                                                    penalty += 1.8 + (report.g_force - 2.00) * 8.0
+                                                    
+                                            # Centerline Deviation
+                                            c_dev = abs(report.centerline)
+                                            if c_dev > 4.0:
+                                                penalty += (c_dev - 4.0) * 0.16
+                                                
+                                            # Long Landing (Distance from threshold)
+                                            # IF gives distance from 1kft marker. Threshold is ~305m before that.
+                                            # Newsky accepted range is usually up to 635m from threshold.
+                                            # 635 - 305 = 330m from 1kft marker.
+                                            if report.distance_from_1kft > 330.0:
+                                                penalty += (report.distance_from_1kft - 330.0) * 0.0035
+                                        
+                                        report.score = max(0.0, base_score - penalty)
+                                        report.save()
+            except Exception as e:
+                print("Erro ao processar integração Logbook IF:", e)
+                
+        # Se não criou o LandingReport, o pirep fica sem ele (comportamento normal para submissões manuais)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -559,12 +661,14 @@ class LandingReportView(APIView):
         report = LandingReport.objects.create(
             pilot        = request.user,
             aircraft     = data.get('aircraft', ''),
+            if_flight_id = data.get('if_flight_id', None),
+            if_user_id   = data.get('if_user_id', None),
             vs_touchdown = int(data.get('vs_touchdown', 0)),
             g_force      = float(data.get('g_force', 1.0)),
             centerline   = float(data.get('centerline_dev', 0.0)),
             bounce_count = int(data.get('bounce_count', 0)),
             light_infrac = data.get('light_infractions', []),
-            status       = data.get('status', 'LANDED'),
+            status       = data.get('status', 'PENDING_LOGBOOK') if data.get('if_flight_id') else data.get('status', 'LANDED'),
             score        = float(data.get('score', 0.0)),
             fuel_weight_kg      = float(data.get('fuel_weight_kg', 0.0)),
             landing_lat         = float(data.get('landing_lat', 0.0)),

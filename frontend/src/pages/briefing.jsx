@@ -82,68 +82,7 @@ const renderFlag = (icao, airportsData) => {
 };
 
 const translateReason = (reason) => {
-  if (!reason) return reason;
-  
-  let r = reason;
-  
-  // G Force
-  r = r.replace(/Perfect landing/g, "Pouso perfeito");
-  r = r.replace(/Firm landing/g, "Pouso firme");
-  r = r.replace(/Hard landing/g, "Pouso duro");
-  r = r.replace(/Very hard landing/g, "Pouso muito duro");
-  r = r.replace(/Excessive G-force landing/g, "Força G excessiva no pouso");
-  r = r.replace(/Excessive G-force/g, "Força G excessiva");
-  
-  // VS
-  r = r.replace(/Smooth landing/g, "Pouso suave");
-  r = r.replace(/Normal landing/g, "Pouso normal");
-  r = r.replace(/Extremely hard landing/g, "Pouso extremamente duro");
-  
-  // Bounces
-  r = r.replace(/bounce/g, "quique");
-  r = r.replace(/bounces/g, "quiques");
-  
-  // Centerline
-  r = r.replace(/On centerline/g, "No eixo da pista");
-  r = r.replace(/Slight centerline deviation/g, "Desvio leve do eixo da pista");
-  r = r.replace(/Moderate centerline deviation/g, "Desvio moderado do eixo da pista");
-  r = r.replace(/Severe centerline deviation/g, "Desvio severo do eixo da pista");
-  r = r.replace(/Off runway/g, "Fora da pista");
-  
-  // IAS / Unstable
-  r = r.replace(/IAS >250KTS below 10,000ft/g, "Velocidade >250KTS abaixo de 10.000 pés");
-  r = r.replace(/Unstable approach below 500ft/g, "Aproximação instável abaixo de 500 pés");
-  
-  // Lights & Signs
-  r = r.replace(/NAV lights off in motion/g, "Luzes de Navegação (NAV) desligadas em movimento");
-  r = r.replace(/BEACON lights off with engines running/g, "Luz de BEACON desligada com motores em funcionamento");
-  r = r.replace(/STROBE lights off in flight/g, "Luzes STROBE desligadas em voo");
-  r = r.replace(/Turn off Landing lights/g, "Desligue os faróis de pouso");
-  r = r.replace(/Landing lights on above 10,000ft/g, "Faróis de pouso acesos acima de 10.000 pés");
-  r = r.replace(/Landing lights off below 10,000ft/g, "Faróis de pouso desligados abaixo de 10.000 pés");
-  r = r.replace(/No Smoking sign is OFF/g, "Aviso de Não Fumar desligado");
-  r = r.replace(/Seat Belts sign is OFF below 10,000ft/g, "Aviso de cinto de segurança desligado abaixo de 10.000 pés");
-  r = r.replace(/Seat Belts sign is ON above 10,000ft/g, "Aviso de cinto de segurança ligado acima de 10.000 pés");
-  r = r.replace(/Seat Belts sign off below 10,000ft/g, "Aviso de cinto de segurança desligado abaixo de 10.000 pés");
-  r = r.replace(/Seat Belts sign on above 10,000ft/g, "Aviso de cinto de segurança ligado acima de 10.000 pés");
-  
-  // TDZ
-  r = r.replace(/Undershoot landing \(Touchdown before threshold/g, "Toque antes da cabeceira (Touchdown antes da pista");
-  r = r.replace(/Short landing \(Touchdown before TDZ/g, "Pouso curto (Touchdown antes da TDZ");
-  r = r.replace(/On TDZ core \/ Aiming Point/g, "Na zona de toque ideal / Aiming Point");
-  r = r.replace(/Long landing \(Touchdown beyond TDZ/g, "Pouso longo (Touchdown além da TDZ");
-  r = r.replace(/Deep long landing \(Touchdown deep down runway/g, "Pouso muito longo (Touchdown profundo");
-  
-  // Fuel
-  r = r.replace(/Insufficient fuel reserves/g, "Reservas de combustível insuficientes");
-  r = r.replace(/Low fuel reserve at touchdown/g, "Reserva de combustível baixa no toque");
-  r = r.replace(/Fuel reserves managed correctly/g, "Reservas de combustível gerenciadas corretamente");
-
-  // Gear
-  r = r.replace(/Landing gear not retracted within 15s after takeoff/g, "Trem de pouso não recolhido em até 15s após a decolagem");
-  r = r.replace(/Landing gear retracted correctly/g, "Trem de pouso recolhido corretamente");
-
-  return r;
+  return reason;
 };
 
 const Briefing = () => {
@@ -426,7 +365,7 @@ const Briefing = () => {
               {flightData.landing_report ? (() => {
                 const r = flightData.landing_report;
                 const scoreColor = r.score >= 7 ? '#00e676' : r.score >= 6 ? '#4dabf5' : r.score >= 5 ? '#ffeb3b' : '#f44336';
-                const scoreLabel = r.score >= 9 ? 'BUTTER' : r.score >= 8 ? 'SMOOTH' : r.score >= 7 ? 'GOOD' : r.score >= 6 ? 'AVERAGE' : r.score >= 5 ? 'BELOW AVG' : r.score >= 3 ? 'HARD' : 'CRASH';
+                const scoreLabel = r.score >= 9 ? 'BUTTER' : r.score >= 8 ? 'SMOOTH' : r.score >= 7 ? 'GOOD' : r.score >= 6 ? 'AVERAGE' : r.score >= 5 ? 'BELOW AVG' : r.score >= 2 ? 'HARD' : 'SEVERE HARD';
                 return (
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} sm={4} sx={{ textAlign: 'center' }}>
@@ -440,9 +379,9 @@ const Briefing = () => {
                       <Grid container spacing={1.5}>
                         <Grid item xs={6}>
                           <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
-                            <Typography variant="caption" color="rgba(255,255,255,0.5)">TOUCHDOWN</Typography>
-                            <Typography variant="h6" fontWeight="bold" sx={{ color: Math.abs(r.vs_touchdown) < 200 ? '#00e676' : Math.abs(r.vs_touchdown) < 600 ? '#ffeb3b' : '#f44336' }}>
-                              {r.vs_touchdown} FPM
+                            <Typography variant="caption" color="rgba(255,255,255,0.5)">CENTERLINE</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline) && Math.abs(r.centerline) <= 4.0) ? '#00e676' : (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline) && Math.abs(r.centerline) <= 8.0) ? '#ffeb3b' : '#f44336' }}>
+                              {(r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline)) ? Math.abs(r.centerline).toFixed(1) + ' m' : 'N/A'}
                             </Typography>
                           </Box>
                         </Grid>
@@ -456,17 +395,17 @@ const Briefing = () => {
                         </Grid>
                         <Grid item xs={6}>
                           <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
-                            <Typography variant="caption" color="rgba(255,255,255,0.5)">BOUNCES</Typography>
-                            <Typography variant="h6" fontWeight="bold" sx={{ color: r.bounce_count === 0 ? '#00e676' : '#f44336' }}>
-                              {r.bounce_count === 0 ? '✓ NONE' : `${r.bounce_count}x`}
+                            <Typography variant="caption" color="rgba(255,255,255,0.5)">FPM</Typography>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: Math.abs(r.vs_touchdown) <= 200 ? '#00e676' : Math.abs(r.vs_touchdown) <= 400 ? '#ffeb3b' : '#f44336' }}>
+                              {Math.abs(r.vs_touchdown)} FPM
                             </Typography>
                           </Box>
                         </Grid>
                         <Grid item xs={6}>
                           <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
                             <Typography variant="caption" color="rgba(255,255,255,0.5)">STATUS</Typography>
-                            <Typography variant="h6" fontWeight="bold" sx={{ color: r.status === 'LANDED' ? '#00e676' : '#f44336' }}>
-                              {r.status === 'LANDED' ? '✈ LANDED' : '💥 CRASH'}
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: ['LANDED', 'COMPLETED'].includes(r.status) ? '#00e676' : '#f44336' }}>
+                              {['LANDED', 'COMPLETED'].includes(r.status) ? '✈ LANDED' : '💥 CRASH'}
                             </Typography>
                           </Box>
                         </Grid>
@@ -505,23 +444,26 @@ const Briefing = () => {
                         if (!scoringList || scoringList.length === 0) {
                           scoringList = [];
                           
-                          // G Force
-                          if (r.g_force !== null && r.g_force !== undefined && !isNaN(r.g_force)) {
-                            if (r.g_force <= 1.20) scoringList.push({ reason: `Perfect landing (${Number(r.g_force).toFixed(2)}G) ✓`, penalty: 0.0 });
-                            else if (r.g_force <= 1.50) scoringList.push({ reason: `Firm landing (${Number(r.g_force).toFixed(2)}G)`, penalty: -1.0 });
-                            else if (r.g_force <= 2.00) scoringList.push({ reason: `Hard landing (${Number(r.g_force).toFixed(2)}G)`, penalty: -3.0 });
-                            else if (r.g_force <= 3.00) scoringList.push({ reason: `Very hard landing (${Number(r.g_force).toFixed(2)}G)`, penalty: -6.0 });
-                            else scoringList.push({ reason: `Excessive G-force (${Number(r.g_force).toFixed(2)}G)`, penalty: -10.0 });
-                          }
-
-                          // VS Touchdown
+                          // VS Touchdown (FPM)
                           if (r.vs_touchdown !== null && r.vs_touchdown !== undefined && !isNaN(r.vs_touchdown)) {
                             const vs = Math.abs(r.vs_touchdown);
-                            if (vs <= 200) scoringList.push({ reason: `Smooth landing (${vs} FPM) ✓`, penalty: 0.0 });
-                            else if (vs <= 400) scoringList.push({ reason: `Normal landing (${vs} FPM)`, penalty: -1.0 });
-                            else if (vs <= 600) scoringList.push({ reason: `Firm landing (${vs} FPM)`, penalty: -3.0 });
-                            else if (vs <= 1000) scoringList.push({ reason: `Hard landing (${vs} FPM)`, penalty: -6.0 });
-                            else scoringList.push({ reason: `Extremely hard landing (${vs} FPM)`, penalty: -10.0 });
+                            if (vs > 200) {
+                              if (vs <= 400) scoringList.push({ reason: `Normal landing (${vs} FPM)`, penalty: -1.0 });
+                              else if (vs <= 600) scoringList.push({ reason: `Firm landing (${vs} FPM)`, penalty: -3.0 });
+                              else if (vs <= 1000) scoringList.push({ reason: `Hard landing (${vs} FPM)`, penalty: -6.0 });
+                              else scoringList.push({ reason: `Extremely hard landing (${vs} FPM)`, penalty: -10.0 });
+                            } else {
+                              scoringList.push({ reason: `Smooth landing (${vs} FPM) ✓`, penalty: 0.0 });
+                            }
+                          }
+
+                          // G Force
+                          if (r.g_force !== null && r.g_force !== undefined && !isNaN(r.g_force)) {
+                            const g = r.g_force;
+                            if (g < 1.05) scoringList.push({ reason: `Greased landing (${g.toFixed(2)}G)`, penalty: -0.5 });
+                            else if (g <= 1.40) scoringList.push({ reason: `Great landing (${g.toFixed(2)}G) ✓`, penalty: 0.0 });
+                            else if (g <= 2.00) scoringList.push({ reason: `Hard landing (${g.toFixed(2)}G)`, penalty: -((g - 1.40) * 3.0) });
+                            else scoringList.push({ reason: `Severe G-Force (${g.toFixed(2)}G)`, penalty: -(1.8 + (g - 2.00) * 8.0) });
                           }
 
                           // Bounces
@@ -532,41 +474,20 @@ const Briefing = () => {
                           // Centerline
                           if (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline)) {
                             const c = Math.abs(r.centerline);
-                            if (c <= 5) scoringList.push({ reason: `On centerline (${c.toFixed(1)}m) ✓`, penalty: 0.0 });
-                            else if (c <= 10) scoringList.push({ reason: `Slight centerline deviation (${c.toFixed(1)}m)`, penalty: -1.0 });
-                            else if (c <= 15) scoringList.push({ reason: `Moderate centerline deviation (${c.toFixed(1)}m)`, penalty: -3.0 });
-                            else if (c <= 25) scoringList.push({ reason: `Severe centerline deviation (${c.toFixed(1)}m)`, penalty: -6.0 });
-                            else scoringList.push({ reason: `Off runway (${c.toFixed(1)}m)`, penalty: -10.0 });
+                            if (c <= 4.0) scoringList.push({ reason: `On centerline (${c.toFixed(1)}m) ✓`, penalty: 0.0 });
+                            else scoringList.push({ reason: `Off centerline deviation (${c.toFixed(1)}m)`, penalty: -((c - 4.0) * 0.16) });
                           }
 
                           // Touchdown Zone Distance
                           if (r.distance_from_1kft !== null && r.distance_from_1kft !== undefined && !isNaN(r.distance_from_1kft) && r.distance_from_1kft !== 0.0) {
                             const dist = r.distance_from_1kft;
-                            if (dist < -250.0) scoringList.push({ reason: `Undershoot landing (Touchdown before threshold: ${dist.toFixed(1)}m)`, penalty: -10.0 });
-                            else if (dist < -100.0) scoringList.push({ reason: `Short landing (Touchdown before TDZ: ${dist.toFixed(1)}m)`, penalty: -1.5 });
-                            else if (dist <= 200.0) scoringList.push({ reason: `On TDZ core / Aiming Point (${dist.toFixed(1)}m) ✓`, penalty: 0.0 });
-                            else if (dist <= 500.0) scoringList.push({ reason: `Long landing (Touchdown beyond TDZ: ${dist.toFixed(1)}m)`, penalty: -3.0 });
-                            else scoringList.push({ reason: `Deep long landing (Touchdown deep down runway: ${dist.toFixed(1)}m)`, penalty: -6.0 });
+                            if (dist > 330.0) scoringList.push({ reason: `Long landing (Touchdown beyond TDZ: ${dist.toFixed(1)}m)`, penalty: -((dist - 330.0) * 0.0035) });
+                            else scoringList.push({ reason: `On TDZ core / Aiming Point (${dist.toFixed(1)}m) ✓`, penalty: 0.0 });
                           }
 
-                          // Light infractions
-                          if (r.light_infrac && r.light_infrac.length > 0) {
-                            r.light_infrac.forEach(inf => {
-                              // Translate light rules if in PT
-                              let desc = inf;
-                              if (inf.toLowerCase().includes("farol") || inf.toLowerCase().includes("luz")) {
-                                desc = `Light configuration infraction (${inf})`;
-                              }
-                              scoringList.push({ reason: desc, penalty: -1.0 });
-                            });
-                          }
-
-                          // IAS and Unstable Approaches
+                          // Infinite Flight Violations
                           if (r.ias_violations > 0) {
-                            scoringList.push({ reason: `IAS >250KTS below 10,000ft (${r.ias_violations}x)`, penalty: -r.ias_violations * 0.5 });
-                          }
-                          if (r.unstable_approaches > 0) {
-                            scoringList.push({ reason: `Unstable approach below 500ft (${r.unstable_approaches}x)`, penalty: -r.unstable_approaches * 0.5 });
+                            scoringList.push({ reason: `Infinite Flight Violations (${r.ias_violations}x)`, penalty: -r.ias_violations * 3.0 });
                           }
                         }
 
@@ -612,7 +533,7 @@ const Briefing = () => {
                 <Box sx={{ textAlign: 'center', py: 3 }}>
                   <Typography sx={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>
                     No landing data recorded for this flight.<br/>
-                    <span style={{ fontSize: 12 }}>Use the IF Virtual Co-Pilot app to capture your landing score.</span>
+                    <span style={{ fontSize: 12 }}>Your landing score is automatically extracted and calculated by the Infinite Flight Logbook API.</span>
                   </Typography>
                 </Box>
               )}

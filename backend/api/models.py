@@ -259,6 +259,8 @@ class LandingReport(models.Model):
     created_at    = models.DateTimeField(auto_now_add=True)
 
     # Novos campos de telemetria
+    if_flight_id        = models.CharField(max_length=100, blank=True, null=True)
+    if_user_id          = models.CharField(max_length=100, blank=True, null=True)
     fuel_weight_kg      = models.FloatField(default=0.0, null=True, blank=True)  # Combustível no toque (kg)
     landing_lat         = models.FloatField(default=0.0, null=True, blank=True)  # Latitude do toque
     landing_lon         = models.FloatField(default=0.0, null=True, blank=True)  # Longitude do toque
