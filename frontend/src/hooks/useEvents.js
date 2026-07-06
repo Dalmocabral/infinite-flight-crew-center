@@ -7,7 +7,7 @@ export const useEvents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const url = 'https://corsproxy.io/?' + encodeURIComponent('https://community.infiniteflight.com/c/multiplayer/events/16.json');
+        const url = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://community.infiniteflight.com/c/multiplayer/events/16.json');
         const response = await fetch(url);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
