@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
+import { Card, CardContent, Typography, Box, CircularProgress, Chip } from '@mui/material';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import AxiosInstance from './AxiosInstance';
+
+const getTagColor = (tag) => {
+  switch (tag) {
+    case 'NOTAM': return { bgcolor: '#ff5722', color: '#fff' };
+    case 'EVENTS': return { bgcolor: '#2196f3', color: '#fff' };
+    case 'WORLDTOUR': return { bgcolor: '#9c27b0', color: '#fff' };
+    default: return { bgcolor: '#607d8b', color: '#fff' };
+  }
+};
 
 const AnnouncementsCard = () => {
   const [announcements, setAnnouncements] = useState([]);
@@ -60,9 +69,23 @@ const AnnouncementsCard = () => {
                   borderLeft: '3px solid #f50057',
                 }}
               >
-                <Typography sx={{ fontSize: '0.7rem', color: '#929ba8', mb: 0.5 }}>
-                  {new Date(announcement.date_posted).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                  <Typography sx={{ fontSize: '0.7rem', color: '#929ba8' }}>
+                    {new Date(announcement.date_posted).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </Typography>
+                  <Chip 
+                    label={announcement.tag || 'UPDATE'} 
+                    size="small" 
+                    sx={{ 
+                      height: 20, 
+                      fontSize: '0.6rem', 
+                      fontWeight: 'bold', 
+                      bgcolor: getTagColor(announcement.tag).bgcolor, 
+                      color: getTagColor(announcement.tag).color,
+                      borderRadius: 1
+                    }} 
+                  />
+                </Box>
                 <Typography sx={{ fontSize: '0.9rem', fontWeight: 'bold', mb: 0.5, color: '#fff' }}>
                   {announcement.title}
                 </Typography>

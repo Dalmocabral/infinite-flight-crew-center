@@ -300,8 +300,15 @@ class Notification(models.Model):
         return f"Notification for {self.recipient.username}: {self.message}"
     
 class Announcement(models.Model):
+    TAG_CHOICES = [
+        ('NOTAM', 'NOTAM'),
+        ('EVENTS', 'EVENTS'),
+        ('WORLDTOUR', 'WORLDTOUR'),
+        ('UPDATE', 'UPDATE'),
+    ]
     title = models.CharField(max_length=255)
     content = models.TextField()
+    tag = models.CharField(max_length=20, choices=TAG_CHOICES, default='UPDATE')
     date_posted = models.DateTimeField(auto_now_add=True)
 
     class Meta:
