@@ -202,3 +202,8 @@ class CustomUserAdmin(admin.ModelAdmin):
         ('Permissions', {'fields': ('is_active_pilot', 'is_active', 'is_staff', 'is_superuser')}),
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
+
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('title', 'date_posted')
+    search_fields = ('title', 'content')

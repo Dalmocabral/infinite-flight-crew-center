@@ -51,6 +51,8 @@ import { Bar, Doughnut } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
 import ApiService from "../components/ApiService";
+import EventsCard from "../components/EventsCard";
+import AnnouncementsCard from "../components/AnnouncementsCard";
 
 // Register Chart.js components
 ChartJS.register(
@@ -813,6 +815,16 @@ const Dashboard = () => {
               </TableContainer>
             </CardContent>
           </Card>
+        </Grid>
+      </Grid>
+
+      {/* Community Events & System Updates */}
+      <Grid container spacing={3} sx={{ mt: 1, mb: 4 }}>
+        <Grid item xs={12} md={6}>
+            <EventsCard />
+        </Grid>
+        <Grid item xs={12} md={6}>
+            <AnnouncementsCard />
         </Grid>
       </Grid>
 

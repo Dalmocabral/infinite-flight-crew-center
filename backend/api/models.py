@@ -299,6 +299,17 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.recipient.username}: {self.message}"
     
+class Announcement(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    date_posted = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_posted']
+
+    def __str__(self):
+        return self.title
+
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
     # Defaulting to the new Vercel domain if FRONTEND_URL is not provided

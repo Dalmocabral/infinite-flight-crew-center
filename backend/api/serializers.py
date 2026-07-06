@@ -195,3 +195,8 @@ class LandingReportSerializer(serializers.ModelSerializer):
             'fuel_reserve_minutes', 'has_retractable_gear', 'gear_retraction_time'
         ]
         read_only_fields = ['id', 'pilot', 'created_at']
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Announcement
+        fields = '__all__'

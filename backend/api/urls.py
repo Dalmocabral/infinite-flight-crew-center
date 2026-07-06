@@ -30,6 +30,7 @@ urlpatterns = [
     path('landing-report/', LandingReportView.as_view(), name='landing-report'),
     path('reactivate-account/', ReactivateAccountView.as_view(), name='reactivate-account'),
     path('request-reactivation-email/', RequestReactivationEmailView.as_view(), name='request-reactivation-email'),
+    path('announcements/', AnnouncementListView.as_view(), name='announcements'),
 ]
 
 # Inclua as rotas do router

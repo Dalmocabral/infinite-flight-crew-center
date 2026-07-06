@@ -700,4 +700,12 @@ class LandingReportView(APIView):
         """Lista os últimos 10 relatórios do piloto autenticado."""
         reports = LandingReport.objects.filter(pilot=request.user)[:10]
         serializer = LandingReportSerializer(reports, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data)
+
+from rest_framework.generics import ListAPIView
+
+class AnnouncementListView(ListAPIView):
+    queryset = Announcement.objects.all()
+    serializer_class = AnnouncementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
