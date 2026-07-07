@@ -530,6 +530,13 @@ class UserApprovedFlightsViewSet(ViewSet):
             flights_data = []
 
             for flight in approved_flights:
+                score = None
+                try:
+                    if flight.landing_report:
+                        score = flight.landing_report.score
+                except Exception:
+                    pass
+
                 flights_data.append({
                     "id": flight.id,
                     "flight": flight.flight_number,
@@ -541,8 +548,8 @@ class UserApprovedFlightsViewSet(ViewSet):
                     "aircraft": flight.aircraft,
                     "status": flight.status,
                     "landing_report": {
-                        "score": getattr(flight.landing_report, 'score', None)
-                    } if hasattr(flight, 'landing_report') and flight.landing_report else None
+                        "score": score
+                    }
                 })
 
             return Response(flights_data, status=status.HTTP_200_OK)

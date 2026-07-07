@@ -408,7 +408,30 @@ const UserDetail = () => {
                         <Chip label={flight.network} size="small" variant="outlined" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
                       </TableCell>
                       <TableCell>{formatDuration(flight.duration)}</TableCell>
-                      <TableCell>{flight.landing_report?.score != null ? flight.landing_report.score : '-'}</TableCell>
+                      <TableCell>
+                        {flight.landing_report?.score != null ? (
+                          <Chip
+                            label={Number(flight.landing_report.score).toFixed(2)}
+                            size="small"
+                            sx={{
+                              fontWeight: 'bold', minWidth: 54,
+                              bgcolor:
+                                flight.landing_report.score >= 7 ? 'rgba(0,230,118,0.2)' :
+                                flight.landing_report.score >= 6 ? 'rgba(77,171,245,0.2)' :
+                                flight.landing_report.score >= 5 ? 'rgba(255,235,59,0.2)' :
+                                'rgba(244,67,54,0.2)',
+                              color:
+                                flight.landing_report.score >= 7 ? '#00e676' :
+                                flight.landing_report.score >= 6 ? '#4dabf5' :
+                                flight.landing_report.score >= 5 ? '#ffeb3b' :
+                                '#f44336',
+                              border: '1px solid currentColor',
+                            }}
+                          />
+                        ) : (
+                          <Chip label="N/A" size="small" sx={{ fontWeight: 'bold', bgcolor: 'rgba(13,50,100,0.6)', color: '#5b8dd9', border: '1px solid #2a5298', fontSize: '0.7rem' }} />
+                        )}
+                      </TableCell>
                       <TableCell>{flight.aircraft}</TableCell>
                       <TableCell>
                         <Chip
