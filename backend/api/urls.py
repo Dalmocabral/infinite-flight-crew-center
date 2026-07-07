@@ -31,6 +31,7 @@ urlpatterns = [
     path('reactivate-account/', ReactivateAccountView.as_view(), name='reactivate-account'),
     path('request-reactivation-email/', RequestReactivationEmailView.as_view(), name='request-reactivation-email'),
     path('announcements/', AnnouncementListView.as_view(), name='announcements'),
+    path('delete-account/', DeleteAccountView.as_view(), name='delete-account'),
 ]
 
 # Inclua as rotas do router

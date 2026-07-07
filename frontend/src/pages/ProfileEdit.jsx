@@ -9,7 +9,12 @@ import {
     Snackbar,
     CircularProgress as Spinner,
     TextField,
-    Typography
+    Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogContentText,
+    DialogActions
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { debounce } from 'lodash';
@@ -34,6 +39,8 @@ const ProfileEdit = () => {
   const [success, setSuccess] = useState(false);
   const [usernameValid, setUsernameValid] = useState(null);
   const [usernameLoading, setUsernameLoading] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +65,18 @@ const ProfileEdit = () => {
       setTimeout(() => navigate('/app/dashboard'), 2000);
     } catch (error) {
       setError('Error updating profile.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await AxiosInstance.delete('/delete-account/');
+      localStorage.clear();
+      sessionStorage.clear();
+      navigate('/login');
+    } catch (error) {
+      setError('Error deleting account. Please try again.');
+      setDeleteModalOpen(false);
     }
   };
 
@@ -227,9 +246,20 @@ const ProfileEdit = () => {
                 fullWidth 
                 size="large"
                 onClick={handleUpdateProfile} 
-                sx={{ height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
+                sx={{ height: '56px', fontSize: '1.1rem', fontWeight: 'bold', mb: 2 }}
             >
                 UPDATE PROFILE
+            </Button>
+            
+            <Button 
+                variant="outlined" 
+                color="error"
+                fullWidth 
+                size="large"
+                onClick={() => setDeleteModalOpen(true)} 
+                sx={{ height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
+            >
+                DELETE ACCOUNT
             </Button>
           </Box>
 
@@ -243,6 +273,39 @@ const ProfileEdit = () => {
               <Alert severity="success">Profile updated successfully!</Alert>
             </Snackbar>
           )}
+
+          <Dialog open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+            <DialogTitle sx={{ color: '#d32f2f', fontWeight: 'bold' }}>Excluir Conta Definitivamente</DialogTitle>
+            <DialogContent>
+              <DialogContentText sx={{ mb: 2 }}>
+                Você está prestes a excluir definitivamente sua conta. Todos os seus registros serão apagados permanentemente e esta ação não poderá ser desfeita.
+              </DialogContentText>
+              <DialogContentText sx={{ mb: 2, fontWeight: 'bold' }}>
+                Para confirmar, digite "world tour excluir {user.usernameIFC}" na caixa abaixo.
+              </DialogContentText>
+              <TextField
+                fullWidth
+                variant="outlined"
+                color="error"
+                placeholder={`world tour excluir ${user.usernameIFC}`}
+                value={deleteConfirmationText}
+                onChange={(e) => setDeleteConfirmationText(e.target.value)}
+              />
+            </DialogContent>
+            <DialogActions sx={{ p: 2 }}>
+              <Button onClick={() => { setDeleteModalOpen(false); setDeleteConfirmationText(''); }} color="inherit">
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleDeleteAccount} 
+                color="error" 
+                variant="contained"
+                disabled={deleteConfirmationText !== `world tour excluir ${user.usernameIFC}`}
+              >
+                Excluir Minha Conta
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Paper>
         </Box>
       </motion.div>
