@@ -166,17 +166,19 @@ const UserDetail = () => {
       {/* Gravatar no centro */}
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 5 }}>
         <Box sx={{ 
-            p: 0.5, 
+            p: 0, 
+            display: 'flex',
             borderRadius: '50%', 
             border: '3px solid #4dabf5', 
             boxShadow: '0 0 25px rgba(77, 171, 245, 0.6)',
-            mb: 2
+            mb: 2,
+            overflow: 'hidden'
         }}>
             <Gravatar
             email={user.email}
             size={160}
             alt={`Imagem de perfil de ${user.first_name} ${user.last_name}`}
-            style={{ borderRadius: '50%' }}
+            style={{ display: 'block' }}
             />
         </Box>
         <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#fff' }}>{user.first_name} {user.last_name}</Typography>
@@ -389,6 +391,7 @@ const UserDetail = () => {
                     <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Network</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Rating</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Aircraft</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
@@ -405,6 +408,7 @@ const UserDetail = () => {
                         <Chip label={flight.network} size="small" variant="outlined" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }} />
                       </TableCell>
                       <TableCell>{formatDuration(flight.duration)}</TableCell>
+                      <TableCell>{flight.landing_report?.score != null ? flight.landing_report.score : '-'}</TableCell>
                       <TableCell>{flight.aircraft}</TableCell>
                       <TableCell>
                         <Chip

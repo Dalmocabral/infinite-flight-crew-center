@@ -152,13 +152,15 @@ const ProfileEdit = () => {
             }}
           >
              <Box sx={{ 
-                p: 0.5, 
+                p: 0, 
+                display: 'flex',
                 borderRadius: '50%', 
                 border: '3px solid #4dabf5', 
                 boxShadow: '0 0 15px rgba(77, 171, 245, 0.5)',
-                mb: 2
+                mb: 2,
+                overflow: 'hidden'
             }}>
-                <Gravatar email={user.email} size={120} alt="Profile Picture" style={{ borderRadius: '50%' }} />
+                <Gravatar email={user.email} size={120} alt="Profile Picture" style={{ display: 'block' }} />
             </Box>
             <Button
               variant="outlined"
@@ -274,35 +276,46 @@ const ProfileEdit = () => {
             </Snackbar>
           )}
 
-          <Dialog open={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
-            <DialogTitle sx={{ color: '#d32f2f', fontWeight: 'bold' }}>Excluir Conta Definitivamente</DialogTitle>
+          <Dialog 
+            open={deleteModalOpen} 
+            onClose={() => setDeleteModalOpen(false)}
+            PaperProps={{
+              sx: {
+                backgroundColor: '#0a1929', // Solid dark color
+                backgroundImage: 'none',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
+            <DialogTitle sx={{ color: '#d32f2f', fontWeight: 'bold' }}>Permanently Delete Account</DialogTitle>
             <DialogContent>
-              <DialogContentText sx={{ mb: 2 }}>
-                Você está prestes a excluir definitivamente sua conta. Todos os seus registros serão apagados permanentemente e esta ação não poderá ser desfeita.
+              <DialogContentText sx={{ mb: 2, color: 'rgba(255, 255, 255, 0.7)' }}>
+                You are about to permanently delete your account. All your records will be permanently erased and this action cannot be undone.
               </DialogContentText>
-              <DialogContentText sx={{ mb: 2, fontWeight: 'bold' }}>
-                Para confirmar, digite "world tour excluir {user.usernameIFC}" na caixa abaixo.
+              <DialogContentText sx={{ mb: 2, fontWeight: 'bold', color: 'white' }}>
+                To confirm, type "delete {user.usernameIFC}" in the box below.
               </DialogContentText>
               <TextField
                 fullWidth
                 variant="outlined"
                 color="error"
-                placeholder={`world tour excluir ${user.usernameIFC}`}
+                placeholder={`delete ${user.usernameIFC}`}
                 value={deleteConfirmationText}
                 onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                sx={{ input: { color: 'white' } }}
               />
             </DialogContent>
             <DialogActions sx={{ p: 2 }}>
-              <Button onClick={() => { setDeleteModalOpen(false); setDeleteConfirmationText(''); }} color="inherit">
-                Cancelar
+              <Button onClick={() => { setDeleteModalOpen(false); setDeleteConfirmationText(''); }} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                Cancel
               </Button>
               <Button 
                 onClick={handleDeleteAccount} 
                 color="error" 
                 variant="contained"
-                disabled={deleteConfirmationText !== `world tour excluir ${user.usernameIFC}`}
+                disabled={deleteConfirmationText !== `delete ${user.usernameIFC}`}
               >
-                Excluir Minha Conta
+                Delete My Account
               </Button>
             </DialogActions>
           </Dialog>

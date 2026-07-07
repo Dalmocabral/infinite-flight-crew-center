@@ -540,6 +540,9 @@ class UserApprovedFlightsViewSet(ViewSet):
                     "duration": flight.flight_duration,
                     "aircraft": flight.aircraft,
                     "status": flight.status,
+                    "landing_report": {
+                        "score": getattr(flight.landing_report, 'score', None)
+                    } if hasattr(flight, 'landing_report') and flight.landing_report else None
                 })
 
             return Response(flights_data, status=status.HTTP_200_OK)
