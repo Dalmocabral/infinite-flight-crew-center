@@ -1,5 +1,6 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
+    Alert,
     Box,
     Button,
     Container,
@@ -20,6 +21,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AxiosInstance from "../components/AxiosInstance";
+import ApiService from "../components/ApiService";
 
 const SubmitScheduledPirep = () => {
   const { id } = useParams(); 
@@ -36,6 +38,22 @@ const SubmitScheduledPirep = () => {
     observation: "",
   });
 
+  const [aircraftList, setAircraftList] = useState([]);
+  const [submissionType, setSubmissionType] = useState('Manual');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [apiMessage, setApiMessage] = useState(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [liveryId, setLiveryId] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  useEffect(() => {
+    AxiosInstance.get('aircrafts/')
+      .then(res => {
+          setAircraftList(res.data);
+      })
+      .catch(err => console.error('Error fetching aircrafts:', err));
+  }, []);
+
   useEffect(() => {
     AxiosInstance.get(`/pirepsflight/${id}/`)
       .then((response) => {
@@ -43,9 +61,98 @@ const SubmitScheduledPirep = () => {
           ...response.data,
           flight_duration: response.data.flight_duration ? dayjs(response.data.flight_duration, "HH:mm:ss") : dayjs("2022-04-17T00:00"), 
         });
+        setDataLoaded(true);
       })
       .catch((error) => console.error("Erro ao carregar o PIREP:", error));
   }, [id]);
+
+  useEffect(() => {
+    if (dataLoaded && aircraftList.length > 0 && formData.departure_airport && formData.arrival_airport) {
+      verifyFlightWithApi(formData.departure_airport, formData.arrival_airport);
+    }
+  }, [dataLoaded, aircraftList, formData.departure_airport, formData.arrival_airport]);
+
+  const verifyFlightWithApi = async (from, to) => {
+    setIsVerifying(true);
+    setApiMessage(null);
+    setIsLocked(false);
+    try {
+      const userRes = await AxiosInstance.get('users/me/');
+      const usernameIFC = userRes.data.usernameIFC;
+
+      if (!usernameIFC) {
+        setApiMessage({ type: 'warning', text: 'No IFC Username found in your profile. Proceeding with Manual submission.' });
+        setIsVerifying(false);
+        return;
+      }
+
+      const ifcUser = await ApiService.userStatusByUsername(usernameIFC);
+      if (!ifcUser) {
+        setApiMessage({ type: 'warning', text: `IFC account "${usernameIFC}" not found in the Infinite Flight database. Proceeding with Manual submission.` });
+        setIsVerifying(false);
+        return;
+      }
+
+      const flights = await ApiService.getUserFlights(ifcUser.userId);
+      
+      const match = flights.find(f => 
+        (f.originAirport === from || f.departureAirport === from) && 
+        (f.destinationAirport === to || f.arrivalAirport === to)
+      );
+
+      if (match) {
+        let matchedInternalAc = aircraftList.find(ac => 
+            ac.if_id && match.aircraftId && ac.if_id.toLowerCase() === match.aircraftId.toLowerCase()
+        );
+
+        if (!matchedInternalAc && match.liveryId) {
+            try {
+                const liveryRes = await AxiosInstance.get(`aircrafts/lookup_by_livery/?livery_id=${match.liveryId}`);
+                matchedInternalAc = {
+                    if_id: liveryRes.data.aircraft_id,
+                    name: liveryRes.data.aircraft_name,
+                    category: liveryRes.data.category
+                };
+            } catch (err) {}
+        }
+
+        if (!matchedInternalAc && match.aircraftName) {
+            matchedInternalAc = aircraftList.find(ac => 
+                ac.name.toLowerCase() === match.aircraftName.toLowerCase()
+            );
+        }
+
+        const hours = Math.floor(match.totalTime / 60);
+        const minutes = Math.floor(match.totalTime % 60);
+        
+        let matchedServer = 'Casual';
+        if (match.server && match.server.includes('Training')) matchedServer = 'Training';
+        if (match.server && match.server.includes('Expert')) matchedServer = 'Expert';
+
+        setFormData(prev => ({
+            ...prev,
+            flight_duration: dayjs().hour(hours).minute(minutes),
+            network: matchedServer
+        }));
+
+        setLiveryId(match.liveryId);
+        setSubmissionType('Auto');
+        setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
+        setIsLocked(true);
+      } else {
+        setSubmissionType('Manual');
+        setApiMessage({ 
+            type: 'warning', 
+            text: 'Attention: Your flight was not automatically located in the Infinite Flight database. You may proceed with a MANUAL submission.' 
+        });
+      }
+    } catch (error) {
+      console.error('Error verifying flight:', error);
+      setApiMessage({ type: 'warning', text: 'Failed to connect to the Infinite Flight database. Proceeding with Manual submission.' });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -68,7 +175,9 @@ const SubmitScheduledPirep = () => {
       flight_duration: formattedDuration,
       network: formData.network,
       observation: formData.observation,
-      status: 'In Review' // Mudar o status para In Review após o piloto submeter
+      submission_type: submissionType,
+      livery_id: liveryId,
+      status: submissionType === 'Auto' ? 'Approved' : 'In Review'
     };
   
     try {
@@ -110,6 +219,20 @@ const SubmitScheduledPirep = () => {
             You are submitting PIREP for your scheduled flight {formData.flight_icao} {formData.flight_number}
           </Typography>
 
+          {isVerifying ? (
+             <Alert severity="info" sx={{ mb: 4, borderRadius: '12px' }}>
+               Verifying flight with the Infinite Flight database...
+             </Alert>
+          ) : apiMessage ? (
+             <Alert severity={apiMessage.type} sx={{ mb: 4, borderRadius: '12px', '& .MuiAlert-icon': { color: apiMessage.type === 'warning' ? '#ff9800' : '#2ecc71' } }}>
+               {apiMessage.text}
+             </Alert>
+          ) : (
+            <Alert severity="warning" sx={{ mb: 4, borderRadius: '12px', '& .MuiAlert-icon': { color: '#ff9800' } }}>
+              Due to high demand, manual flight approval may take up to 3 days. Thank you for your patience.
+            </Alert>
+          )}
+
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
@@ -138,6 +261,7 @@ const SubmitScheduledPirep = () => {
                   format="HH:mm"
                   fullWidth
                   required
+                  disabled={isLocked}
                 />
               </Grid>
 
@@ -149,6 +273,7 @@ const SubmitScheduledPirep = () => {
                     value={formData.network}
                     onChange={handleChange}
                     label="Network"
+                    disabled={isLocked}
                   >
                     <MenuItem value="Casual">Casual</MenuItem>
                     <MenuItem value="Training">Training</MenuItem>
@@ -173,12 +298,12 @@ const SubmitScheduledPirep = () => {
                 <Button 
                     type="submit" 
                     variant="contained" 
-                    fullWidth
+                    fullWidth 
                     size="large"
-                    color="success"
+                    disabled={isVerifying}
                     sx={{ mt: 2, height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
                 >
-                  SUBMIT PIREP
+                  SUBMIT FLIGHT REPORT
                 </Button>
               </Grid>
             </Grid>
