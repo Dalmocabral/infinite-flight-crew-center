@@ -58,9 +58,6 @@ const BookFlightWiki = () => {
                 <li>If the data matches, the system will automatically extract your flight time, landing score, and telemetry. The flight status will be set to <strong>In Review</strong> for final staff approval.</li>
                 <li>If the Auto-Validation fails (e.g., Infinite Flight API is slow or data mismatch), it will fall back to a manual submission form where you can enter the details yourself.</li>
             </Box>
-
-        </Box>
-
             <Divider sx={{ my: 4 }} />
 
             <Typography variant="h5" fontWeight="bold" sx={{ color: '#1976d2', mb: 2 }}>
