@@ -21,11 +21,15 @@ const PirepsWiki = () => {
                 Filing a PIREP
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
-                There are two ways to file a PIREP in our system:
+                There are now two main paths to file a PIREP in our system, depending on the type of flight you are doing:
             </Typography>
             <Box component="ul" sx={{ mb: 3, lineHeight: 1.8 }}>
-                <li><strong>Autocomplete Mode:</strong> This is the recommended method. The system will automatically fetch your flight telemetry and details from the Infinite Flight API if you used the correct callsign and aircraft.</li>
-                <li><strong>Manual Mode:</strong> If the autocomplete fails or you experienced a technical issue, you can file your PIREP manually by filling in all the flight details yourself. Note that manual PIREPs may be subject to stricter review by staff.</li>
+                <li>
+                    <strong>World Tours:</strong> Go to the World Tours page, select your tour, and click the <strong>"Fly Leg"</strong> button on the leg you wish to fly. After completion, click the green cloud icon to submit your PIREP. The system will attempt an <strong>Auto-Validation</strong> by checking your Infinite Flight Logbook. If it fails, it will proceed as a <strong>Manual</strong> submission.
+                </li>
+                <li>
+                    <strong>Free Flights (Book Flight):</strong> You are not restricted to tours! From the Sidebar Menu (under Dashboard), click on <strong>Book Flight</strong>. You can choose between <em>Free Flight Pax</em> or <em>Free Flight Cargo</em>. Fill out your flight plan and confirm. It will appear on your Dashboard as a <code>scheduled</code> flight. After you fly, locate the flight on the Dashboard or My Flights and click the <strong>green cloud icon</strong> in the Actions column to auto-validate and submit your PIREP.
+                </li>
             </Box>
             <Box sx={{ mb: 4, borderRadius: 2, overflow: 'hidden', border: '1px solid #ddd' }}>
                 <img src="/wiki_images/pirepsflights.png" alt="Filing a PIREP" style={{ width: '100%', display: 'block' }} />
