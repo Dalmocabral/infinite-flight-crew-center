@@ -23,6 +23,7 @@ import Register from './pages/Register';
 import UserDetail from './pages/UserDetail';
 import Briefing from './pages/briefing';
 import BookFlight from './pages/BookFlight';
+import SubmitScheduledPirep from './pages/SubmitScheduledPirep';
 import WikiLayout from './layouts/WikiLayout';
 import ComingSoon from './pages/wiki/ComingSoon';
 import FaqWiki from './pages/wiki/FaqWiki';
@@ -79,6 +80,7 @@ function App() {
             <Route path="book-flight/cargo" element={<BookFlight />} />
             <Route path="pirepsflights" element={<PirepsFlights />} />
             <Route path="edit-pirep/:id" element={<EditPirep />} />
+            <Route path="submit-scheduled-pirep/:id" element={<SubmitScheduledPirep />} />
             <Route path="briefing/:id" element={<Briefing />} />
             <Route path="awards/awardDetail/:id" element={<AwardDetail />} />
             <Route path="userdetail/:id" element={<UserDetail />} />

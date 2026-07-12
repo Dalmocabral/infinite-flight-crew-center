@@ -49,7 +49,6 @@ import Notifications from './Notifications'; // Importando o componente Notifica
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/app/dashboard' },
   { text: 'Members', icon: <GroupIcon />, path: '/app/members' },
   { text: 'World Tour', icon: <AwardsIcon />, path: '/app/awards' },
   { text: 'My Flights', icon: <FlightsIcon />, path: '/app/my-flights' },
@@ -70,6 +69,14 @@ const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handle
     <div>
       <Toolbar />
       <List>
+        <ListItemButton
+          onClick={() => navigate('/app/dashboard')}
+          selected={location.pathname === '/app/dashboard'}
+        >
+          <ListItemIcon><DashboardIcon /></ListItemIcon>
+          <ListItemText primary="Dashboard" />
+        </ListItemButton>
+
         <ListItemButton onClick={handleBookFlightClick}>
           <ListItemIcon>
             <FlightTakeoffIcon />

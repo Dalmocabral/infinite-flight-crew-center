@@ -3,10 +3,15 @@ import AirplanemodeActiveIcon from "@mui/icons-material/AirplanemodeActive";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents"; // Trophy icon
+import {
+    ThumbUp as ThumbUpIcon,
+    Warning as WarningIcon,
+    FlightTakeoff as FlightTakeoffIcon,
+    CloudUpload as CloudUploadIcon
+} from '@mui/icons-material';
 import FlightIcon from "@mui/icons-material/Flight";
 import FlightLandIcon from "@mui/icons-material/FlightLand";
 import StarRateIcon from "@mui/icons-material/StarRate";
-import WarningIcon from "@mui/icons-material/Warning";
 import PreviewIcon from "@mui/icons-material/Preview";
 import {
     Box,
@@ -625,6 +630,37 @@ const Dashboard = () => {
                         <PreviewIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
+                    {flight.status === 'Scheduled' && (
+                        <Tooltip title="Generate SimBrief">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                                const baseUrl = 'https://www.simbrief.com/system/dispatch.php';
+                                const params = new URLSearchParams({
+                                  orig: flight.departure_airport,
+                                  dest: flight.arrival_airport,
+                                  fltnum: flight.flight_number,
+                                  type: flight.aircraft,
+                                });
+                                window.open(`${baseUrl}?${params.toString()}`, '_blank');
+                            }}
+                            sx={{ color: '#ff9800' }}
+                          >
+                            <FlightTakeoffIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                    )}
+                    {flight.status === 'Scheduled' && (
+                        <Tooltip title="Submit PIREP">
+                          <IconButton
+                            size="small"
+                            onClick={() => navigate(`/app/submit-scheduled-pirep/${flight.id}`)}
+                            sx={{ color: '#4caf50' }}
+                          >
+                            <CloudUploadIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                    )}
                     <Tooltip title="Edit">
                         <span>
                         <IconButton

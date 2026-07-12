@@ -1,6 +1,14 @@
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AssignmentLateIcon from "@mui/icons-material/AssignmentLate";
+import FlightIcon from '@mui/icons-material/Flight';
+import FlightLandIcon from '@mui/icons-material/FlightLand';
 import PreviewIcon from '@mui/icons-material/Preview';
 import SearchIcon from '@mui/icons-material/Search';
+import StarRateIcon from '@mui/icons-material/StarRate';
+import {
+  FlightTakeoff as FlightTakeoffIcon,
+  CloudUpload as CloudUploadIcon
+} from '@mui/icons-material';
 import {
     Box,
     Chip,
@@ -288,6 +296,37 @@ const MyFlights = () => {
                         )}
                     </TableCell>
                     <TableCell>
+                      {flight.status === 'Scheduled' && (
+                        <Tooltip title="Generate SimBrief">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                                const baseUrl = 'https://www.simbrief.com/system/dispatch.php';
+                                const params = new URLSearchParams({
+                                  orig: flight.departure_airport,
+                                  dest: flight.arrival_airport,
+                                  fltnum: flight.flight_number,
+                                  type: flight.aircraft,
+                                });
+                                window.open(`${baseUrl}?${params.toString()}`, '_blank');
+                            }}
+                            sx={{ color: '#ff9800' }}
+                          >
+                            <FlightTakeoffIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {flight.status === 'Scheduled' && (
+                        <Tooltip title="Submit PIREP">
+                          <IconButton
+                            size="small"
+                            onClick={() => navigate(`/app/submit-scheduled-pirep/${flight.id}`)}
+                            sx={{ color: '#4caf50' }}
+                          >
+                            <CloudUploadIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       <Tooltip
                         title="Review flight log" 
                         placement="top"

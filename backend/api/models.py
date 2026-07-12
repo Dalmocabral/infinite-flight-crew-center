@@ -224,6 +224,7 @@ class PirepsFlight (models.Model):
         ('In Review', 'In Review'),
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
+        ('Scheduled', 'Scheduled'),
     ]
     aircraft_choices = CHOICE_AIRCRAFT
     flight_icao =  models.CharField(max_length=10, null=True)
