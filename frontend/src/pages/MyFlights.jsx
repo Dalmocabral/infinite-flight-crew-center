@@ -294,9 +294,9 @@ const MyFlights = () => {
                         sx={{ 
                             fontWeight: 'bold',
                             ...(flight.status === 'Scheduled' && { 
-                                bgcolor: '#4caf50', 
+                                bgcolor: '#9c27b0', 
                                 color: 'white',
-                                borderColor: '#4caf50' 
+                                borderColor: '#9c27b0' 
                             })
                         }}
                         />
