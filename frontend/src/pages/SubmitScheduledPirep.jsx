@@ -177,7 +177,7 @@ const SubmitScheduledPirep = () => {
       observation: formData.observation,
       submission_type: submissionType,
       livery_id: liveryId,
-      status: submissionType === 'Auto' ? 'Approved' : 'In Review'
+      status: 'In Review'
     };
   
     try {
