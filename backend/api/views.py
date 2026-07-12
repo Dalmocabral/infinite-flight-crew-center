@@ -107,8 +107,14 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
             
         pirep = serializer.save(pilot=self.request.user, status=req_status)
         
-        # Tentaremos buscar os dados no Logbook do Infinite Flight se não for um submission Manual (ou mesmo se for, podemos tentar)
-        if pirep.submission_type == "Auto" and self.request.user.usernameIFC:
+        self._process_auto_validation(pirep)
+
+    def perform_update(self, serializer):
+        pirep = serializer.save()
+        self._process_auto_validation(pirep)
+        
+    def _process_auto_validation(self, pirep):
+        if pirep.submission_type == "Auto" and self.request.user.usernameIFC and not LandingReport.objects.filter(pirep=pirep).exists():
             api_key = os.environ.get('VITE_API_KEY', '36d1c8xdt1zvxn9cqqs9pxr7dty8rhm4')
             
             try:
@@ -214,8 +220,6 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                         report.save()
             except Exception as e:
                 print("Erro ao processar integração Logbook IF:", e)
-                
-        # Se não criou o LandingReport, o pirep fica sem ele (comportamento normal para submissões manuais)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
