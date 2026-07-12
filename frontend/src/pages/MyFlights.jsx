@@ -206,7 +206,7 @@ const MyFlights = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
-                        <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography>
+                        <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold', whiteSpace: 'nowrap'}}>{flight.flight_icao} {flight.flight_number}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -308,7 +308,7 @@ const MyFlights = () => {
                             </Tooltip>
                         )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
                       {flight.status === 'Scheduled' && (
                         <Tooltip title="Generate SimBrief">
                           <IconButton

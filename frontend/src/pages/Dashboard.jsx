@@ -544,7 +544,7 @@ const Dashboard = () => {
                     <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
-                            <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold'}}>{flight.flight_icao} {flight.flight_number}</Typography>
+                            <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold', whiteSpace: 'nowrap'}}>{flight.flight_icao} {flight.flight_number}</Typography>
                         </Box>
                     </TableCell>
                     <TableCell>
@@ -637,7 +637,7 @@ const Dashboard = () => {
                         }}
                     />
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
                     <Tooltip title="Details">
                         <IconButton size="small" href={`/app/briefing/${flight.id}`} sx={{ color: '#4dabf5' }}>
                         <PreviewIcon fontSize="small" />
