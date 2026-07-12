@@ -523,6 +523,7 @@ const Dashboard = () => {
                     "Duration",
                     "Rating",
                     "Aircraft",
+                    "Type",
                     "Validation",
                     "Status",
                     "Action",
@@ -598,6 +599,11 @@ const Dashboard = () => {
                       )}
                     </TableCell>
                     <TableCell>{flight.aircraft}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                        {flight.flight_type || 'World Tour'}
+                      </Typography>
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}

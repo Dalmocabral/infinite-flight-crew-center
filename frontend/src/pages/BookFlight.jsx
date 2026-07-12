@@ -58,6 +58,7 @@ const BookFlight = () => {
       arrival_airport: arrival,
       aircraft: aircraft,
       status: 'Scheduled',
+      flight_type: isCargo ? 'Free Flight Cargo' : 'Free Flight Pax',
       // Note: we can format date if needed or store it if model supports it
       // Currently PirepsFlight doesn't have a specific scheduled_date field, 
       // but we can pass it if we add it, or just use the created_at.

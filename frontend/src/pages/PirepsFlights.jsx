@@ -210,6 +210,7 @@ const PirepsFlights = () => {
       network: network,
       submission_type: submissionType,
       livery_id: liveryId,
+      flight_type: 'World Tour',
     };
     
     // Validate manual submission if this is part of an award

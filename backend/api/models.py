@@ -241,6 +241,13 @@ class PirepsFlight (models.Model):
     observation = models.TextField(max_length=500, null=True, blank=True)
     livery_id = models.UUIDField(null=True, blank=True)
     telemetry_log = models.JSONField(null=True, blank=True)
+    
+    FLIGHT_TYPE_CHOICES = [
+        ('World Tour', 'World Tour'),
+        ('Free Flight Pax', 'Free Flight Pax'),
+        ('Free Flight Cargo', 'Free Flight Cargo'),
+    ]
+    flight_type = models.CharField(max_length=50, choices=FLIGHT_TYPE_CHOICES, default='World Tour')
 
     def __str__(self):
         return f"{self.flight_number} - {self.pilot.first_name}"

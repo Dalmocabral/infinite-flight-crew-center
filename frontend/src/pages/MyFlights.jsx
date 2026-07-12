@@ -192,6 +192,7 @@ const MyFlights = () => {
                     {!isMobile && <TableCell sx={{ fontWeight: 'bold' }}>Duration</TableCell>}
                     {!isMobile && <TableCell sx={{ fontWeight: 'bold' }}>Rating</TableCell>}
                     <TableCell sx={{ fontWeight: 'bold' }}>Aircraft</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Validation</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Action</TableCell>
@@ -262,6 +263,11 @@ const MyFlights = () => {
                       </TableCell>
                     )}
                     <TableCell>{flight.aircraft}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                        {flight.flight_type || 'World Tour'}
+                      </Typography>
+                    </TableCell>
                     <TableCell>
                       <Chip
                         label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}

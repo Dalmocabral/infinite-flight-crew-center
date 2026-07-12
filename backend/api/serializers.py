@@ -63,8 +63,8 @@ class PirepsFlightSerializer(serializers.ModelSerializer):
         model = PirepsFlight
         fields = ('id', 'flight_icao', 'flight_number', 'departure_airport', 'arrival_airport',
                   'aircraft', 'flight_duration', 'network', 'registration_date', 'status',
-                  'submission_type', 'observation', 'pilot_name', 'pilot_country', 'livery_id',
-                  'landing_report')
+                  'pilot', 'pilot_name', 'pilot_country', 'observation', 'livery_id', 'telemetry_log',
+                  'submission_type', 'landing_report', 'flight_type')
         read_only_fields = ('pilot',)
 
 class AwardsSerializer(serializers.ModelSerializer):
