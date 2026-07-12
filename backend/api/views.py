@@ -160,7 +160,8 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                             report.centerline = best_landing.get('centerlineDistance', 0.0)
                                             report.distance_from_1kft = best_landing.get('distanceFrom1kftMarker', 0.0)
                                             
-                                            # Custom Mixed Penalty Logic (FPM + Smoothed G-Force)
+                                            # Custom Penalty Logic (FPM + G-Force + Centerline)
+                                            
                                             # FPM (Vertical Speed)
                                             vs_abs = abs(report.vs_touchdown)
                                             if vs_abs > 200:
@@ -173,26 +174,28 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                                 else:
                                                     penalty += 10.0 # Extremely Hard
                                                     
-                                            # Smoothed G-Force
-                                            if report.g_force < 1.05:
-                                                penalty += 0.5 # Greased penalty
-                                            elif report.g_force > 1.40:
-                                                if report.g_force <= 2.00:
-                                                    penalty += (report.g_force - 1.40) * 3.0
+                                            # G-Force
+                                            if report.g_force > 1.20:
+                                                if report.g_force <= 1.50:
+                                                    penalty += 1.0
+                                                elif report.g_force <= 2.00:
+                                                    penalty += 3.0
+                                                elif report.g_force <= 3.00:
+                                                    penalty += 6.0
                                                 else:
-                                                    penalty += 1.8 + (report.g_force - 2.00) * 8.0
+                                                    penalty += 10.0
                                                     
                                             # Centerline Deviation
                                             c_dev = abs(report.centerline)
-                                            if c_dev > 4.0:
-                                                penalty += (c_dev - 4.0) * 0.16
-                                                
-                                            # Long Landing (Distance from threshold)
-                                            # IF gives distance from 1kft marker. Threshold is ~305m before that.
-                                            # Newsky accepted range is usually up to 635m from threshold.
-                                            # 635 - 305 = 330m from 1kft marker.
-                                            if report.distance_from_1kft > 330.0:
-                                                penalty += (report.distance_from_1kft - 330.0) * 0.0035
+                                            if c_dev > 5.0:
+                                                if c_dev <= 10.0:
+                                                    penalty += 1.0
+                                                elif c_dev <= 15.0:
+                                                    penalty += 3.0
+                                                elif c_dev <= 25.0:
+                                                    penalty += 6.0
+                                                else:
+                                                    penalty += 10.0
                                         
                                         report.score = max(0.0, base_score - penalty)
                                         report.save()
