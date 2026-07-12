@@ -228,7 +228,7 @@ const PirepsFlights = () => {
     }
 
     if (submissionType === 'Auto') {
-      formData.status = 'Approved';
+      formData.status = 'In Review';
     }
 
     try {
