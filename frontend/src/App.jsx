@@ -22,7 +22,7 @@ import ProfileEdit from './pages/ProfileEdit';
 import Register from './pages/Register';
 import UserDetail from './pages/UserDetail';
 import Briefing from './pages/briefing';
-
+import BookFlight from './pages/BookFlight';
 import WikiLayout from './layouts/WikiLayout';
 import ComingSoon from './pages/wiki/ComingSoon';
 import FaqWiki from './pages/wiki/FaqWiki';
@@ -75,6 +75,8 @@ function App() {
             <Route path="map" element={<Map />} />
 
             <Route path="members" element={<Members />} />
+            <Route path="book-flight/pax" element={<BookFlight />} />
+            <Route path="book-flight/cargo" element={<BookFlight />} />
             <Route path="pirepsflights" element={<PirepsFlights />} />
             <Route path="edit-pirep/:id" element={<EditPirep />} />
             <Route path="briefing/:id" element={<Briefing />} />

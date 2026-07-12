@@ -10,7 +10,12 @@ import {
     Menu as MenuIcon,
     Public as PublicIcon,
     PhoneAndroid as PhoneAndroidIcon,
-    MenuBook as MenuBookIcon
+    MenuBook as MenuBookIcon,
+    FlightTakeoff as FlightTakeoffIcon,
+    ExpandLess,
+    ExpandMore,
+    LocalMall as CargoIcon,
+    Person as PaxIcon
 } from '@mui/icons-material';
 import {
     AppBar,
@@ -22,8 +27,10 @@ import {
     IconButton,
     List,
     ListItem,
+    ListItemButton,
     ListItemIcon,
     ListItemText,
+    Collapse,
     Menu,
     MenuItem,
     Switch,
@@ -52,37 +59,76 @@ const menuItems = [
   { text: 'Wiki World Tour', icon: <MenuBookIcon />, path: '/wiki/faq' },
 ];
 
-const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handleLogout }) => (
-  <div>
-    <Toolbar />
-    <List>
-      {menuItems.map((item) => (
-        <ListItem
-          button
-          key={item.text}
-          onClick={() => navigate(item.path)}
-          selected={location.pathname === item.path}
-        >
-          <ListItemIcon>{item.icon}</ListItemIcon>
-          <ListItemText primary={item.text} />
+const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handleLogout }) => {
+  const [openBookFlight, setOpenBookFlight] = useState(false);
+
+  const handleBookFlightClick = () => {
+    setOpenBookFlight(!openBookFlight);
+  };
+
+  return (
+    <div>
+      <Toolbar />
+      <List>
+        <ListItemButton onClick={handleBookFlightClick}>
+          <ListItemIcon>
+            <FlightTakeoffIcon />
+          </ListItemIcon>
+          <ListItemText primary="Book Flight" />
+          {openBookFlight ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openBookFlight} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => navigate('/app/book-flight/pax')}
+              selected={location.pathname === '/app/book-flight/pax'}
+            >
+              <ListItemIcon>
+                <PaxIcon />
+              </ListItemIcon>
+              <ListItemText primary="Free Flight Pax" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              onClick={() => navigate('/app/book-flight/cargo')}
+              selected={location.pathname === '/app/book-flight/cargo'}
+            >
+              <ListItemIcon>
+                <CargoIcon />
+              </ListItemIcon>
+              <ListItemText primary="Free Flight Cargo" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+
+        {menuItems.map((item) => (
+          <ListItemButton
+            key={item.text}
+            onClick={() => navigate(item.path)}
+            selected={location.pathname === item.path}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItemButton>
+        ))}
+        <ListItem>
+          <ListItemIcon>{darkMode ? <LightModeIcon /> : <DarkModeIcon />}</ListItemIcon>
+          <Switch checked={darkMode} onChange={handleThemeChange} sx={{ ml: 1 }} />
         </ListItem>
-      ))}
-      <ListItem>
-        <ListItemIcon>{darkMode ? <LightModeIcon /> : <DarkModeIcon />}</ListItemIcon>
-        <Switch checked={darkMode} onChange={handleThemeChange} sx={{ ml: 1 }} />
-      </ListItem>
-    </List>
-    <Divider />
-    <List>
-      <ListItem button onClick={handleLogout}>
-        <ListItemIcon>
-          <LogoutIcon />
-        </ListItemIcon>
-        <ListItemText primary="Logout" />
-      </ListItem>
-    </List>
-  </div>
-);
+      </List>
+      <Divider />
+      <List>
+        <ListItemButton onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItemButton>
+      </List>
+    </div>
+  );
+};
 
 const Navbar = () => {
   const [userData, setUserData] = useState(null);
