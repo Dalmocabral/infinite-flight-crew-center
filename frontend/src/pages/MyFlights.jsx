@@ -276,7 +276,7 @@ const MyFlights = () => {
                     </TableCell>
                     <TableCell>
                         <Chip
-                        label={flight.status || 'Scheduled'}
+                        label={flight.status === 'Scheduled' ? 'scheduled' : flight.status || 'Scheduled'}
                         size="small"
                         color={
                             flight.status === 'Approved'
@@ -285,7 +285,14 @@ const MyFlights = () => {
                             ? 'error'
                             : 'warning'
                         }
-                        sx={{ fontWeight: 'bold' }}
+                        sx={{ 
+                            fontWeight: 'bold',
+                            ...(flight.status === 'Scheduled' && { 
+                                bgcolor: '#4caf50', 
+                                color: 'white',
+                                borderColor: '#4caf50' 
+                            })
+                        }}
                         />
                          {flight.status === "Rejected" && (
                             <Tooltip title={flight.observation || "No observation available"}  placement="top" arrow>

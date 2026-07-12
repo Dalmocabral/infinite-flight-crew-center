@@ -612,7 +612,7 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell>
                     <Chip
-                        label={flight.status || "Scheduled"}
+                        label={flight.status === 'Scheduled' ? 'scheduled' : flight.status || "Scheduled"}
                         size="small"
                         color={
                         flight.status === "Approved"
@@ -621,7 +621,14 @@ const Dashboard = () => {
                             ? "error"
                             : "warning"
                         }
-                        sx={{ fontWeight: 'bold' }}
+                        sx={{ 
+                            fontWeight: 'bold',
+                            ...(flight.status === 'Scheduled' && { 
+                                bgcolor: '#4caf50', 
+                                color: 'white',
+                                borderColor: '#4caf50' 
+                            })
+                        }}
                     />
                     </TableCell>
                     <TableCell>
