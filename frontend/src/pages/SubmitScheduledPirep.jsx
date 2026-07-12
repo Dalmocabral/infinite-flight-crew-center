@@ -101,6 +101,19 @@ const SubmitScheduledPirep = () => {
       );
 
       if (match) {
+        const ifFlightTime = dayjs(match.created);
+        const bookingTime = dayjs(formData.registration_date);
+        
+        if (ifFlightTime.isBefore(bookingTime)) {
+            setSubmissionType('Manual');
+            setApiMessage({ 
+                type: 'error', 
+                text: 'Dispatch Fraud Detected: The flight session in Infinite Flight started BEFORE this flight was booked on the panel. The PIREP cannot be auto-validated. Please review the Book Flight rules in the Wiki.' 
+            });
+            setIsVerifying(false);
+            return;
+        }
+
         let matchedInternalAc = aircraftList.find(ac => 
             ac.if_id && match.aircraftId && ac.if_id.toLowerCase() === match.aircraftId.toLowerCase()
         );

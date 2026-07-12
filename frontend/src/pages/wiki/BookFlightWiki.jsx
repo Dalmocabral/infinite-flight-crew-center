@@ -60,6 +60,21 @@ const BookFlightWiki = () => {
             </Box>
 
         </Box>
+
+            <Divider sx={{ my: 4 }} />
+
+            <Typography variant="h5" fontWeight="bold" sx={{ color: '#1976d2', mb: 2 }}>
+                4. Dispatch & Anti-Cheat Rules
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+                To maintain the highest level of realism, Free Flights are subject to strict dispatch rules:
+            </Typography>
+            <Box component="ul" sx={{ mb: 3, lineHeight: 1.8 }}>
+                <li><strong>Dispatch Fraud:</strong> You <em>MUST</em> book your flight on the panel <strong>before</strong> you spawn and start the flight in Infinite Flight. If the system detects that your simulator session started before the flight was booked, the PIREP will be rejected for Dispatch Fraud. You cannot fly first and book later!</li>
+                <li><strong>24-Hour Expiration:</strong> A booked flight represents an active dispatch. If you do not complete the flight within <strong>24 hours</strong> of booking it, the schedule will automatically expire and be deleted from your Dashboard.</li>
+            </Box>
+
+        </Box>
     );
 };
 

@@ -87,6 +87,19 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
     serializer_class = PirepsFlightSerializer
     queryset = PirepsFlight.objects.all()
 
+    def list(self, request, *args, **kwargs):
+        # Auto-expire scheduled Free Flights older than 24 hours
+        from django.utils import timezone
+        import datetime
+        expiration_date = timezone.now() - datetime.timedelta(hours=24)
+        PirepsFlight.objects.filter(
+            status='Scheduled',
+            flight_type__in=['Free Flight Pax', 'Free Flight Cargo'],
+            registration_date__lt=expiration_date
+        ).delete()
+        
+        return super().list(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         req_status = self.request.data.get('status', 'In Review')
         if req_status not in ['Scheduled', 'In Review', 'Approved']:
