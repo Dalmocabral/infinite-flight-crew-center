@@ -88,7 +88,11 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
     queryset = PirepsFlight.objects.all()
 
     def perform_create(self, serializer):
-        pirep = serializer.save(pilot=self.request.user, status="In Review")
+        req_status = self.request.data.get('status', 'In Review')
+        if req_status not in ['Scheduled', 'In Review', 'Approved']:
+            req_status = 'In Review'
+            
+        pirep = serializer.save(pilot=self.request.user, status=req_status)
         
         # Tentaremos buscar os dados no Logbook do Infinite Flight se não for um submission Manual (ou mesmo se for, podemos tentar)
         if pirep.submission_type == "Auto" and self.request.user.usernameIFC:
@@ -201,9 +205,9 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
         instance = self.get_object()
         if instance.pilot != request.user:
             raise PermissionDenied("Você não tem permissão para editar este PIREP.")
-        if instance.status != "In Review":
+        if instance.status not in ["In Review", "Scheduled"]:
             return Response(
-                {"detail": "Este PIREP não pode ser editado porque não está em análise."},
+                {"detail": "Este PIREP não pode ser editado porque não está em análise nem agendado."},
                 status=status.HTTP_403_FORBIDDEN,
             )
         serializer = self.get_serializer(instance, data=request.data, partial=True)
