@@ -96,6 +96,26 @@ Uma aplicação silenciosa (React Native) que roda no dispositivo do piloto em b
 
 ---
 
+## ✈️ Como Registrar seus Voos (PIREPs)
+
+O sistema suporta diferentes tipos de voos para dar liberdade ao piloto, com processos de validação automáticos e manuais.
+
+### 1. Voos de Turnê (World Tour)
+- Vá até a página da Turnê desejada e clique em **Fly Leg** na perna que deseja voar.
+- Após concluir o voo, clique em **Submit PIREP** (Nuvem verde).
+- O sistema tentará **buscar automaticamente** seu voo na API do Infinite Flight usando seus aeroportos de partida e chegada. Se encontrado, o voo é aprovado imediatamente! Caso contrário, você pode enviar manualmente para revisão da diretoria.
+
+### 2. Voos Livres (Book Flight - Pax / Cargo)
+Você não precisa se prender apenas às turnês! Pode criar planos de voo livres:
+- No menu lateral (abaixo de Dashboard), clique em **Book Flight**.
+- Escolha entre **Free Flight Pax** (Passageiros) ou **Free Flight Cargo** (Carga).
+- Preencha os dados do seu plano de voo (Companhia, Número, Origem, Destino e Aeronave) e confirme.
+- O seu voo aparecerá no seu **Dashboard** e em **My Flights** com a etiqueta verdinha `scheduled`.
+- **Após realizar o voo no simulador**, vá na tabela de voos, encontre o voo agendado e clique no ícone da **Nuvem Verde (Action)**.
+- O sistema usará a **Auto-Validação** cruzando os dados do seu Logbook na API do Infinite Flight. Se bater com o que você agendou, é aprovado na hora!
+
+---
+
 ## ⚙️ Como Rodar Localmente (Desenvolvimento)
 
 Quer contribuir ou dar uma olhada no código? Siga as instruções:
