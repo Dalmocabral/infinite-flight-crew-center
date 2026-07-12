@@ -108,7 +108,7 @@ const SubmitScheduledPirep = () => {
             setSubmissionType('Manual');
             setApiMessage({ 
                 type: 'error', 
-                text: 'Dispatch Fraud Detected: The flight session in Infinite Flight started BEFORE this flight was booked on the panel. The PIREP cannot be auto-validated. Please review the Book Flight rules in the Wiki.' 
+                text: 'Unable to Validate PIREP Automatically. We detected that your Infinite Flight session started before this flight was scheduled in the dispatch panel. As a result, the PIREP could not be validated automatically. This can happen if the flight session is opened before the dispatch is created. Please review the Book Flight rules in the Wiki for more information. If you believe this was detected in error, feel free to contact the support team for assistance.' 
             });
             setIsVerifying(false);
             return;
