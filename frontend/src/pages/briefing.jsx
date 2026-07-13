@@ -380,7 +380,7 @@ const Briefing = () => {
                         <Grid item xs={6}>
                           <Box sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 2, textAlign: 'center' }}>
                             <Typography variant="caption" color="rgba(255,255,255,0.5)">CENTERLINE</Typography>
-                            <Typography variant="h6" fontWeight="bold" sx={{ color: (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline) && Math.abs(r.centerline) <= 4.0) ? '#00e676' : (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline) && Math.abs(r.centerline) <= 8.0) ? '#ffeb3b' : '#f44336' }}>
+                            <Typography variant="h6" fontWeight="bold" sx={{ color: (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline) && Math.abs(r.centerline) <= 5.0) ? '#00e676' : (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline) && Math.abs(r.centerline) <= 10.0) ? '#ffeb3b' : '#f44336' }}>
                               {(r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline)) ? Math.abs(r.centerline).toFixed(1) + ' m' : 'N/A'}
                             </Typography>
                           </Box>
@@ -447,42 +447,31 @@ const Briefing = () => {
                           // VS Touchdown (FPM)
                           if (r.vs_touchdown !== null && r.vs_touchdown !== undefined && !isNaN(r.vs_touchdown)) {
                             const vs = Math.abs(r.vs_touchdown);
-                            if (vs > 200) {
-                              if (vs <= 400) scoringList.push({ reason: `Normal landing (${vs} FPM)`, penalty: -1.0 });
-                              else if (vs <= 600) scoringList.push({ reason: `Firm landing (${vs} FPM)`, penalty: -3.0 });
-                              else if (vs <= 1000) scoringList.push({ reason: `Hard landing (${vs} FPM)`, penalty: -6.0 });
-                              else scoringList.push({ reason: `Extremely hard landing (${vs} FPM)`, penalty: -10.0 });
-                            } else {
-                              scoringList.push({ reason: `Smooth landing (${vs} FPM) ✓`, penalty: 0.0 });
-                            }
+                            if (vs <= 200) scoringList.push({ reason: `Smooth landing (${vs} FPM) ✓`, penalty: 0.0 });
+                            else if (vs <= 400) scoringList.push({ reason: `Normal landing (${vs} FPM)`, penalty: -1.0 });
+                            else if (vs <= 600) scoringList.push({ reason: `Firm landing (${vs} FPM)`, penalty: -3.0 });
+                            else if (vs <= 1000) scoringList.push({ reason: `Hard landing (${vs} FPM)`, penalty: -6.0 });
+                            else scoringList.push({ reason: `Extremely hard landing (${vs} FPM)`, penalty: -10.0 });
                           }
 
                           // G Force
                           if (r.g_force !== null && r.g_force !== undefined && !isNaN(r.g_force)) {
                             const g = r.g_force;
-                            if (g < 1.05) scoringList.push({ reason: `Greased landing (${g.toFixed(2)}G)`, penalty: -0.5 });
-                            else if (g <= 1.40) scoringList.push({ reason: `Great landing (${g.toFixed(2)}G) ✓`, penalty: 0.0 });
-                            else if (g <= 2.00) scoringList.push({ reason: `Hard landing (${g.toFixed(2)}G)`, penalty: -((g - 1.40) * 3.0) });
-                            else scoringList.push({ reason: `Severe G-Force (${g.toFixed(2)}G)`, penalty: -(1.8 + (g - 2.00) * 8.0) });
-                          }
-
-                          // Bounces
-                          if (r.bounce_count !== null && r.bounce_count !== undefined && !isNaN(r.bounce_count) && r.bounce_count > 0) {
-                            scoringList.push({ reason: `${r.bounce_count} bounce(s)`, penalty: r.bounce_count === 1 ? -4.0 : -10.0 });
+                            if (g <= 1.20) scoringList.push({ reason: `Perfect landing (${g.toFixed(2)}G) ✓`, penalty: 0.0 });
+                            else if (g <= 1.50) scoringList.push({ reason: `Firm landing (${g.toFixed(2)}G)`, penalty: -1.0 });
+                            else if (g <= 2.00) scoringList.push({ reason: `Hard landing (${g.toFixed(2)}G)`, penalty: -3.0 });
+                            else if (g <= 3.00) scoringList.push({ reason: `Very hard landing (${g.toFixed(2)}G)`, penalty: -6.0 });
+                            else scoringList.push({ reason: `Severe G-Force (${g.toFixed(2)}G)`, penalty: -10.0 });
                           }
 
                           // Centerline
                           if (r.centerline !== null && r.centerline !== undefined && !isNaN(r.centerline)) {
                             const c = Math.abs(r.centerline);
-                            if (c <= 4.0) scoringList.push({ reason: `On centerline (${c.toFixed(1)}m) ✓`, penalty: 0.0 });
-                            else scoringList.push({ reason: `Off centerline deviation (${c.toFixed(1)}m)`, penalty: -((c - 4.0) * 0.16) });
-                          }
-
-                          // Touchdown Zone Distance
-                          if (r.distance_from_1kft !== null && r.distance_from_1kft !== undefined && !isNaN(r.distance_from_1kft) && r.distance_from_1kft !== 0.0) {
-                            const dist = r.distance_from_1kft;
-                            if (dist > 330.0) scoringList.push({ reason: `Long landing (Touchdown beyond TDZ: ${dist.toFixed(1)}m)`, penalty: -((dist - 330.0) * 0.0035) });
-                            else scoringList.push({ reason: `On TDZ core / Aiming Point (${dist.toFixed(1)}m) ✓`, penalty: 0.0 });
+                            if (c <= 5.0) scoringList.push({ reason: `On centerline (${c.toFixed(1)}m) ✓`, penalty: 0.0 });
+                            else if (c <= 10.0) scoringList.push({ reason: `Slight deviation (${c.toFixed(1)}m)`, penalty: -1.0 });
+                            else if (c <= 15.0) scoringList.push({ reason: `Moderate deviation (${c.toFixed(1)}m)`, penalty: -3.0 });
+                            else if (c <= 25.0) scoringList.push({ reason: `Severe deviation (${c.toFixed(1)}m)`, penalty: -6.0 });
+                            else scoringList.push({ reason: `Extreme deviation (${c.toFixed(1)}m)`, penalty: -10.0 });
                           }
 
                           // Infinite Flight Violations
