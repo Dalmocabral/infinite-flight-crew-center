@@ -6,7 +6,7 @@
 .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
 .btn-signup { background-color: var(--accent-green); color: white !important; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
 .status-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; margin-right: 5px; display: inline-block; }
-.hero-section { position: relative; min-height: 100vh; background: linear-gradient(to bottom, #2c2e3e 0%, #1a1c29 100%); display: flex; align-items: center; padding: 120px 5% 40px; }
+.hero-section { position: relative; height: 100vh; background: linear-gradient(to bottom, #2c2e3e 0%, #1a1c29 100%); display: flex; align-items: center; padding: 0 5%; }
 .container { display: flex; width: 100%; max-width: 1200px; margin: 0 auto; justify-content: space-between; align-items: center; z-index: 2; }
 .hero-content { flex: 1; }
 .hero-visual { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }

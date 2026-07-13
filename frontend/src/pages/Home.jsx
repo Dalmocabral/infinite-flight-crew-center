@@ -143,11 +143,11 @@ const Home = () => {
             <Button color="inherit" component={Link} to="/" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
                 Home
             </Button>
+            <Button color="inherit" component={Link} to="/wiki/members" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
+                Wiki World
+            </Button>
             <Button color="inherit" component={Link} to="/register" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
                 Sign Up
-            </Button>
-            <Button color="inherit" component={Link} to="/wiki" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
-                Wiki World
             </Button>
             <Button 
                 variant="outlined" 
@@ -168,11 +168,11 @@ const Home = () => {
       </AppBar>
 
       {/* Main Content */}
-      <main className={styles['hero-section']} style={{ background: 'transparent' }}>
+      <main className={styles['hero-section']} style={{ background: 'transparent', paddingTop: '100px' }}>
         <div className={styles.container} style={{ zIndex: 2, position: 'relative' }}>
             <motion.div 
                 className={styles['hero-content']} 
-                style={{ color: 'white', maxWidth: '600px' }}
+                style={{ color: 'white', maxWidth: '600px', marginTop: '40px' }}
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
