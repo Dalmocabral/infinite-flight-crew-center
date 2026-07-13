@@ -146,6 +146,9 @@ const Home = () => {
             <Button color="inherit" component={Link} to="/register" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
                 Sign Up
             </Button>
+            <Button color="inherit" component={Link} to="/wiki" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
+                Wiki World
+            </Button>
             <Button 
                 variant="outlined" 
                 onClick={handleLoginClick} 
