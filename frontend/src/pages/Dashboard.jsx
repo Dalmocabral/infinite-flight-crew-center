@@ -572,8 +572,8 @@ const Dashboard = () => {
                         </Box>
                     </TableCell>
                     <TableCell>{dayjs(flight.registration_date).format("MM/DD/YYYY")}</TableCell>
-                    <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'white' }} /></TableCell>
-                    <TableCell>{flight.flight_duration}</TableCell>
+                    <TableCell><Chip label={flight.status === 'Scheduled' ? 'Pending' : (flight.network || "N/A")} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: flight.status === 'Scheduled' ? 'rgba(255,255,255,0.5)' : 'white', fontStyle: flight.status === 'Scheduled' ? 'italic' : 'normal' }} /></TableCell>
+                    <TableCell>{flight.status === 'Scheduled' ? <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography> : flight.flight_duration}</TableCell>
                     <TableCell>
                       {flight.landing_report ? (
                         <Chip

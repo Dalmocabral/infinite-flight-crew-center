@@ -234,8 +234,8 @@ const MyFlights = () => {
                       </Box>
                     </TableCell>
                     <TableCell>{dayjs(flight.registration_date).format('MM/DD/YYYY')}</TableCell>
-                    {!isMobile && <TableCell><Chip label={flight.network || "N/A"} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.7)' }} /></TableCell>}
-                    {!isMobile && <TableCell>{flight.flight_duration}</TableCell>}
+                    {!isMobile && <TableCell><Chip label={flight.status === 'Scheduled' ? 'Pending' : (flight.network || "N/A")} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: flight.status === 'Scheduled' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.7)', fontStyle: flight.status === 'Scheduled' ? 'italic' : 'normal' }} /></TableCell>}
+                    {!isMobile && <TableCell>{flight.status === 'Scheduled' ? <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography> : flight.flight_duration}</TableCell>}
                     {!isMobile && (
                       <TableCell>
                         {flight.landing_report ? (
