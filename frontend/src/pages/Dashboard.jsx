@@ -594,6 +594,8 @@ const Dashboard = () => {
                             border: '1px solid currentColor',
                           }}
                         />
+                      ) : flight.status === 'Scheduled' ? (
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
                       ) : (
                         <Chip label="N/A" size="small" sx={{ fontWeight: 'bold', bgcolor: 'rgba(13,50,100,0.6)', color: '#5b8dd9', border: '1px solid #2a5298', fontSize: '0.7rem' }} />
                       )}
