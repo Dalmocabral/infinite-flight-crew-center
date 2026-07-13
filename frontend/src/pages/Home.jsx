@@ -168,11 +168,11 @@ const Home = () => {
       </AppBar>
 
       {/* Main Content */}
-      <main className={styles['hero-section']} style={{ background: 'transparent', paddingTop: '100px' }}>
+      <main className={styles['hero-section']} style={{ background: 'transparent' }}>
         <div className={styles.container} style={{ zIndex: 2, position: 'relative' }}>
             <motion.div 
                 className={styles['hero-content']} 
-                style={{ color: 'white', maxWidth: '600px', marginTop: '40px' }}
+                style={{ color: 'white', maxWidth: '600px' }}
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
