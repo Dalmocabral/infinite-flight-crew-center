@@ -177,8 +177,23 @@ const Home = () => {
               <Typography variant="h2" component="h1" gutterBottom sx={{ fontFamily: '"Orbitron", sans-serif', fontWeight: 700, textTransform: "uppercase", fontSize: { xs: '2rem', md: '4rem'}, lineHeight: 1.1, mb: 3, background: '-webkit-linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Infinite World Tour
               </Typography>
-              <Typography variant="h5" component="p" sx={{ lineHeight: 1.6, mb: 4, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
-                Welcome to the Infinite World Tour System, your gateway to exploring the virtual world of aviation in the Infinite Flight simulator! Uncover challenges, earn rewards, and connect with a global community.
+              <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 2, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
+                More than just a flight panel, this is a place where every takeoff tells a story and every landing becomes part of your journey as a pilot.
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 2, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
+                Explore routes across the globe, take on exclusive challenges, track your progress, earn new ranks, and build your own flight history. Every flight is a new opportunity to push your limits and discover how far your skills can take you.
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 2, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
+                Whether you enjoy short regional hops or long-haul adventures, passenger or cargo operations, there's always a new destination waiting for you.
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 2, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
+                And don't worry if everything feels new at first. Infinite World Tour was designed to make your flying experience more immersive, rewarding, and enjoyable, while keeping the focus on what truly matters: having fun and sharing the skies with the community. 🛫
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 2, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 300 }}>
+                Before your first flight, we highly recommend taking a look at our Wiki, available in the navigation menu. In just a few minutes, you'll learn how everything works and how to get the most out of the platform.
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.6, mb: 4, opacity: 0.9, fontSize: { xs: '0.95rem', md: '1.1rem' }, fontWeight: 500, color: '#4dabf5' }}>
+                Your next flight could be the beginning of an incredible journey. Are you ready for takeoff? 🚀
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 2, mb: 6, justifyContent: { xs: 'center', md: 'flex-start' } }}>
