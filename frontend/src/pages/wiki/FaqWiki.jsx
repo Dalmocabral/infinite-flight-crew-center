@@ -1,5 +1,6 @@
 import React from 'react';
-import { Typography, Box, Breadcrumbs, Link, Divider, Grid } from '@mui/material';
+import { Typography, Box, Breadcrumbs, Link, Divider, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const FaqWiki = () => {
     const faqs = [
@@ -15,8 +16,7 @@ const FaqWiki = () => {
             id: 'delete-flight',
             question: '2. I made a terrible landing. Can I delete my flight?',
             answer: [
-                'Yes.',
-                'As long as your flight is still marked as Pending Review, you can edit or delete it directly from the My Flights page.',
+                '**Yes.** As long as your flight is still marked as Pending Review, you can edit or delete it directly from the My Flights page.',
                 'Once the flight has been approved or rejected, it will be locked and can no longer be edited or removed.'
             ]
         },
@@ -40,8 +40,7 @@ const FaqWiki = () => {
             id: 'is-it-free',
             question: '5. Is Infinite World Tour free?',
             answer: [
-                'Absolutely!',
-                'Infinite World Tour is completely free for all registered pilots.',
+                '**Absolutely!** Infinite World Tour is completely free for all registered pilots.',
                 'Our goal is to provide a complete virtual airline experience where you can track your progress, participate in exclusive events, explore new destinations, and compete on the global leaderboards—completely free of charge.'
             ]
         },
@@ -57,8 +56,7 @@ const FaqWiki = () => {
             id: 'fly-offline',
             question: '7. Can I fly offline?',
             answer: [
-                'No.',
-                'Infinite World Tour relies on data provided by the Infinite Flight servers to validate your flights.',
+                '**No.** Infinite World Tour relies on data provided by the Infinite Flight servers to validate your flights.',
                 'Flights performed in Solo (offline) mode are not recorded online and therefore cannot be validated.',
                 'To ensure your flights are recognized, always fly on a Live Server (Casual, Training, or Expert).'
             ]
@@ -67,8 +65,7 @@ const FaqWiki = () => {
             id: 'cancel-booking',
             question: '8. Can I cancel a booked flight?',
             answer: [
-                'Yes!',
-                'You can cancel a booking at any time from your Dashboard or the My Flights page.',
+                '**Yes!** You can cancel a booking at any time from your Dashboard or the My Flights page.',
                 'If a booking is not used within 24 hours, it will automatically expire and be removed from the system.'
             ]
         },
@@ -85,8 +82,7 @@ const FaqWiki = () => {
             id: 'change-aircraft',
             question: '10. Can I change my aircraft after booking a flight?',
             answer: [
-                'No.',
-                'The aircraft you fly in Infinite Flight must be the same one selected when you booked the flight.',
+                '**No.** The aircraft you fly in Infinite Flight must be the same one selected when you booked the flight.',
                 'If you use a different aircraft, the flight cannot be validated.',
                 'If you change your mind before takeoff, simply cancel the booking and create a new one using your preferred aircraft.'
             ]
@@ -114,8 +110,7 @@ const FaqWiki = () => {
             id: 'free-flights',
             question: '13. Can I create Free Flights without joining a World Tour?',
             answer: [
-                'Yes!',
-                'You can create as many Free Flights as you\'d like through the Book Flight page.',
+                '**Yes!** You can create as many Free Flights as you\'d like through the Book Flight page.',
                 'Simply choose your departure and arrival airports, select your aircraft, and decide whether the flight will be a passenger or cargo operation. Free Flights let you explore the world without being part of a World Tour.'
             ]
         },
@@ -140,8 +135,7 @@ const FaqWiki = () => {
             id: 'any-airline',
             question: '16. Can I fly for any airline?',
             answer: [
-                'Absolutely!',
-                'Infinite World Tour is not tied to any specific virtual airline.',
+                '**Absolutely!** Infinite World Tour is not tied to any specific virtual airline.',
                 'You\'re free to choose any airline, callsign, or livery available in Infinite Flight.',
                 'Fly the way you enjoy most and create your own journey across the virtual skies.'
             ]
@@ -150,8 +144,7 @@ const FaqWiki = () => {
             id: 'specific-livery',
             question: '17. Do I have to use a specific livery?',
             answer: [
-                'No.',
-                'You may use any livery available for your aircraft.',
+                '**No.** You may use any livery available for your aircraft.',
                 'Your flight is evaluated based on the operation itself—not on the livery you choose.'
             ]
         },
@@ -159,8 +152,7 @@ const FaqWiki = () => {
             id: 'repeat-route',
             question: '18. Can I fly the same route more than once?',
             answer: [
-                'Yes!',
-                'For Free Flights, you may fly the same route as many times as you like.',
+                '**Yes!** For Free Flights, you may fly the same route as many times as you like.',
                 'For World Tours, each leg only needs to be completed once to unlock the next one. After finishing the tour, you\'re free to fly those routes again using Free Flights.'
             ]
         },
@@ -187,8 +179,7 @@ const FaqWiki = () => {
             id: 'fly-with-friends',
             question: '21. Can I fly with friends?',
             answer: [
-                'Of course!',
-                'Flying with friends is one of the best ways to enjoy Infinite Flight.',
+                '**Of course!** Flying with friends is one of the best ways to enjoy Infinite Flight.',
                 'Each pilot simply needs to create their own flight booking before departure so that every flight can be tracked and validated individually.'
             ]
         },
@@ -196,8 +187,7 @@ const FaqWiki = () => {
             id: 'daily-limit',
             question: '22. Is there a daily flight limit?',
             answer: [
-                'No.',
-                'You can complete as many flights as you like each day.',
+                '**No.** You can complete as many flights as you like each day.',
                 'Just make sure to complete or cancel your current booking before creating a new one.'
             ]
         },
@@ -213,18 +203,29 @@ const FaqWiki = () => {
         }
     ];
 
+    // Parser to make **bold** markdown-like syntax work
+    const renderText = (text) => {
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, index) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={index}>{part.slice(2, -2)}</strong>;
+            }
+            return <span key={index}>{part}</span>;
+        });
+    };
+
     return (
-        <Box>
+        <Box component="article">
             <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3, fontSize: '0.85rem' }}>
                 <Link underline="hover" color="inherit" href="#">Home</Link>
                 <Link underline="hover" color="inherit" href="#">Basics</Link>
                 <Typography color="text.primary" sx={{ fontSize: '0.85rem' }}>Frequently Asked Questions (FAQ)</Typography>
             </Breadcrumbs>
 
-            <Typography variant="h4" fontWeight="bold" sx={{ color: '#255a9e', mb: 1 }}>
+            <Typography variant="h4" component="h1" fontWeight="bold" sx={{ color: '#255a9e', mb: 1, fontFamily: '"Orbitron", sans-serif' }}>
                 Frequently Asked Questions
             </Typography>
-            <Typography variant="body1" sx={{ color: '#666', mb: 4 }}>
+            <Typography variant="body1" sx={{ color: '#505050', mb: 4 }}>
                 Quick answers to the most common questions about using our Crew Center.
             </Typography>
 
@@ -232,9 +233,9 @@ const FaqWiki = () => {
 
             <Grid container spacing={4}>
                 {/* Menu de Âncoras (Esquerda) */}
-                <Grid item xs={12} md={4} lg={3}>
+                <Grid item xs={12} md={4} lg={3} component="aside" sx={{ display: { xs: 'none', md: 'block' } }}>
                     <Box sx={{ position: 'sticky', top: '90px' }}>
-                        <Typography variant="overline" fontWeight="bold" sx={{ color: '#888', letterSpacing: 1 }}>
+                        <Typography variant="overline" component="h2" fontWeight="bold" sx={{ color: '#888', letterSpacing: 1 }}>
                             PAGE CONTENTS
                         </Typography>
                         <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0, mt: 2 }}>
@@ -260,18 +261,29 @@ const FaqWiki = () => {
 
                 {/* Conteúdo das Perguntas (Direita) */}
                 <Grid item xs={12} md={8} lg={9}>
-                    {faqs.map((faq) => (
-                        <Box key={`content-${faq.id}`} id={faq.id} sx={{ mb: 5, scrollMarginTop: '100px' }}>
-                            <Typography variant="h5" fontWeight="bold" sx={{ color: '#1976d2', mb: 1.5 }}>
-                                {faq.question}
-                            </Typography>
-                            {faq.answer.map((paragraph, idx) => (
-                                <Typography key={idx} variant="body1" sx={{ color: '#333', lineHeight: 1.7, mb: 1.5, whiteSpace: 'pre-line' }}>
-                                    {paragraph}
-                                </Typography>
-                            ))}
-                        </Box>
-                    ))}
+                    <Box component="section" sx={{ maxWidth: '850px' }}>
+                        {faqs.map((faq) => (
+                            <Accordion key={`content-${faq.id}`} id={faq.id} sx={{ mb: 2, '&:before': { display: 'none' }, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', borderRadius: '8px !important', overflow: 'hidden', backgroundColor: 'transparent' }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon sx={{ color: '#333' }} />}
+                                    aria-controls={`${faq.id}-content`}
+                                    id={`${faq.id}-header`}
+                                    sx={{ backgroundColor: 'transparent', '&:hover': { backgroundColor: 'rgba(0,0,0,0.02)' } }}
+                                >
+                                    <Typography variant="h6" component="h2" fontWeight="bold" sx={{ color: '#1976d2', fontSize: '1.1rem' }}>
+                                        {faq.question}
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails sx={{ pt: 3, pb: 3, px: { xs: 2, sm: 4 }, backgroundColor: 'transparent' }}>
+                                    {faq.answer.map((paragraph, idx) => (
+                                        <Typography key={idx} variant="body1" sx={{ color: '#333', lineHeight: 1.8, mb: idx !== faq.answer.length - 1 ? 2 : 0, whiteSpace: 'pre-line', fontFamily: '"Roboto", "Inter", sans-serif' }}>
+                                            {renderText(paragraph)}
+                                        </Typography>
+                                    ))}
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                    </Box>
                 </Grid>
             </Grid>
         </Box>
