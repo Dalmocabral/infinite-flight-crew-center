@@ -607,16 +607,19 @@ const Dashboard = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
-                        size="small"
-                        variant="outlined"
-                        sx={{ 
-                          fontWeight: 'bold', 
-                          borderColor: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.3)', 
-                          color: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.7)' 
-                        }}
-                      />
+                      {flight.status === 'Scheduled' ? (
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
+                      ) : (
+                        <Chip
+                          label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
+                          size="small"
+                          sx={{
+                            bgcolor: flight.submission_type === 'Auto' ? 'rgba(77,171,245,0.2)' : 'rgba(255,152,0,0.2)',
+                            color: flight.submission_type === 'Auto' ? '#4dabf5' : '#ff9800',
+                            border: '1px solid currentColor',
+                          }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell>
                     <Chip

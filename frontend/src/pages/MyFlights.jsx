@@ -271,16 +271,20 @@ const MyFlights = () => {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
-                        size="small"
-                        variant="outlined"
-                        sx={{ 
-                          fontWeight: 'bold', 
-                          borderColor: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.3)', 
-                          color: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.7)' 
-                        }}
-                      />
+                      {flight.status === 'Scheduled' ? (
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
+                      ) : (
+                        <Chip
+                          label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
+                          size="small"
+                          variant="outlined"
+                          sx={{ 
+                            fontWeight: 'bold', 
+                            borderColor: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.3)', 
+                            color: flight.submission_type === 'Auto' ? '#4dabf5' : 'rgba(255,255,255,0.7)' 
+                          }}
+                        />
+                      )}
                     </TableCell>
                     <TableCell>
                         <Chip
