@@ -4,11 +4,11 @@ import { Typography, Box, Breadcrumbs, Link, Divider, Grid } from '@mui/material
 const FaqWiki = () => {
     const faqs = [
         {
-            id: 'email-confirmation',
-            question: '1. I didn\'t receive my confirmation email.',
+            id: 'email-recovery',
+            question: '1. I didn\'t receive my password recovery email.',
             answer: [
                 'First, check your Spam or Junk folder. Depending on your email provider, such as Gmail or Outlook, the message may also appear in the Promotions or Offers tab.',
-                'If you still haven\'t received the email after a few minutes, please contact our team through our Discord server. We\'ll be happy to verify your account and, if necessary, activate it manually.'
+                'If you still haven\'t received the email after a few minutes, please contact our team through our Discord server. We\'ll be happy to assist you in recovering your access.'
             ]
         },
         {
