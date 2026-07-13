@@ -10,6 +10,7 @@ import Awards from './pages/Awards';
 import Dashboard from './pages/Dashboard';
 import EditPirep from './pages/EditPirep';
 import Home from './pages/Home';
+import AboutUs from './pages/AboutUs';
 import Login from './pages/Login';
 import Map from './pages/Map';
 import Members from './pages/Members';
@@ -43,6 +44,7 @@ function App() {
       <Routes>
         {/* Public Routes - Wrapped in Box or Fragment to apply theme background if needed, but pages handle it self */}
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutUs />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/request/passworld_reset" element={<PassworldResetRequest />} />

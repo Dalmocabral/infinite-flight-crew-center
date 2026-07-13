@@ -61,15 +61,37 @@ const BookFlightWiki = () => {
             <Divider sx={{ my: 4 }} />
 
             <Typography variant="h5" fontWeight="bold" sx={{ color: '#1976d2', mb: 2 }}>
-                4. Dispatch & Anti-Cheat Rules
+                4. Flight Dispatch Rules
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
-                To maintain the highest level of realism, Free Flights are subject to strict dispatch rules:
+                To ensure a fair, organized, and immersive experience for all pilots, every flight follows a few simple dispatch rules.
             </Typography>
-            <Box component="ul" sx={{ mb: 3, lineHeight: 1.8 }}>
-                <li><strong>Dispatch Fraud:</strong> You <em>MUST</em> book your flight on the panel <strong>before</strong> you spawn and start the flight in Infinite Flight. If the system detects that your simulator session started before the flight was booked, the PIREP will be rejected for Dispatch Fraud. You cannot fly first and book later!</li>
-                <li><strong>24-Hour Expiration:</strong> A booked flight represents an active dispatch. If you do not complete the flight within <strong>24 hours</strong> of booking it, the schedule will automatically expire and be deleted from your Dashboard.</li>
-            </Box>
+
+            <Typography variant="h6" fontWeight="bold" sx={{ mt: 3, mb: 1 }}>
+                Book your flight before takeoff
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+                Always book your flight through Infinite World Tour <strong>before</strong> starting your session in Infinite Flight.
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+                The system automatically compares your booking time with the time your flight session begins. If your session starts before the flight is booked, the flight cannot be validated automatically.
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+                <strong>Simply put:</strong> book your flight first, then begin your operation in Infinite Flight.
+            </Typography>
+
+            <Typography variant="h6" fontWeight="bold" sx={{ mt: 3, mb: 1 }}>
+                24-Hour Booking Validity
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+                Each flight booking remains active for 24 hours.
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 1 }}>
+                If the flight is not completed within this period, the booking will automatically expire and be removed from your dashboard. If you still wish to fly the route, simply create a new booking.
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+                <strong>Tip:</strong> Only book your flight when you're ready to begin your operation. This helps prevent your booking from expiring before the flight is completed.
+            </Typography>
 
         </Box>
     );
