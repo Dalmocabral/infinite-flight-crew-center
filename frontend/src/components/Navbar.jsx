@@ -52,6 +52,7 @@ const menuItems = [
   { text: 'Members', icon: <GroupIcon />, path: '/app/members' },
   { text: 'World Tour', icon: <AwardsIcon />, path: '/app/awards' },
   { text: 'My Flights', icon: <FlightsIcon />, path: '/app/my-flights' },
+  { text: 'All Flights', icon: <FlightsIcon />, path: '/app/all-flights' },
   { text: 'My World Tour', icon: <PublicIcon />, path: '/app/my-awards' },
   { text: 'Map', icon: <MapIcon />, path: '/app/map' },
 

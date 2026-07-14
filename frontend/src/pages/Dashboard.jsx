@@ -366,6 +366,215 @@ const Dashboard = () => {
     }
   };
   
+  const scheduledFlights = flights.filter(f => f.status === 'Scheduled');
+  const recentFlights = flights.filter(f => f.status !== 'Scheduled');
+
+  const renderFlightTable = (flightsList, title, limit = 5) => {
+    if (flightsList.length === 0 && title === "Scheduled Flights") return null;
+
+    return (
+      <Paper sx={{ width: '100%', mb: 4, overflow: 'hidden', p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+             <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 1 }}>
+                {title === "Scheduled Flights" && <FlightTakeoffIcon sx={{ color: '#9c27b0' }} />}
+                {title}
+             </Typography>
+             {title === "Recent Flights" && (
+                <Button variant="outlined" size="small" onClick={() => navigate('/app/my-flights')}>View All</Button>
+             )}
+          </Box>
+        <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader>
+            <TableHead>
+                <TableRow>
+                {[
+                    "Flight", "Dep", "Arr", "Date", "Network", "Duration", "Rating", "Aircraft", "Type", "Validation", "Status", "Action",
+                ].map((header, index) => (
+                    <TableCell
+                    key={index}
+                    sx={{ fontWeight: "bold", cursor: "pointer" }}
+                    onClick={() => handleSort(header.toLowerCase())}
+                    >
+                    {header} {sortConfig.key === header.toLowerCase() && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </TableCell>
+                ))}
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {flightsList.slice(0, limit).map((flight) => (
+                <TableRow key={flight.id} hover>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
+                            <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold', whiteSpace: 'nowrap'}}>{flight.flight_icao} {flight.flight_number}</Typography>
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {airportsData[flight.departure_airport]?.country && (
+                                <img
+                                    src={`https://flagcdn.com/w320/${airportsData[flight.departure_airport].country.toLowerCase()}.png`}
+                                    alt={airportsData[flight.departure_airport].country}
+                                    style={{ width: '20px', borderRadius: '3px' }}
+                                />
+                            )}
+                            {flight.departure_airport}
+                        </Box>
+                    </TableCell>
+                    <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {airportsData[flight.arrival_airport]?.country && (
+                                <img
+                                    src={`https://flagcdn.com/w320/${airportsData[flight.arrival_airport].country.toLowerCase()}.png`}
+                                    alt={airportsData[flight.arrival_airport].country}
+                                    style={{ width: '20px', borderRadius: '3px' }}
+                                />
+                            )}
+                            {flight.arrival_airport}
+                        </Box>
+                    </TableCell>
+                    <TableCell>{dayjs(flight.registration_date).format("MM/DD/YYYY")}</TableCell>
+                    <TableCell><Chip label={flight.status === 'Scheduled' ? 'Pending' : (flight.network || "N/A")} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: flight.status === 'Scheduled' ? 'rgba(255,255,255,0.5)' : 'white', fontStyle: flight.status === 'Scheduled' ? 'italic' : 'normal' }} /></TableCell>
+                    <TableCell>{flight.status === 'Scheduled' ? <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography> : flight.flight_duration}</TableCell>
+                    <TableCell>
+                      {flight.status === 'Scheduled' ? (
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
+                      ) : flight.landing_report ? (
+                        <Chip
+                          label={Number(flight.landing_report.score).toFixed(2)}
+                          size="small"
+                          sx={{
+                            fontWeight: 'bold', minWidth: 54,
+                            bgcolor:
+                              flight.landing_report.score >= 7 ? 'rgba(0,230,118,0.2)' :
+                              flight.landing_report.score >= 6 ? 'rgba(77,171,245,0.2)' :
+                              flight.landing_report.score >= 5 ? 'rgba(255,235,59,0.2)' :
+                              'rgba(244,67,54,0.2)',
+                            color:
+                              flight.landing_report.score >= 7 ? '#00e676' :
+                              flight.landing_report.score >= 6 ? '#4dabf5' :
+                              flight.landing_report.score >= 5 ? '#ffeb3b' :
+                              '#f44336',
+                            border: '1px solid currentColor',
+                          }}
+                        />
+                      ) : (
+                        <Chip label="N/A" size="small" sx={{ fontWeight: 'bold', bgcolor: 'rgba(13,50,100,0.6)', color: '#5b8dd9', border: '1px solid #2a5298', fontSize: '0.7rem' }} />
+                      )}
+                    </TableCell>
+                    <TableCell>{flight.aircraft}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                        {flight.flight_type || 'World Tour'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {flight.status === 'Scheduled' ? (
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
+                      ) : (
+                        <Chip
+                          label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
+                          size="small"
+                          sx={{
+                            bgcolor: flight.submission_type === 'Auto' ? 'rgba(77,171,245,0.2)' : 'rgba(255,152,0,0.2)',
+                            color: flight.submission_type === 'Auto' ? '#4dabf5' : '#ff9800',
+                            border: '1px solid currentColor',
+                          }}
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                    <Chip
+                        label={flight.status === 'Scheduled' ? 'scheduled' : flight.status || "Scheduled"}
+                        size="small"
+                        color={
+                        flight.status === "Approved"
+                            ? "success"
+                            : flight.status === "Rejected"
+                            ? "error"
+                            : "warning"
+                        }
+                        sx={{ 
+                            fontWeight: 'bold',
+                            ...(flight.status === 'Scheduled' && { 
+                                bgcolor: '#9c27b0', 
+                                color: 'white',
+                                borderColor: '#9c27b0' 
+                            })
+                        }}
+                    />
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                    <Tooltip title="Details">
+                        <IconButton size="small" href={`/app/briefing/${flight.id}`} sx={{ color: '#4dabf5' }}>
+                        <PreviewIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    {flight.status === 'Scheduled' && (
+                        <Tooltip title="Generate SimBrief">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                                const baseUrl = 'https://www.simbrief.com/system/dispatch.php';
+                                const params = new URLSearchParams({
+                                  orig: flight.departure_airport,
+                                  dest: flight.arrival_airport,
+                                  fltnum: flight.flight_number,
+                                  type: flight.aircraft,
+                                });
+                                window.open(`${baseUrl}?${params.toString()}`, '_blank');
+                            }}
+                            sx={{ color: '#ff9800' }}
+                          >
+                            <FlightTakeoffIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                    )}
+                    {flight.status === 'Scheduled' && (
+                        <Tooltip title="Submit PIREP">
+                          <IconButton
+                            size="small"
+                            onClick={() => navigate(`/app/submit-scheduled-pirep/${flight.id}`)}
+                            sx={{ color: '#4caf50' }}
+                          >
+                            <CloudUploadIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                    )}
+                    <Tooltip title="Edit">
+                        <span>
+                        <IconButton
+                            size="small"
+                            onClick={() => handleEdit(flight.id)}
+                            disabled={flight.status === "Approved" || flight.status === "Rejected"}
+                            sx={{ color: '#fff' }}
+                        >
+                            <EditIcon fontSize="small"  />
+                        </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <span>
+                        <IconButton
+                            size="small"
+                            disabled={flight.status === "Approved"}
+                            onClick={() => handleDeleteClick(flight.id)}
+                            sx={{ color: '#f50057' }}
+                        >
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                        </span>
+                    </Tooltip>
+                    </TableCell>
+                </TableRow>
+                ))}
+            </TableBody>
+            </Table>
+        </TableContainer>
+      </Paper>
+    );
+  };
+
   return (
     <Container maxWidth="xl">
         <motion.div
@@ -504,212 +713,10 @@ const Dashboard = () => {
         </Paper>
       )}
 
-      {/* Flights Table */}
-      <Paper sx={{ width: '100%', mb: 4, overflow: 'hidden', p: 2 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Recent Flights</Typography>
-             <Button variant="outlined" size="small" onClick={() => navigate('/app/my-flights')}>View All</Button>
-          </Box>
-        <TableContainer sx={{ maxHeight: 440 }}>
-            <Table stickyHeader>
-            <TableHead>
-                <TableRow>
-                {[
-                    "Flight",
-                    "Dep",
-                    "Arr",
-                    "Date",
-                    "Network",
-                    "Duration",
-                    "Rating",
-                    "Aircraft",
-                    "Type",
-                    "Validation",
-                    "Status",
-                    "Action",
-                ].map((header, index) => (
-                    <TableCell
-                    key={index}
-                    sx={{ fontWeight: "bold", cursor: "pointer" }}
-                    onClick={() => handleSort(header.toLowerCase())}
-                    >
-                    {header} {sortConfig.key === header.toLowerCase() && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                    </TableCell>
-                ))}
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {flights.slice(0, 5).map((flight) => (
-                <TableRow key={flight.id} hover>
-                    <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
-                            <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold', whiteSpace: 'nowrap'}}>{flight.flight_icao} {flight.flight_number}</Typography>
-                        </Box>
-                    </TableCell>
-                    <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {airportsData[flight.departure_airport]?.country && (
-                                <img
-                                    src={`https://flagcdn.com/w320/${airportsData[flight.departure_airport].country.toLowerCase()}.png`}
-                                    alt={airportsData[flight.departure_airport].country}
-                                    style={{ width: '20px', borderRadius: '3px' }}
-                                />
-                            )}
-                            {flight.departure_airport}
-                        </Box>
-                    </TableCell>
-                    <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {airportsData[flight.arrival_airport]?.country && (
-                                <img
-                                    src={`https://flagcdn.com/w320/${airportsData[flight.arrival_airport].country.toLowerCase()}.png`}
-                                    alt={airportsData[flight.arrival_airport].country}
-                                    style={{ width: '20px', borderRadius: '3px' }}
-                                />
-                            )}
-                            {flight.arrival_airport}
-                        </Box>
-                    </TableCell>
-                    <TableCell>{dayjs(flight.registration_date).format("MM/DD/YYYY")}</TableCell>
-                    <TableCell><Chip label={flight.status === 'Scheduled' ? 'Pending' : (flight.network || "N/A")} size="small" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.3)', color: flight.status === 'Scheduled' ? 'rgba(255,255,255,0.5)' : 'white', fontStyle: flight.status === 'Scheduled' ? 'italic' : 'normal' }} /></TableCell>
-                    <TableCell>{flight.status === 'Scheduled' ? <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography> : flight.flight_duration}</TableCell>
-                    <TableCell>
-                      {flight.landing_report ? (
-                        <Chip
-                          label={Number(flight.landing_report.score).toFixed(2)}
-                          size="small"
-                          sx={{
-                            fontWeight: 'bold', minWidth: 54,
-                            bgcolor:
-                              flight.landing_report.score >= 7 ? 'rgba(0,230,118,0.2)' :
-                              flight.landing_report.score >= 6 ? 'rgba(77,171,245,0.2)' :
-                              flight.landing_report.score >= 5 ? 'rgba(255,235,59,0.2)' :
-                              'rgba(244,67,54,0.2)',
-                            color:
-                              flight.landing_report.score >= 7 ? '#00e676' :
-                              flight.landing_report.score >= 6 ? '#4dabf5' :
-                              flight.landing_report.score >= 5 ? '#ffeb3b' :
-                              '#f44336',
-                            border: '1px solid currentColor',
-                          }}
-                        />
-                      ) : flight.status === 'Scheduled' ? (
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
-                      ) : (
-                        <Chip label="N/A" size="small" sx={{ fontWeight: 'bold', bgcolor: 'rgba(13,50,100,0.6)', color: '#5b8dd9', border: '1px solid #2a5298', fontSize: '0.7rem' }} />
-                      )}
-                    </TableCell>
-                    <TableCell>{flight.aircraft}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                        {flight.flight_type || 'World Tour'}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      {flight.status === 'Scheduled' ? (
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>Pending</Typography>
-                      ) : (
-                        <Chip
-                          label={flight.submission_type === 'Auto' ? 'Auto' : 'Manual'}
-                          size="small"
-                          sx={{
-                            bgcolor: flight.submission_type === 'Auto' ? 'rgba(77,171,245,0.2)' : 'rgba(255,152,0,0.2)',
-                            color: flight.submission_type === 'Auto' ? '#4dabf5' : '#ff9800',
-                            border: '1px solid currentColor',
-                          }}
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell>
-                    <Chip
-                        label={flight.status === 'Scheduled' ? 'scheduled' : flight.status || "Scheduled"}
-                        size="small"
-                        color={
-                        flight.status === "Approved"
-                            ? "success"
-                            : flight.status === "Rejected"
-                            ? "error"
-                            : "warning"
-                        }
-                        sx={{ 
-                            fontWeight: 'bold',
-                            ...(flight.status === 'Scheduled' && { 
-                                bgcolor: '#9c27b0', 
-                                color: 'white',
-                                borderColor: '#9c27b0' 
-                            })
-                        }}
-                    />
-                    </TableCell>
-                    <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                    <Tooltip title="Details">
-                        <IconButton size="small" href={`/app/briefing/${flight.id}`} sx={{ color: '#4dabf5' }}>
-                        <PreviewIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    {flight.status === 'Scheduled' && (
-                        <Tooltip title="Generate SimBrief">
-                          <IconButton
-                            size="small"
-                            onClick={() => {
-                                const baseUrl = 'https://www.simbrief.com/system/dispatch.php';
-                                const params = new URLSearchParams({
-                                  orig: flight.departure_airport,
-                                  dest: flight.arrival_airport,
-                                  fltnum: flight.flight_number,
-                                  type: flight.aircraft,
-                                });
-                                window.open(`${baseUrl}?${params.toString()}`, '_blank');
-                            }}
-                            sx={{ color: '#ff9800' }}
-                          >
-                            <FlightTakeoffIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                    )}
-                    {flight.status === 'Scheduled' && (
-                        <Tooltip title="Submit PIREP">
-                          <IconButton
-                            size="small"
-                            onClick={() => navigate(`/app/submit-scheduled-pirep/${flight.id}`)}
-                            sx={{ color: '#4caf50' }}
-                          >
-                            <CloudUploadIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                    )}
-                    <Tooltip title="Edit">
-                        <span>
-                        <IconButton
-                            size="small"
-                            onClick={() => handleEdit(flight.id)}
-                            disabled={flight.status === "Approved" || flight.status === "Rejected"}
-                            sx={{ color: '#fff' }}
-                        >
-                            <EditIcon fontSize="small"  />
-                        </IconButton>
-                        </span>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                        <span>
-                        <IconButton
-                            size="small"
-                            disabled={flight.status === "Approved"}
-                            onClick={() => handleDeleteClick(flight.id)}
-                            sx={{ color: '#f50057' }}
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                        </span>
-                    </Tooltip>
-                    </TableCell>
-                </TableRow>
-                ))}
-            </TableBody>
-            </Table>
-        </TableContainer>
-      </Paper>
+      {/* Scheduled Flights Table */}
+      {renderFlightTable(scheduledFlights, "Scheduled Flights", 10)}
+      {/* Recent Flights Table */}
+      {renderFlightTable(recentFlights, "Recent Flights", 5)}
 
       {/* Charts */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

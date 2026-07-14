@@ -82,7 +82,7 @@ const renderLogo = (liveryId, logoData, icao = null) => {
     );
 };
 
-const MyFlights = () => {
+const AllFlights = () => {
   const [flights, setFlights] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -122,7 +122,7 @@ const MyFlights = () => {
 
   const fetchFlights = async () => {
     try {
-      const response = await AxiosInstance.get('/myflights/'); // Correct endpoint based on original file
+      const response = await AxiosInstance.get('/pirepsflight/'); // Correct endpoint based on original file
       const sortedFlights = response.data.sort(
         (a, b) => new Date(b.registration_date) - new Date(a.registration_date)
       );
@@ -132,12 +132,13 @@ const MyFlights = () => {
     }
   };
 
-  const filteredFlights = flights.filter((flight) =>
-     flight.status !== 'Scheduled' && (
-       flight.flight_number.toLowerCase().includes(search.toLowerCase()) ||
-       flight.flight_icao.toLowerCase().includes(search.toLowerCase())
-     )
-  );
+  const filteredFlights = flights.filter((flight) => {
+     if (flight.status === 'Scheduled') return false;
+     const s = search.toLowerCase();
+     const flightInfo = (flight.flight_icao + ' ' + flight.flight_number).toLowerCase();
+     const pilotName = (flight.pilot_name || '').toLowerCase();
+     return flightInfo.includes(s) || pilotName.includes(s);
+  });
 
   const handleChangePage = (event, newPage) => setPage(newPage);
   
@@ -147,7 +148,7 @@ const MyFlights = () => {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -155,11 +156,11 @@ const MyFlights = () => {
       >
         <Box sx={{ display: 'flex', flexDirection: {xs: 'column', sm: 'row'}, justifyContent: 'space-between', alignItems: 'center', my: 3, gap: 2 }}>
            <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#fff', textShadow: '0 0 10px rgba(77, 171, 245, 0.5)' }}>
-            MY FLIGHTS
+            ALL FLIGHTS
           </Typography>
           <TextField
             variant="outlined"
-            placeholder="Search by Flight Number..."
+            placeholder="Search by Flight Number or Pilot..."
             size="small"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -187,6 +188,7 @@ const MyFlights = () => {
                 <TableHead>
                 <TableRow>
                     <TableCell sx={{ fontWeight: 'bold' }}>Flight</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Pilot</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Dep</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Arr</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
@@ -209,6 +211,12 @@ const MyFlights = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
                         <Typography sx={{fontFamily: 'monospace', fontWeight: 'bold', whiteSpace: 'nowrap'}}>{flight.flight_icao} {flight.flight_number}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {renderFlag(flight.pilot_country)}
+                        <Typography sx={{ fontWeight: 'bold', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{flight.pilot_name || 'N/A'}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -381,4 +389,4 @@ const MyFlights = () => {
   );
 };
 
-export default MyFlights;
+export default AllFlights;

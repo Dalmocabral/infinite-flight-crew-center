@@ -19,6 +19,7 @@ import MyFlights from './pages/MyFlights';
 import PasswordResetConfirm from './pages/PassworldResetConfirm';
 import PassworldResetRequest from './pages/PassworldResetRequest';
 import PirepsFlights from './pages/PirepsFlights';
+import AllFlights from './pages/AllFlights';
 import ProfileEdit from './pages/ProfileEdit';
 import Register from './pages/Register';
 import UserDetail from './pages/UserDetail';
@@ -77,6 +78,7 @@ function App() {
             <Route path="awards" element={<Awards />} />
             <Route path="my-flights" element={<MyFlights />} />
             <Route path="my-awards" element={<MyAwards />} />
+            <Route path="all-flights" element={<AllFlights />} />
             <Route path="map" element={<Map />} />
 
             <Route path="members" element={<Members />} />
