@@ -85,7 +85,7 @@ const BookFlight = () => {
         </Box>
 
         <Typography variant="body1" color="textSecondary" mb={4}>
-          Schedule your flight below. Once scheduled, it will appear in your Dashboard and My Flights. 
+          Schedule your flight below. Once scheduled, it will appear in your Dashboard under Scheduled Flights. 
           You can generate a SimBrief flight plan and submit your PIREP when you are ready to fly.
         </Typography>
 
