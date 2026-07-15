@@ -140,28 +140,27 @@ const Home = () => {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontFamily: '"Orbitron", sans-serif', fontWeight: 700, color: '#4dabf5', letterSpacing: { xs: '0px', md: '2px' }, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                 INFINITE WORLD TOUR
             </Typography>
-            <Button color="inherit" component={Link} to="/" sx={{ mx: 0.5, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-                Home
+            <Button color="inherit" component={Link} to="/wiki/faq" sx={{ mx: { xs: 0.2, md: 1 }, fontFamily: '"Orbitron", sans-serif', fontSize: { xs: '0.65rem', md: '0.875rem' }, letterSpacing: '1px' }}>
+                Wiki
             </Button>
-            <Button color="inherit" component={Link} to="/wiki/faq" sx={{ mx: 0.5, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-                Wiki World
+            <Button color="inherit" component={Link} to="/about" sx={{ mx: { xs: 0.2, md: 1 }, fontFamily: '"Orbitron", sans-serif', fontSize: { xs: '0.65rem', md: '0.875rem' }, letterSpacing: '1px' }}>
+                About
             </Button>
-            <Button color="inherit" component={Link} to="/about" sx={{ mx: 0.5, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-                About Us
-            </Button>
-            <Button color="inherit" component={Link} to="/register" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
+            <Button color="inherit" component={Link} to="/register" sx={{ mx: { xs: 0.2, md: 1 }, fontFamily: '"Orbitron", sans-serif', fontSize: { xs: '0.65rem', md: '0.875rem' }, letterSpacing: '1px' }}>
                 Sign Up
             </Button>
             <Button 
                 variant="outlined" 
                 onClick={handleLoginClick} 
                 sx={{ 
-                    ml: { xs: 1, md: 2 }, 
+                    ml: { xs: 0.5, md: 2 }, 
                     borderColor: '#4dabf5', 
                     color: '#4dabf5',
+                    fontFamily: '"Orbitron", sans-serif',
                     "&:hover": { borderColor: '#fff', color: '#fff' },
-                    fontSize: { xs: '0.75rem', md: '0.875rem' },
-                    padding: { xs: '4px 10px', md: '5px 15px' }
+                    fontSize: { xs: '0.65rem', md: '0.875rem' },
+                    padding: { xs: '3px 8px', md: '5px 15px' },
+                    letterSpacing: '1px'
                 }}
             >
                 Login
@@ -218,36 +217,36 @@ const Home = () => {
               </Box>
 
               {/* Estatísticas */}
-              <Grid container spacing={2} className={styles['stats-section']}>
-                <Grid item xs={6} sm={6} md={6}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 4 }}>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
                   <FlightStats
                     label="Total Flights"
                     value={stats.total_flights}
                     icon={<Flight fontSize="large" sx={{ color: '#4dabf5' }} />} 
                   />
-                </Grid>
-                <Grid item xs={6} sm={6} md={6}>
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
                   <FlightStats
                     label="Total Hours"
                     value={stats.total_hours}
                     icon={<Schedule fontSize="large" sx={{ color: '#e91e63' }} />} 
                   />
-                </Grid>
-                <Grid item xs={6} sm={6} md={6}>
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
                   <FlightStats
                     label="Total Pilots"
                     value={stats.total_pilots}
                     icon={<Person fontSize="large" sx={{ color: '#00e676' }} />} 
                   />
-                </Grid>
-                <Grid item xs={6} sm={6} md={6}>
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
                   <FlightStats
                     label="Airports"
                     value={stats.total_airports}
                     icon={<Public fontSize="large" sx={{ color: '#ff9100' }} />} 
                   />
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
             </motion.div> 
 
             <motion.div 
