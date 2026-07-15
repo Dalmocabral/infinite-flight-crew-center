@@ -9,6 +9,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TableRow,
     Typography
@@ -86,15 +87,15 @@ const MyAwards = () => {
           MY WORLD TOURS
         </Typography>
 
-        <Paper sx={{ width: '100%', mb: 4, overflow: 'hidden', p: 0, borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <TableContainer component={Paper} sx={{ width: '100%', mb: 4, overflowX: 'auto', p: 0, borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
             <Table>
                 <TableHead>
                 <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Tour</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Start Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>Completion Date</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', width: '30%' }}>Progress</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'right' }}>Action</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', minWidth: 150 }}>Tour</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', minWidth: 100 }}>Start Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', minWidth: 100 }}>Completion Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', width: '30%', minWidth: 150 }}>Progress</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold', textAlign: 'right', minWidth: 100 }}>Action</TableCell>
                 </TableRow>
                 </TableHead>
                 <TableBody>
@@ -132,7 +133,7 @@ const MyAwards = () => {
                         variant="outlined"
                         size="small"
                         onClick={() => handleDetailsClick(award)}
-                        sx={{ borderColor: '#4dabf5', color: '#4dabf5', '&:hover': { borderColor: '#fff', color: '#fff' } }}
+                        sx={{ borderColor: '#4dabf5', color: '#4dabf5', '&:hover': { borderColor: '#fff', color: '#fff' }, whiteSpace: 'nowrap' }}
                         >
                         Details
                         </Button>
@@ -151,7 +152,7 @@ const MyAwards = () => {
                 )}
                 </TableBody>
             </Table>
-        </Paper>
+        </TableContainer>
       </motion.div>
     </Container>
   );

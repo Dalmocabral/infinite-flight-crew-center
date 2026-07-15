@@ -269,7 +269,7 @@ class DashboardViewSet(viewsets.ViewSet):
         
         # Top 5 Duração de Voo
         top_duration = (
-            PirepsFlight.objects.filter(status="Approved")
+            PirepsFlight.objects.filter(status="Approved", pilot__is_active_pilot=True)
             .values("pilot__first_name", "pilot__last_name", "pilot__country")
             .annotate(total_duration=Sum("flight_duration"))
             .order_by("-total_duration")[:5]
@@ -277,7 +277,7 @@ class DashboardViewSet(viewsets.ViewSet):
 
         # Top 5 Total de Voos
         top_flights = (
-            PirepsFlight.objects.filter(status="Approved")
+            PirepsFlight.objects.filter(status="Approved", pilot__is_active_pilot=True)
             .values("pilot__first_name", "pilot__last_name", "pilot__country")
             .annotate(total_flights=Count("id"))
             .order_by("-total_flights")[:5]
@@ -285,7 +285,8 @@ class DashboardViewSet(viewsets.ViewSet):
 
         # Top 5 Média de Rating (Usando a tabela LandingReport)
         top_ratings = (
-            LandingReport.objects.values("pilot__first_name", "pilot__last_name", "pilot__country")
+            LandingReport.objects.filter(pilot__is_active_pilot=True)
+            .values("pilot__first_name", "pilot__last_name", "pilot__country")
             .annotate(avg_score=Avg("score"))
             .order_by("-avg_score")[:5]
         )

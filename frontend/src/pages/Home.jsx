@@ -140,13 +140,13 @@ const Home = () => {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontFamily: '"Orbitron", sans-serif', fontWeight: 700, color: '#4dabf5', letterSpacing: { xs: '0px', md: '2px' }, fontSize: { xs: '1rem', md: '1.25rem' } }}>
                 INFINITE WORLD TOUR
             </Typography>
-            <Button color="inherit" component={Link} to="/" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
+            <Button color="inherit" component={Link} to="/" sx={{ mx: 0.5, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
                 Home
             </Button>
-            <Button color="inherit" component={Link} to="/wiki/faq" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
+            <Button color="inherit" component={Link} to="/wiki/faq" sx={{ mx: 0.5, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
                 Wiki World
             </Button>
-            <Button color="inherit" component={Link} to="/about" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
+            <Button color="inherit" component={Link} to="/about" sx={{ mx: 0.5, fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
                 About Us
             </Button>
             <Button color="inherit" component={Link} to="/register" sx={{ mx: 1, display: { xs: 'none', md: 'block' } }}>
