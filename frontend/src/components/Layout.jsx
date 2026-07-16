@@ -43,8 +43,8 @@ const Layout = () => {
           p: { xs: 2, md: 4 }, 
           position: 'relative', 
           zIndex: 1,
-          width: { sm: `calc(100% - 240px)` }, // Respect drawer width
-          ml: { sm: `240px` }, // Offset for fixed drawer
+          width: { md: `calc(100% - 240px)` }, // Respect drawer width
+          ml: { md: `240px` }, // Offset for fixed drawer
         }}
       >
         <div style={{ minHeight: '64px' }} /> {/* Spacer for AppBar */}
