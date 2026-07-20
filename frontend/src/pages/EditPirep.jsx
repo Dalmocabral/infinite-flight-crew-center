@@ -69,18 +69,21 @@ const EditPirep = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
   
-    const formattedDuration = formData.flight_duration.format("HH:mm:ss");
-  
-    const updatedData = {
-      ...formData,
-      flight_duration: formattedDuration,
-    };
+    const updatedData = { ...formData };
+    
+    if (updatedData.status === 'Scheduled') {
+        delete updatedData.flight_duration;
+        delete updatedData.network;
+    } else {
+        updatedData.flight_duration = formData.flight_duration.format("HH:mm:ss");
+    }
   
     try {
       await AxiosInstance.patch(`/pirepsflight/${id}/`, updatedData);
       navigate("/app/dashboard"); 
     } catch (error) {
       console.error("Erro ao editar PIREP:", error);
+      alert("Error saving flight. Check the console for more details.");
     }
   };
   
@@ -179,31 +182,35 @@ const EditPirep = () => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TimeField
-                  label="Flight Duration (HH:mm)"
-                  value={formData.flight_duration}
-                  onChange={handleTimeChange}
-                  format="HH:mm"
-                  fullWidth
-                />
-              </Grid>
+              {formData.status !== 'Scheduled' && (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <TimeField
+                      label="Flight Duration (HH:mm)"
+                      value={formData.flight_duration}
+                      onChange={handleTimeChange}
+                      format="HH:mm"
+                      fullWidth
+                    />
+                  </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>Network</InputLabel>
-                  <Select
-                    name="network"
-                    value={formData.network}
-                    onChange={handleChange}
-                    label="Network"
-                  >
-                    <MenuItem value="Casual">Casual</MenuItem>
-                    <MenuItem value="Training">Training</MenuItem>
-                    <MenuItem value="Expert">Expert</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth required>
+                      <InputLabel>Network</InputLabel>
+                      <Select
+                        name="network"
+                        value={formData.network}
+                        onChange={handleChange}
+                        label="Network"
+                      >
+                        <MenuItem value="Casual">Casual</MenuItem>
+                        <MenuItem value="Training">Training</MenuItem>
+                        <MenuItem value="Expert">Expert</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </>
+              )}
 
               <Grid item xs={12}>
                 <Button 

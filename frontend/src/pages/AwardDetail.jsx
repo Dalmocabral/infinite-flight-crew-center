@@ -271,17 +271,29 @@ const AwardDetail = () => {
                           </IconButton>
                       </TableCell>
                       <TableCell>
-                          <Button
-                            variant={leg.pirep_status === 'Approved' ? "outlined" : "contained"}
-                            color={leg.pirep_status === 'Approved' ? "success" : "primary"}
-                            size="small"
-                            onClick={() => {
-                              navigate('/app/pirepsflights', { state: { leg, award } });
-                            }}
-                            disabled={leg.pirep_status === 'Approved'}
-                          >
-                            {leg.pirep_status === 'Approved' ? 'Completed' : 'Fly Leg'}
-                          </Button>
+                          {(() => {
+                              const isCompleted = leg.pirep_status === 'Approved';
+                              const isPreviousCompleted = index === 0 || flightLegs[index - 1].pirep_status === 'Approved';
+                              const isDisabled = isCompleted || !isPreviousCompleted;
+
+                              return (
+                                  <Button
+                                    variant={isCompleted ? "outlined" : "contained"}
+                                    color={isCompleted ? "success" : "primary"}
+                                    size="small"
+                                    onClick={() => {
+                                      if (!isPreviousCompleted) {
+                                          alert(`Por favor, complete a Leg ${index} antes de iniciar esta.`);
+                                          return;
+                                      }
+                                      navigate('/app/pirepsflights', { state: { leg, award } });
+                                    }}
+                                    disabled={isDisabled}
+                                  >
+                                    {isCompleted ? 'Completed' : 'Fly Leg'}
+                                  </Button>
+                              );
+                          })()}
                       </TableCell>
                     </TableRow>
                   ))}
