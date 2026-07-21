@@ -86,6 +86,7 @@ const WikiLayout = () => {
                     {renderNavItem('Live Map', 'live-map')}
                     {renderNavItem('Members', 'members')}
                     {renderNavItem('Book Flight', 'book-flight')}
+                    {renderNavItem('Rejected Flights', 'rejected-flights')}
                 </List>
 
                 <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', my: 1 }} />
