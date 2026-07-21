@@ -289,32 +289,34 @@ const MyFlights = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                        <Chip
-                        label={flight.status === 'Scheduled' ? 'scheduled' : flight.status || 'Scheduled'}
-                        size="small"
-                        color={
-                            flight.status === 'Approved'
-                            ? 'success'
-                            : flight.status === 'Rejected'
-                            ? 'error'
-                            : 'warning'
-                        }
-                        sx={{ 
-                            fontWeight: 'bold',
-                            ...(flight.status === 'Scheduled' && { 
-                                bgcolor: '#9c27b0', 
-                                color: 'white',
-                                borderColor: '#9c27b0' 
-                            })
-                        }}
-                        />
-                         {flight.status === "Rejected" && (
-                            <Tooltip title={flight.observation || "No observation available"}  placement="top" arrow>
-                                <AssignmentLateIcon
-                                    sx={{ ml: 1, color: "#d32f2f", verticalAlign: "middle", fontSize: '1.2rem' }} 
-                                />
-                            </Tooltip>
-                        )}
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Chip
+                            label={flight.status === 'Scheduled' ? 'scheduled' : flight.status || 'Scheduled'}
+                            size="small"
+                            color={
+                                flight.status === 'Approved'
+                                ? 'success'
+                                : flight.status === 'Rejected'
+                                ? 'error'
+                                : 'warning'
+                            }
+                            sx={{ 
+                                fontWeight: 'bold',
+                                ...(flight.status === 'Scheduled' && { 
+                                    bgcolor: '#9c27b0', 
+                                    color: 'white',
+                                    borderColor: '#9c27b0' 
+                                })
+                            }}
+                            />
+                             {flight.status === "Rejected" && (
+                                <Tooltip title={flight.observation || "No observation available"}  placement="top" arrow>
+                                    <AssignmentLateIcon
+                                        sx={{ ml: 1, color: "#d32f2f", verticalAlign: "middle", fontSize: '1.2rem' }} 
+                                    />
+                                </Tooltip>
+                            )}
+                        </Box>
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap' }}>
                       {flight.status === 'Scheduled' && (
