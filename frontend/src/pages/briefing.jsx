@@ -91,6 +91,7 @@ const Briefing = () => {
   const [flightData, setFlightData] = useState(null);
   const [logoData, setLogoData] = useState([]);
   const [airportsData, setAirportsData] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const mapContainer = useRef(null);
   const map = useRef(null);
 
@@ -104,9 +105,21 @@ const Briefing = () => {
       }
     };
 
+    const fetchUser = async () => {
+      try {
+        if (localStorage.getItem('token')) {
+          const res = await AxiosInstance.get('/users/me/');
+          setCurrentUser(res.data);
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+    };
+
     fetchFlightDetails();
     fetchLogos();
     fetchAirports();
+    fetchUser();
   }, [id]);
 
   const fetchLogos = async () => {
@@ -617,6 +630,7 @@ const Briefing = () => {
             </Paper>
           )}
 
+        {currentUser && flightData && currentUser.id === flightData.pilot && (
           <Paper sx={{ 
               mb: 3, 
               backgroundColor: 'rgba(10, 25, 41, 0.7)', 
@@ -637,6 +651,7 @@ const Briefing = () => {
               </Box>
             </CardContent>
           </Paper>
+        )}
         </Grid>
 
         {/* Map Column */}
