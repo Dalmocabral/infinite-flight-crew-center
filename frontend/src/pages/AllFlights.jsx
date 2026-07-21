@@ -133,7 +133,7 @@ const AllFlights = () => {
   };
 
   const filteredFlights = flights.filter((flight) => {
-     if (flight.status === 'Scheduled') return false;
+     if (flight.status !== 'Approved' && flight.status !== 'Rejected') return false;
      const s = search.toLowerCase();
      const flightInfo = (flight.flight_icao + ' ' + flight.flight_number).toLowerCase();
      const pilotName = (flight.pilot_name || '').toLowerCase();
@@ -316,13 +316,7 @@ const AllFlights = () => {
                             })
                         }}
                         />
-                         {flight.status === "Rejected" && (
-                            <Tooltip title={flight.observation || "No observation available"}  placement="top" arrow>
-                                <AssignmentLateIcon
-                                    sx={{ ml: 1, color: "#d32f2f", verticalAlign: "middle", fontSize: '1.2rem' }} 
-                                />
-                            </Tooltip>
-                        )}
+                        
                     </TableCell>
                     <TableCell sx={{ whiteSpace: 'nowrap' }}>
                       {flight.status === 'Scheduled' && (
