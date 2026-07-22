@@ -162,12 +162,14 @@ const Analytics = () => {
     
     // Day vs Night specific logic
     const [userIfFlights, setUserIfFlights] = useState([]);
+    const [userData, setUserData] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const userRes = await AxiosInstance.get('users/me/');
                 if (userRes.data && userRes.data.usernameIFC) {
+                    setUserData(userRes.data);
                     const statusRes = await ApiService.userStatusByUsername(userRes.data.usernameIFC);
                     if (statusRes && statusRes.userId) {
                         const ifFlights = await ApiService.getUserFlights(statusRes.userId);
@@ -180,16 +182,6 @@ const Analytics = () => {
         };
         fetchUserData();
     }, []);
-
-    let totalDayTime = 0;
-    let totalNightTime = 0;
-    userIfFlights.forEach(f => {
-        totalDayTime += (f.dayTime || 0);
-        totalNightTime += (f.nightTime || 0);
-    });
-    const totalIfTime = totalDayTime + totalNightTime;
-    const dayPercent = totalIfTime > 0 ? Math.round((totalDayTime / totalIfTime) * 100) : 0;
-    const nightPercent = totalIfTime > 0 ? Math.round((totalNightTime / totalIfTime) * 100) : 0;
 
     const mapContainer = useRef(null);
     const [distanceStats, setDistanceStats] = useState({ short: 0, medium: 0, long: 0, ultra: 0, total: 0 });
@@ -328,6 +320,30 @@ const Analytics = () => {
     }, [flights, airportsData]);
 
     const approvedFlights = flights.filter(f => f.status === 'Approved');
+    
+    // Match VA flights with IF logbook to calculate Day/Night exactly
+    const userVAFlights = approvedFlights.filter(f => f.pilot && userData && f.pilot.usernameIFC === userData.usernameIFC);
+    let totalDayTime = 0;
+    let totalNightTime = 0;
+    let availableIfFlights = [...userIfFlights];
+
+    userVAFlights.forEach(vaFlight => {
+        const matchIndex = availableIfFlights.findIndex(ifF => 
+            ifF.originAirport === vaFlight.departure_airport && 
+            ifF.destinationAirport === vaFlight.arrival_airport
+        );
+        if (matchIndex !== -1) {
+            const match = availableIfFlights[matchIndex];
+            totalDayTime += (match.dayTime || 0);
+            totalNightTime += (match.nightTime || 0);
+            availableIfFlights.splice(matchIndex, 1);
+        }
+    });
+
+    const totalIfTime = totalDayTime + totalNightTime;
+    const dayPercent = totalIfTime > 0 ? Math.round((totalDayTime / totalIfTime) * 100) : 0;
+    const nightPercent = totalIfTime > 0 ? Math.round((totalNightTime / totalIfTime) * 100) : 0;
+
     const totalApproved = approvedFlights.length;
     const uniqueRoutes = new Set(approvedFlights.map(f => `${f.departure_airport}-${f.arrival_airport}`)).size;
     
