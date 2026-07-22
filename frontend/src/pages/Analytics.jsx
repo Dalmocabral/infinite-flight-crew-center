@@ -322,7 +322,7 @@ const Analytics = () => {
     const approvedFlights = flights.filter(f => f.status === 'Approved');
     
     // Match VA flights with IF logbook to calculate Day/Night exactly
-    const userVAFlights = approvedFlights.filter(f => f.pilot && userData && f.pilot.usernameIFC === userData.usernameIFC);
+    const userVAFlights = approvedFlights.filter(f => userData && f.pilot === userData.id);
     let totalDayTime = 0;
     let totalNightTime = 0;
     let availableIfFlights = [...userIfFlights];
