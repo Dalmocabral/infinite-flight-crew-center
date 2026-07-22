@@ -154,14 +154,45 @@ const TopStatsWidget = ({ flights, airportsData, logoData, ifLiveries, page }) =
 };
 
 const Analytics = () => {
+    const mapRef = useRef(null);
     const [flights, setFlights] = useState([]);
     const [airportsData, setAirportsData] = useState({});
     const [logoData, setLogoData] = useState([]);
-    const mapContainer = useRef(null);
-    const mapRef = useRef(null);
-    const [distanceStats, setDistanceStats] = useState({ short: 0, medium: 0, long: 0, ultra: 0, total: 0 });
-
     const [ifLiveries, setIfLiveries] = useState([]);
+    
+    // Day vs Night specific logic
+    const [userIfFlights, setUserIfFlights] = useState([]);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userRes = await AxiosInstance.get('users/me/');
+                if (userRes.data && userRes.data.usernameIFC) {
+                    const statusRes = await ApiService.userStatusByUsername(userRes.data.usernameIFC);
+                    if (statusRes && statusRes.userId) {
+                        const ifFlights = await ApiService.getUserFlights(statusRes.userId);
+                        setUserIfFlights(ifFlights || []);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching user IF flights:", error);
+            }
+        };
+        fetchUserData();
+    }, []);
+
+    let totalDayTime = 0;
+    let totalNightTime = 0;
+    userIfFlights.forEach(f => {
+        totalDayTime += (f.dayTime || 0);
+        totalNightTime += (f.nightTime || 0);
+    });
+    const totalIfTime = totalDayTime + totalNightTime;
+    const dayPercent = totalIfTime > 0 ? Math.round((totalDayTime / totalIfTime) * 100) : 0;
+    const nightPercent = totalIfTime > 0 ? Math.round((totalNightTime / totalIfTime) * 100) : 0;
+
+    const mapContainer = useRef(null);
+    const [distanceStats, setDistanceStats] = useState({ short: 0, medium: 0, long: 0, ultra: 0, total: 0 });
 
     useEffect(() => {
         const fetchFlights = async () => {
@@ -419,7 +450,7 @@ const Analytics = () => {
             </Grid>
 
             <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid item xs={12} md={8}>
                     <Card sx={{ p: 3, minHeight: 400 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                             Flight Activity (30 Days)
@@ -427,6 +458,37 @@ const Analytics = () => {
                         <Box sx={{ height: 320 }}>
                             <Bar data={barChartData} options={barChartOptions} />
                         </Box>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, minHeight: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)' }}>
+                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center' }}>
+                            Your Day vs Night Flights
+                        </Typography>
+                        
+                        <Box sx={{ width: 180, height: 180, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <img src="/src/assets/sun_moon.png" alt="Day vs Night" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </Box>
+
+                        <Grid container spacing={2} sx={{ width: '100%', px: 1 }}>
+                            <Grid item xs={6}>
+                                <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(255, 193, 7, 0.1)', border: '1px solid rgba(255,193,7,0.3)', borderRadius: 2 }}>
+                                    <Typography variant="h4" sx={{ color: '#ffc107', fontWeight: 'bold' }}>{dayPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white' }}>DAY</Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(144, 202, 249, 0.1)', border: '1px solid rgba(144,202,249,0.3)', borderRadius: 2 }}>
+                                    <Typography variant="h4" sx={{ color: '#90caf9', fontWeight: 'bold' }}>{nightPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white' }}>NIGHT</Typography>
+                                </Box>
+                            </Grid>
+                        </Grid>
+                        {userIfFlights.length === 0 && (
+                            <Typography variant="caption" sx={{ mt: 2, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                                Searching recent IF logbook...
+                            </Typography>
+                        )}
                     </Card>
                 </Grid>
             </Grid>
