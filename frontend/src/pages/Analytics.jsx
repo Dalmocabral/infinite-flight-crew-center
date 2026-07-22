@@ -451,22 +451,22 @@ const Analytics = () => {
 
             <Grid container spacing={3}>
                 <Grid item xs={12} md={8}>
-                    <Card sx={{ p: 3, minHeight: 400 }}>
+                    <Card sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                             Flight Activity (30 Days)
                         </Typography>
-                        <Box sx={{ height: 320 }}>
-                            <Bar data={barChartData} options={barChartOptions} />
+                        <Box sx={{ flexGrow: 1, minHeight: 320, position: 'relative' }}>
+                            <Bar data={barChartData} options={{...barChartOptions, maintainAspectRatio: false}} />
                         </Box>
                     </Card>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, minHeight: 400, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)' }}>
+                    <Card sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)' }}>
                         <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center' }}>
                             Your Day vs Night Flights
                         </Typography>
                         
-                        <Box sx={{ width: 180, height: 180, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Box sx={{ width: 280, height: 280, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <img src="/sun_moon.png" alt="Day vs Night" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </Box>
 
