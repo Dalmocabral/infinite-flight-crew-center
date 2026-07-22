@@ -118,8 +118,8 @@ const ApiService = {
   },
 
   getUserFlights: (userId) => {
-    return getCached(`user_flights_${userId}`, TTL.flights, async () => {
-      const response = await axios.get(`${BASE_URL}/users/${userId}/flights?apikey=${API_KEY}`);
+    return getCached(`user_flights_100_${userId}`, TTL.flights, async () => {
+      const response = await axios.get(`${BASE_URL}/users/${userId}/flights?apikey=${API_KEY}&pageSize=100`);
       if (response.data.result && response.data.result.data) {
         return response.data.result.data;
       }
