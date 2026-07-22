@@ -237,7 +237,7 @@ const Analytics = () => {
                     
                     if (dist < 1000) { short++; lineColor = '#2ecc71'; }
                     else if (dist < 2500) { medium++; lineColor = '#f1c40f'; }
-                    else if (dist < 5000) { long++; lineColor = '#ff9800'; }
+                    else if (dist < 5000) { long++; lineColor = '#ff5722'; }
                     else { ultra++; lineColor = '#e74c3c'; }
 
                     let durationSecs = 0;
@@ -274,8 +274,8 @@ const Analytics = () => {
                     const line = L.polyline(latLngs, { color: lineColor, weight: 2, opacity: 0.6 }).addTo(mapRef.current);
                     line.bindTooltip(tooltipHtml, { sticky: true, className: 'flight-tooltip' });
 
-                    L.circleMarker([dep.lat, dep.lon], { radius: 3, color: '#000000', fillColor: '#000000', fillOpacity: 1 }).addTo(mapRef.current);
-                    L.circleMarker([arr.lat, arr.lon], { radius: 3, color: '#000000', fillColor: '#000000', fillOpacity: 1 }).addTo(mapRef.current);
+                    L.circleMarker([dep.lat, dep.lon], { radius: 2.5, color: '#ffffff', weight: 1, fillColor: '#000000', fillOpacity: 1 }).addTo(mapRef.current);
+                    L.circleMarker([arr.lat, arr.lon], { radius: 2.5, color: '#ffffff', weight: 1, fillColor: '#000000', fillOpacity: 1 }).addTo(mapRef.current);
                 }
             });
 

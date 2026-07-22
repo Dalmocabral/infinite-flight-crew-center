@@ -50,13 +50,13 @@ import Notifications from './Notifications'; // Importando o componente Notifica
 const drawerWidth = 240;
 
 const menuItems = [
-  { text: 'Members', icon: <GroupIcon />, path: '/app/members' },
-  { text: 'World Tour', icon: <AwardsIcon />, path: '/app/awards' },
   { text: 'My Flights', icon: <FlightsIcon />, path: '/app/my-flights' },
-  { text: 'All Flights', icon: <FlightsIcon />, path: '/app/all-flights' },
   { text: 'My World Tour', icon: <PublicIcon />, path: '/app/my-awards' },
+  { text: 'Analytics', icon: <AnalyticsIcon />, path: '/app/analytics' },
+  { text: 'All Flights', icon: <FlightsIcon />, path: '/app/all-flights' },
+  { text: 'World Tour', icon: <AwardsIcon />, path: '/app/awards' },
+  { text: 'Members', icon: <GroupIcon />, path: '/app/members' },
   { text: 'Map', icon: <MapIcon />, path: '/app/map' },
-
   { text: 'Wiki World Tour', icon: <MenuBookIcon />, path: '/wiki/faq' },
 ];
 
@@ -77,14 +77,6 @@ const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handle
         >
           <ListItemIcon><DashboardIcon /></ListItemIcon>
           <ListItemText primary="Dashboard" />
-        </ListItemButton>
-
-        <ListItemButton
-          onClick={() => navigate('/app/analytics')}
-          selected={location.pathname === '/app/analytics'}
-        >
-          <ListItemIcon><AnalyticsIcon /></ListItemIcon>
-          <ListItemText primary="Analytics" />
         </ListItemButton>
 
         <ListItemButton onClick={handleBookFlightClick}>
