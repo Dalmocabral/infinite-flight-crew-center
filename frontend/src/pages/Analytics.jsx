@@ -467,7 +467,7 @@ const Analytics = () => {
                         </Typography>
                         
                         <Box sx={{ width: 180, height: 180, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <img src="/src/assets/sun_moon.png" alt="Day vs Night" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            <img src="/sun_moon.png" alt="Day vs Night" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </Box>
 
                         <Grid container spacing={2} sx={{ width: '100%', px: 1 }}>
