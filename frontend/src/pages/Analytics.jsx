@@ -13,6 +13,8 @@ import {
   Title
 } from "chart.js";
 import dayjs from "dayjs";
+import greatCircle from '@turf/great-circle';
+import { point } from '@turf/helpers';
 import { Bar, Doughnut } from "react-chartjs-2";
 import AxiosInstance from "../components/AxiosInstance";
 import ApiService from "../components/ApiService";
@@ -270,7 +272,18 @@ const Analytics = () => {
                         </div>
                     `;
 
-                    const latLngs = [[dep.lat, dep.lon], [arr.lat, arr.lon]];
+                    let latLngs = [];
+                    if (dep.lat === arr.lat && dep.lon === arr.lon) {
+                        latLngs = [[dep.lat, dep.lon]];
+                    } else {
+                        try {
+                            const greatCircleLine = greatCircle(point([dep.lon, dep.lat]), point([arr.lon, arr.lat]));
+                            latLngs = greatCircleLine.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                        } catch (e) {
+                            latLngs = [[dep.lat, dep.lon], [arr.lat, arr.lon]];
+                        }
+                    }
+
                     const line = L.polyline(latLngs, { color: lineColor, weight: 2, opacity: 0.6 }).addTo(mapRef.current);
                     line.bindTooltip(tooltipHtml, { sticky: true, className: 'flight-tooltip' });
 
