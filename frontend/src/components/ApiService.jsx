@@ -118,12 +118,27 @@ const ApiService = {
   },
 
   getUserFlights: (userId) => {
-    return getCached(`user_flights_100_${userId}`, TTL.flights, async () => {
-      const response = await axios.get(`${BASE_URL}/users/${userId}/flights?apikey=${API_KEY}&pageSize=100`);
-      if (response.data.result && response.data.result.data) {
-        return response.data.result.data;
+    return getCached(`user_flights_all_${userId}`, TTL.flights, async () => {
+      let allFlights = [];
+      let page = 1;
+      let hasNextPage = true;
+      const MAX_PAGES = 5; // 500 flights total to prevent slow loading / rate limits
+
+      try {
+        while (hasNextPage && page <= MAX_PAGES) {
+          const response = await axios.get(`${BASE_URL}/users/${userId}/flights?apikey=${API_KEY}&pageSize=100&page=${page}`);
+          if (response.data && response.data.result && response.data.result.data) {
+            allFlights = [...allFlights, ...response.data.result.data];
+            hasNextPage = response.data.result.hasNextPage === true;
+            page++;
+          } else {
+            hasNextPage = false;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching IF flights pagination:", error);
       }
-      return [];
+      return allFlights;
     });
   },
   
