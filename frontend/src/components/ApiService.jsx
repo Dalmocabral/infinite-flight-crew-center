@@ -133,6 +133,13 @@ const ApiService = {
       return response.data.result || [];
     });
   },
+
+  getAircraftLiveries: () => {
+    return getCached('if_aircraft_liveries', TTL.airports, async () => {
+      const response = await axios.get(`${BASE_URL}/aircraft/liveries?apikey=${API_KEY}`);
+      return response.data.result || [];
+    });
+  },
 };
 
 export default ApiService;
