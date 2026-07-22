@@ -15,7 +15,8 @@ import {
     ExpandLess,
     ExpandMore,
     LocalMall as CargoIcon,
-    Person as PaxIcon
+    Person as PaxIcon,
+    BarChart as AnalyticsIcon
 } from '@mui/icons-material';
 import {
     AppBar,
@@ -76,6 +77,14 @@ const DrawerContent = ({ darkMode, handleThemeChange, navigate, location, handle
         >
           <ListItemIcon><DashboardIcon /></ListItemIcon>
           <ListItemText primary="Dashboard" />
+        </ListItemButton>
+
+        <ListItemButton
+          onClick={() => navigate('/app/analytics')}
+          selected={location.pathname === '/app/analytics'}
+        >
+          <ListItemIcon><AnalyticsIcon /></ListItemIcon>
+          <ListItemText primary="Analytics" />
         </ListItemButton>
 
         <ListItemButton onClick={handleBookFlightClick}>

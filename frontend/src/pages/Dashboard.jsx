@@ -278,62 +278,6 @@ const Dashboard = () => {
     (flight) => flight.status === "Approved"
   ).length;
 
-  // Filter flights from the last 30 days with status "Approved"
-  const flightsLast30Days = flights.filter((flight) => {
-    const flightDate = dayjs(flight.registration_date);
-    const today = dayjs();
-    return (
-      today.diff(flightDate, "day") <= 30 && flight.status === "Approved"
-    );
-  });
-
-  // Group flights by day for the bar chart
-  const flightsByDay = flightsLast30Days.reduce((acc, flight) => {
-    const date = dayjs(flight.registration_date).format("YYYY-MM-DD");
-    acc[date] = (acc[date] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Bar chart data
-  const barChartData = {
-    labels: Object.keys(flightsByDay),
-    datasets: [
-      {
-        label: "Flights per Day (Approved)",
-        data: Object.values(flightsByDay),
-        backgroundColor: "#4dabf5", // Light Blue
-        borderColor: "#2196f3",
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  // Group flights by aircraft type for the doughnut chart
-  const aircraftCount = flightsLast30Days.reduce((acc, flight) => {
-    acc[flight.aircraft] = (acc[flight.aircraft] || 0) + 1;
-    return acc;
-  }, {});
-
-  // Doughnut chart data
-  const doughnutChartData = {
-    labels: Object.keys(aircraftCount),
-    datasets: [
-      {
-        label: "Aircraft Types (Approved)",
-        data: Object.values(aircraftCount),
-        backgroundColor: [
-          "#4dabf5", // Blue
-          "#f50057", // Pink
-          "#2ecc71", // Green
-          "#f1c40f", // Yellow
-          "#9c27b0", // Purple
-        ],
-        borderColor: 'rgba(255,255,255,0.1)',
-        borderWidth: 1,
-      },
-    ],
-  };
-
   // Format duration from seconds to HH:MM
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -341,31 +285,6 @@ const Dashboard = () => {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
   };
 
-  const barChartOptions = {
-    responsive: true, 
-    maintainAspectRatio: false, 
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: { color: 'rgba(255,255,255,0.1)' }
-      },
-      x: {
-        grid: { color: 'rgba(255,255,255,0.1)' }
-      }
-    },
-    plugins: {
-        legend: { labels: { color: 'white' } }
-    }
-  };
-  
-  const doughnutChartOptions = {
-    responsive: true, 
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { position: 'right', labels: { color: 'white' } }
-    }
-  };
-  
   const scheduledFlights = flights.filter(f => f.status === 'Scheduled');
   const recentFlights = flights.filter(f => f.status !== 'Scheduled');
 
@@ -717,30 +636,6 @@ const Dashboard = () => {
       {renderFlightTable(scheduledFlights, "Scheduled Flights", 10)}
       {/* Recent Flights Table */}
       {renderFlightTable(recentFlights, "Recent Flights", 5)}
-
-      {/* Charts */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
-          <Card sx={{ p: 3, minHeight: 400 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>  
-            Flight Activity (30 Days)
-            </Typography>
-            <Box sx={{ height: 320 }}>
-                <Bar data={barChartData} options={barChartOptions} />
-            </Box>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ p: 3, minHeight: 400 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-            Fleet Usage
-            </Typography>
-            <Box sx={{ height: 320 }}>
-                <Doughnut data={doughnutChartData} options={doughnutChartOptions} />
-            </Box>
-          </Card>
-        </Grid>
-      </Grid>
 
       {/* Rankings Cards */}
       <Grid container spacing={3}>
