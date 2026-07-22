@@ -38,6 +38,7 @@ import DashboardWiki from './pages/wiki/DashboardWiki';
 import MembersWiki from './pages/wiki/MembersWiki';
 import BookFlightWiki from './pages/wiki/BookFlightWiki';
 import RejectedFlightsWiki from './pages/wiki/RejectedFlightsWiki';
+import AnalyticsWiki from './pages/wiki/AnalyticsWiki';
 import ReactivateAccount from './pages/ReactivateAccount';
 import InactiveProfile from './pages/InactiveProfile';
 
@@ -70,6 +71,7 @@ function App() {
             <Route path="members" element={<MembersWiki />} />
             <Route path="book-flight" element={<BookFlightWiki />} />
             <Route path="rejected-flights" element={<RejectedFlightsWiki />} />
+            <Route path="analytics" element={<AnalyticsWiki />} />
             {/* Catch-all for other unimplemented pages */}
             <Route path="*" element={<ComingSoon />} />
         </Route>
