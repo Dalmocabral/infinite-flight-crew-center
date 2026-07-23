@@ -542,7 +542,7 @@ const Analytics = () => {
                             <Grid item xs={4}>
                                 <Box sx={{ textAlign: 'center', p: 1, backgroundColor: 'rgba(255, 152, 0, 0.1)', border: '1px solid rgba(255,152,0,0.3)', borderRadius: 2 }}>
                                     <Typography variant="h6" sx={{ color: '#ff9800', fontWeight: 'bold' }}>{trainingPercent}%</Typography>
-                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.55rem' }}>TRAIN</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.55rem' }}>TRAINING</Typography>
                                 </Box>
                             </Grid>
                             <Grid item xs={4}>
