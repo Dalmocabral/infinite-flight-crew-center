@@ -19,6 +19,7 @@ router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'users', UserDetailViewSet, basename='user-detail')  # Registra a ViewSet
 router.register(r'user-metrics', UserMetricsViewSet, basename='user-metrics')
 router.register(r'user-approved-flights', UserApprovedFlightsViewSet, basename='user-approved-flights')
+router.register(r'charts', ChartViewSet, basename='charts')
 
 
 # Adicione a rota manualmente para o endpoint users/me/

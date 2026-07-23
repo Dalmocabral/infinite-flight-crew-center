@@ -23,6 +23,7 @@ import PirepsFlights from './pages/PirepsFlights';
 import AllFlights from './pages/AllFlights';
 import ProfileEdit from './pages/ProfileEdit';
 import Register from './pages/Register';
+import Charts from './pages/Charts';
 import UserDetail from './pages/UserDetail';
 import Briefing from './pages/briefing';
 import BookFlight from './pages/BookFlight';
@@ -86,6 +87,7 @@ function App() {
             <Route path="my-awards" element={<MyAwards />} />
             <Route path="all-flights" element={<AllFlights />} />
             <Route path="map" element={<Map />} />
+            <Route path="charts" element={<Charts />} />
 
             <Route path="members" element={<Members />} />
             <Route path="book-flight/pax" element={<BookFlight />} />

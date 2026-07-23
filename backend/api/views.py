@@ -758,4 +758,12 @@ class DeleteAccountView(APIView):
             return Response({'message': 'Account deleted successfully'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+
+from rest_framework import filters, viewsets
+from .serializers import ChartSerializer
+
+class ChartViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Chart.objects.all().order_by('icao')
+    serializer_class = ChartSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['icao', 'iata', 'name', 'city', 'country']

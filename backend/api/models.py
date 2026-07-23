@@ -347,5 +347,19 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         from_email="admin@myproject.com",
         to=[reset_password_token.user.email],
     )
-    msg.attach_alternative(html_message, "text/html")
     msg.send()
+
+class Chart(models.Model):
+    icao = models.CharField(max_length=10, db_index=True)
+    iata = models.CharField(max_length=10, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    region = models.CharField(max_length=100, null=True, blank=True)
+    runways = models.CharField(max_length=100, null=True, blank=True)
+    pdf_url = models.URLField(max_length=500)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.icao} - {self.name}"
+

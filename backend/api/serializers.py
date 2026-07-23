@@ -200,3 +200,8 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Announcement
         fields = '__all__'
+
+class ChartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Chart
+        fields = '__all__'
