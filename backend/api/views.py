@@ -571,6 +571,7 @@ class UserApprovedFlightsViewSet(ViewSet):
                     "network": flight.network,
                     "duration": flight.flight_duration,
                     "aircraft": flight.aircraft,
+                    "livery_id": flight.livery_id,
                     "status": flight.status,
                     "landing_report": {
                         "score": score

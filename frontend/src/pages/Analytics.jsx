@@ -202,7 +202,8 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                     departure_airport: f.departure_airport || f.dep,
                     arrival_airport: f.arrival_airport || f.arr,
                     flight_duration: f.flight_duration || f.duration,
-                    flight_number: f.flight_number || f.flight
+                    flight_number: f.flight_number || f.flight,
+                    livery_id: f.livery_id || f.livery
                 }));
                 setFlights(compatibleFlights);
             } catch (error) {
@@ -333,7 +334,10 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const approvedFlights = flights.filter(f => f.status === 'Approved');
     
     // Match VA flights with IF logbook to calculate Day/Night exactly
-    const userVAFlights = approvedFlights.filter(f => userData && f.pilot === userData.id);
+    const userVAFlights = targetUserId 
+        ? approvedFlights 
+        : approvedFlights.filter(f => userData && f.pilot === userData.id);
+        
     let totalDayTime = 0;
     let totalNightTime = 0;
     let expertCount = 0;
