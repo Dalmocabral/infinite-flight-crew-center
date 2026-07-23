@@ -43,6 +43,7 @@ const UserDetail = () => {
   const [error, setError] = useState(null);
   const [awardsPage, setAwardsPage] = useState(1);
   const [flightsPage, setFlightsPage] = useState(1);
+  const [logoData, setLogoData] = useState([]);
   const itemsPerPage = 6;
   const rowsPerPage = 5;
 
@@ -86,6 +87,7 @@ const UserDetail = () => {
         fetchInfiniteFlightData(res.data.usernameIFC);
         fetchUserMetrics(res.data.id);
         fetchApprovedFlights(res.data.id);
+        fetchLogoData();
       })
       .catch((error) => {
         console.error('Erro ao buscar os dados do usuário:', error);
