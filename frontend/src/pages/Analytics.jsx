@@ -479,7 +479,7 @@ const Analytics = () => {
             </Grid>
 
             <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={12}>
+                <Grid item xs={12} md={6}>
                     <Card sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
                             Flight Activity (30 Days)
@@ -489,30 +489,28 @@ const Analytics = () => {
                         </Box>
                     </Card>
                 </Grid>
-            </Grid>
 
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={3}>
                     <Card sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)' }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center' }}>
+                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center', fontSize: '1.1rem' }}>
                             Your Day vs Night Flights
                         </Typography>
                         
-                        <Box sx={{ width: 280, height: 280, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Box sx={{ width: '100%', height: 200, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <img src="/sun_moon.png" alt="Day vs Night" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </Box>
 
                         <Grid container spacing={2} sx={{ width: '100%', px: 1 }}>
                             <Grid item xs={6}>
                                 <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(255, 193, 7, 0.1)', border: '1px solid rgba(255,193,7,0.3)', borderRadius: 2 }}>
-                                    <Typography variant="h4" sx={{ color: '#ffc107', fontWeight: 'bold' }}>{dayPercent}%</Typography>
-                                    <Typography variant="caption" sx={{ color: 'white' }}>DAY</Typography>
+                                    <Typography variant="h5" sx={{ color: '#ffc107', fontWeight: 'bold' }}>{dayPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.65rem' }}>DAY</Typography>
                                 </Box>
                             </Grid>
                             <Grid item xs={6}>
                                 <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(144, 202, 249, 0.1)', border: '1px solid rgba(144,202,249,0.3)', borderRadius: 2 }}>
-                                    <Typography variant="h4" sx={{ color: '#90caf9', fontWeight: 'bold' }}>{nightPercent}%</Typography>
-                                    <Typography variant="caption" sx={{ color: 'white' }}>NIGHT</Typography>
+                                    <Typography variant="h5" sx={{ color: '#90caf9', fontWeight: 'bold' }}>{nightPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.65rem' }}>NIGHT</Typography>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -524,33 +522,33 @@ const Analytics = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={3}>
                     <Card sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)' }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center' }}>
+                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 'bold', color: 'white', textAlign: 'center', fontSize: '1.1rem' }}>
                             Server Preference
                         </Typography>
                         
-                        <Box sx={{ width: 280, height: 280, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Box sx={{ width: '100%', height: 200, mb: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             <img src="/server_stats.png" alt="Server Preference" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         </Box>
 
-                        <Grid container spacing={2} sx={{ width: '100%', px: 1 }}>
+                        <Grid container spacing={1} sx={{ width: '100%', px: 0 }}>
                             <Grid item xs={4}>
-                                <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(244, 67, 54, 0.1)', border: '1px solid rgba(244,67,54,0.3)', borderRadius: 2 }}>
-                                    <Typography variant="h4" sx={{ color: '#f44336', fontWeight: 'bold' }}>{casualPercent}%</Typography>
-                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.65rem' }}>CASUAL</Typography>
+                                <Box sx={{ textAlign: 'center', p: 1, backgroundColor: 'rgba(244, 67, 54, 0.1)', border: '1px solid rgba(244,67,54,0.3)', borderRadius: 2 }}>
+                                    <Typography variant="h6" sx={{ color: '#f44336', fontWeight: 'bold' }}>{casualPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.55rem' }}>CASUAL</Typography>
                                 </Box>
                             </Grid>
                             <Grid item xs={4}>
-                                <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(255, 152, 0, 0.1)', border: '1px solid rgba(255,152,0,0.3)', borderRadius: 2 }}>
-                                    <Typography variant="h4" sx={{ color: '#ff9800', fontWeight: 'bold' }}>{trainingPercent}%</Typography>
-                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.65rem' }}>TRAINING</Typography>
+                                <Box sx={{ textAlign: 'center', p: 1, backgroundColor: 'rgba(255, 152, 0, 0.1)', border: '1px solid rgba(255,152,0,0.3)', borderRadius: 2 }}>
+                                    <Typography variant="h6" sx={{ color: '#ff9800', fontWeight: 'bold' }}>{trainingPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.55rem' }}>TRAIN</Typography>
                                 </Box>
                             </Grid>
                             <Grid item xs={4}>
-                                <Box sx={{ textAlign: 'center', p: 1.5, backgroundColor: 'rgba(76, 175, 80, 0.1)', border: '1px solid rgba(76,175,80,0.3)', borderRadius: 2 }}>
-                                    <Typography variant="h4" sx={{ color: '#4caf50', fontWeight: 'bold' }}>{expertPercent}%</Typography>
-                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.65rem' }}>EXPERT</Typography>
+                                <Box sx={{ textAlign: 'center', p: 1, backgroundColor: 'rgba(76, 175, 80, 0.1)', border: '1px solid rgba(76,175,80,0.3)', borderRadius: 2 }}>
+                                    <Typography variant="h6" sx={{ color: '#4caf50', fontWeight: 'bold' }}>{expertPercent}%</Typography>
+                                    <Typography variant="caption" sx={{ color: 'white', fontSize: '0.55rem' }}>EXPERT</Typography>
                                 </Box>
                             </Grid>
                         </Grid>
