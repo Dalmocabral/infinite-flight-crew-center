@@ -112,6 +112,36 @@ const UserDetail = () => {
     }
   };
 
+  const fetchLogoData = async () => {
+    try {
+      const data = await ApiService.getAirplaneLogoData();
+      setLogoData(data);
+    } catch (error) {
+      console.error("Error fetching logo data", error);
+    }
+  };
+
+  const renderLogo = (liveryId, logoData, icao = null) => {
+    if (!logoData || !Array.isArray(logoData)) return null;
+
+    let match = liveryId ? logoData.find(item => item.LiveryId && item.LiveryId.toLowerCase() === liveryId.toLowerCase()) : null;
+
+    if (!match && icao) {
+        match = logoData.find(item => item.Icao && item.Icao.toUpperCase() === icao.toUpperCase());
+    }
+
+    if (match && match.LogoUrl) {
+        return (
+            <img 
+                src={match.LogoUrl} 
+                alt={match.Airline || "Airline Logo"} 
+                style={{ width: '40px', height: 'auto', display: 'inline-block' }} 
+            />
+        );
+    }
+    return null;
+  };
+
   const fetchUserMetrics = async (userId) => {
     try {
       const response = await AxiosInstance.get(`user-metrics/${userId}/`);
@@ -401,7 +431,14 @@ const UserDetail = () => {
                 <TableBody>
                   {paginatedFlights.map((flight) => (
                     <TableRow key={flight.id} hover>
-                      <TableCell sx={{ fontFamily: 'monospace' }}>{flight.flight}</TableCell>
+                      <TableCell sx={{ fontFamily: 'monospace' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
+                            <Typography sx={{ fontWeight: 'bold' }}>
+                                {flight.flight_icao || 'ICAO'} {flight.flight}
+                            </Typography>
+                        </Box>
+                      </TableCell>
                       <TableCell>{flight.dep}</TableCell>
                       <TableCell>{flight.arr}</TableCell>
                       <TableCell>{new Date(flight.date).toLocaleDateString()}</TableCell>

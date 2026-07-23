@@ -564,6 +564,7 @@ class UserApprovedFlightsViewSet(ViewSet):
 
                 flights_data.append({
                     "id": flight.id,
+                    "flight_icao": flight.flight_icao,
                     "flight": flight.flight_number,
                     "dep": flight.departure_airport,
                     "arr": flight.arrival_airport,
