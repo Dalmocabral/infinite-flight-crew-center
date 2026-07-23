@@ -132,12 +132,13 @@ const UserDetail = () => {
         match = logoData.find(item => item.Icao && item.Icao.toUpperCase() === icao.toUpperCase());
     }
 
-    if (match && match.LogoUrl) {
+    if (match && match.Logo) {
         return (
             <img 
-                src={match.LogoUrl} 
-                alt={match.Airline || "Airline Logo"} 
-                style={{ width: '40px', height: 'auto', display: 'inline-block' }} 
+                src={match.Logo} 
+                alt={match.LiveryName || "Airline Logo"} 
+                style={{ width: '24px', height: '24px', objectFit: 'contain', verticalAlign: 'middle' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
             />
         );
     }
