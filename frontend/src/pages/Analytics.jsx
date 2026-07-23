@@ -195,10 +195,14 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                 const sortedFlights = response.data.sort(
                     (a, b) => new Date(b.registration_date || b.date) - new Date(a.registration_date || a.date)
                 );
-                // Ensure date structure compatibility
+                // Ensure data structure compatibility between endpoints
                 const compatibleFlights = sortedFlights.map(f => ({
                     ...f,
-                    registration_date: f.registration_date || f.date
+                    registration_date: f.registration_date || f.date,
+                    departure_airport: f.departure_airport || f.dep,
+                    arrival_airport: f.arrival_airport || f.arr,
+                    flight_duration: f.flight_duration || f.duration,
+                    flight_number: f.flight_number || f.flight
                 }));
                 setFlights(compatibleFlights);
             } catch (error) {
