@@ -436,8 +436,8 @@ const UserDetail = () => {
                       <TableCell sx={{ fontFamily: 'monospace' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             {renderLogo(flight.livery_id, logoData, flight.flight_icao)}
-                            <Typography sx={{ fontWeight: 'bold' }}>
-                                {flight.flight_icao || 'ICAO'} {flight.flight}
+                            <Typography sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                                {flight.flight_icao} {flight.flight}
                             </Typography>
                         </Box>
                       </TableCell>
