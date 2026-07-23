@@ -571,7 +571,7 @@ class UserApprovedFlightsViewSet(ViewSet):
                     "network": flight.network,
                     "duration": flight.flight_duration,
                     "aircraft": flight.aircraft,
-                    "livery_id": flight.livery_id,
+                    "livery_id": str(flight.livery_id) if flight.livery_id else None,
                     "status": flight.status,
                     "landing_report": {
                         "score": score
