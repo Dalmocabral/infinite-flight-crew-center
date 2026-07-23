@@ -57,7 +57,7 @@ const menuItems = [
   { text: 'World Tour', icon: <AwardsIcon />, path: '/app/awards' },
   { text: 'Members', icon: <GroupIcon />, path: '/app/members' },
   { text: 'Map', icon: <MapIcon />, path: '/app/map' },
-  { text: 'Charts', icon: <MapIcon />, path: '/app/charts' },
+  // { text: 'Charts', icon: <MapIcon />, path: '/app/charts' }, // Ocultado para produção (Dark Launch)
   { text: 'Wiki World Tour', icon: <MenuBookIcon />, path: '/wiki/faq' },
 ];
 
