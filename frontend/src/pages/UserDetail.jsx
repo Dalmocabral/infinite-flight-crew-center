@@ -29,6 +29,7 @@ import { useParams } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import Gravatar from '../components/Gravatar';
 import ApiService from '../components/ApiService';
+import Analytics from './Analytics';
 
 const UserDetail = () => {
   const { id } = useParams();
@@ -476,6 +477,16 @@ const UserDetail = () => {
           </Typography>
         )}
       </Box>
+
+      {/* Embedded Analytics for this User */}
+      <Box sx={{ mt: 6 }}>
+        <Divider sx={{ mb: 4, borderColor: 'rgba(255,255,255,0.1)' }} />
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white', mb: 3 }}>
+          Pilot Analytics
+        </Typography>
+        <Analytics targetUserId={id} hideTitle={true} />
+      </Box>
+
       </motion.div>
     </Container>
   );

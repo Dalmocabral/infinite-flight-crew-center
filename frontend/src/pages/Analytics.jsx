@@ -153,7 +153,7 @@ const TopStatsWidget = ({ flights, airportsData, logoData, ifLiveries, page }) =
     );
 };
 
-const Analytics = () => {
+const Analytics = ({ targetUserId, hideTitle }) => {
     const mapRef = useRef(null);
     const [flights, setFlights] = useState([]);
     const [airportsData, setAirportsData] = useState({});
@@ -167,7 +167,8 @@ const Analytics = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const userRes = await AxiosInstance.get('users/me/');
+                const endpoint = targetUserId ? `users/${targetUserId}/` : 'users/me/';
+                const userRes = await AxiosInstance.get(endpoint);
                 if (userRes.data && userRes.data.usernameIFC) {
                     setUserData(userRes.data);
                     const statusRes = await ApiService.userStatusByUsername(userRes.data.usernameIFC);
@@ -181,7 +182,7 @@ const Analytics = () => {
             }
         };
         fetchUserData();
-    }, []);
+    }, [targetUserId]);
 
     const mapContainer = useRef(null);
     const [distanceStats, setDistanceStats] = useState({ short: 0, medium: 0, long: 0, ultra: 0, total: 0 });
@@ -189,11 +190,17 @@ const Analytics = () => {
     useEffect(() => {
         const fetchFlights = async () => {
             try {
-                const response = await AxiosInstance.get("/dashboard/");
+                const endpoint = targetUserId ? `user-approved-flights/${targetUserId}/` : '/dashboard/';
+                const response = await AxiosInstance.get(endpoint);
                 const sortedFlights = response.data.sort(
-                    (a, b) => new Date(b.registration_date) - new Date(a.registration_date)
+                    (a, b) => new Date(b.registration_date || b.date) - new Date(a.registration_date || a.date)
                 );
-                setFlights(sortedFlights);
+                // Ensure date structure compatibility
+                const compatibleFlights = sortedFlights.map(f => ({
+                    ...f,
+                    registration_date: f.registration_date || f.date
+                }));
+                setFlights(compatibleFlights);
             } catch (error) {
                 console.error("Error fetching flights:", error);
             }
@@ -419,9 +426,11 @@ const Analytics = () => {
                 }
                 `}
             </style>
-            <Typography variant="h4" fontWeight="bold" sx={{ mb: 4, color: 'white' }}>
-                Logbook & Analytics
-            </Typography>
+            {!hideTitle && (
+                <Typography variant="h4" fontWeight="bold" sx={{ mb: 4, color: 'white' }}>
+                    Logbook & Analytics
+                </Typography>
+            )}
 
             <Grid container spacing={3} sx={{ mb: 4 }}>
                 <Grid item xs={12} md={8}>
