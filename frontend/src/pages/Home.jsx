@@ -28,7 +28,7 @@ const Home = () => {
 
   useEffect(() => {
     // If token exists, redirect to dashboard
-    if (localStorage.getItem('Token')) {
+    if (localStorage.getItem('token')) {
       navigate('/app/dashboard');
     }
 

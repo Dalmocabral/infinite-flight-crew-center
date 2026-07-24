@@ -263,8 +263,9 @@ const Dashboard = () => {
     return `${hours}:${minutes.toString().padStart(2, "0")}`;
   };
 
-  // Get the latest flight
-  const lastFlight = flights.length > 0 ? flights[0] : null;
+  // Get the latest flight (only Approved or Rejected)
+  const finishedFlights = flights.filter(f => f.status === 'Approved' || f.status === 'Rejected');
+  const lastFlight = finishedFlights.length > 0 ? finishedFlights[0] : null;
 
   // Calculate total approved flight duration
   const totalDuration = sumDurations(

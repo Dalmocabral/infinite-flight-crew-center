@@ -150,7 +150,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 from datetime import timedelta
 REST_KNOX = {
-    'TOKEN_TTL': timedelta(days=10),
+    'TOKEN_TTL': timedelta(days=30),
 }
 
 # Static files (CSS, JavaScript, Images)
