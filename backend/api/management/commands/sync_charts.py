@@ -10,7 +10,10 @@ class Command(BaseCommand):
         url = "https://portalpasha.ru/charts/"
         try:
             self.stdout.write(f"Fetching {url} ...")
-            response = requests.get(url, timeout=15)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers, timeout=15)
             response.raise_for_status()
             content = response.text
 

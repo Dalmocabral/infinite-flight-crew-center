@@ -33,6 +33,7 @@ urlpatterns = [
     path('request-reactivation-email/', RequestReactivationEmailView.as_view(), name='request-reactivation-email'),
     path('announcements/', AnnouncementListView.as_view(), name='announcements'),
     path('delete-account/', DeleteAccountView.as_view(), name='delete-account'),
+    path('trigger-sync-charts/', TriggerSyncChartsView.as_view(), name='trigger-sync-charts'),
 ]
 
 # Inclua as rotas do router

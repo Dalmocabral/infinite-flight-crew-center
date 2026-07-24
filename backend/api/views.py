@@ -767,3 +767,14 @@ class ChartViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ChartSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['icao', 'iata', 'name', 'city', 'country']
+
+from django.core.management import call_command
+from rest_framework.views import APIView
+
+class TriggerSyncChartsView(APIView):
+    def get(self, request):
+        try:
+            call_command('sync_charts')
+            return Response({'status': 'success', 'message': 'Charts synced successfully.'})
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=500)
