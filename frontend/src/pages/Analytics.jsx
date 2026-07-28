@@ -26,6 +26,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import IconButton from '@mui/material/IconButton';
 
+import fuelIcon from '../assets/image/fuel-icon.png';
+import baggageIcon from '../assets/image/baggage-icon.png';
+import paxIcon from '../assets/image/pax-icon.png';
+
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -492,7 +496,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                 <Grid item xs={12} md={4}>
                     <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
                         <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
-                            <img src="/assets/fuel-icon.png" alt="Fuel" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                            <img src={fuelIcon} alt="Fuel" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
                         </Box>
                         <Box>
                             <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalFuelTons} T</Typography>
@@ -503,7 +507,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                 <Grid item xs={12} md={4}>
                     <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
                         <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
-                            <img src="/assets/baggage-icon.png" alt="Baggage" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                            <img src={baggageIcon} alt="Baggage" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
                         </Box>
                         <Box>
                             <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalBaggageTons} T</Typography>
@@ -514,7 +518,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                 <Grid item xs={12} md={4}>
                     <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
                         <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
-                            <img src="/assets/pax-icon.png" alt="Passengers" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                            <img src={paxIcon} alt="Passengers" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
                         </Box>
                         <Box>
                             <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalPassengers}</Typography>
