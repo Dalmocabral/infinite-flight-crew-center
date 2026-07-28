@@ -21,7 +21,7 @@ import PasswordResetConfirm from './pages/PassworldResetConfirm';
 import PassworldResetRequest from './pages/PassworldResetRequest';
 import PirepsFlights from './pages/PirepsFlights';
 import AllFlights from './pages/AllFlights';
-import ProfileEdit from './pages/ProfileEdit';
+import ProfileSettings from './pages/ProfileSettings';
 import Register from './pages/Register';
 import Charts from './pages/Charts';
 import UserDetail from './pages/UserDetail';
@@ -98,7 +98,7 @@ function App() {
             <Route path="briefing/:id" element={<Briefing />} />
             <Route path="awards/awardDetail/:id" element={<AwardDetail />} />
             <Route path="userdetail/:id" element={<UserDetail />} />
-            <Route path="profile/edit" element={<ProfileEdit />} />    
+            <Route path="profile/settings" element={<ProfileSettings />} />    
           </Route>
         </Route>
       </Routes>

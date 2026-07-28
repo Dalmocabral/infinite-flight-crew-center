@@ -41,6 +41,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=200, null=True, blank=True)
     is_active_pilot = models.BooleanField(default=True)
     reactivation_token = models.CharField(max_length=64, null=True, blank=True)
+    simbrief_id = models.CharField(max_length=200, blank=True, null=True)
 
     objects = CustomUserManager()
 

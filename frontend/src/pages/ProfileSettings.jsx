@@ -25,7 +25,7 @@ import { useNavigate } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
 import Gravatar from '../components/Gravatar';
 
-const ProfileEdit = () => {
+const ProfileSettings = () => {
   const { control, handleSubmit, setValue } = useForm();
   const [user, setUser] = useState({
     email: '',
@@ -33,6 +33,7 @@ const ProfileEdit = () => {
     country: '',
     first_name: '',
     last_name: '',
+    simbrief_id: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -139,7 +140,7 @@ const ProfileEdit = () => {
             }}
         >
           <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#fff', textAlign: 'center', mb: 4 }}>
-            EDIT PROFILE
+            SETTINGS
           </Typography>
           
           <Box
@@ -219,6 +220,17 @@ const ProfileEdit = () => {
                 {usernameValid === false && <Alert severity="error" sx={{ py: 0 }}>Invalid IFC Username.</Alert>}
                 {usernameValid === true && <Alert severity="success" sx={{ py: 0 }}>Valid IFC Username!</Alert>}
             </Box>
+
+            <TextField
+                fullWidth
+                label="SimBrief Username / ID"
+                name="simbrief_id"
+                value={user.simbrief_id || ''}
+                onChange={handleChange}
+                sx={{ mb: 4 }}
+                variant="outlined"
+                helperText="Your SimBrief username or numeric ID for importing flight plans."
+            />
 
             <Box sx={{ mb: 4 }}>
                 <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', mb: 1, display: 'block' }}>Country</Typography>
@@ -326,4 +338,4 @@ const ProfileEdit = () => {
   );
 };
 
-export default ProfileEdit;
+export default ProfileSettings;

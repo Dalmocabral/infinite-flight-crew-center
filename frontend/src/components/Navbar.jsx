@@ -319,8 +319,8 @@ const Navbar = () => {
                   </Box>
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={() => navigate('/app/profile/edit')}>
-                  Edit
+                <MenuItem onClick={() => navigate('/app/profile/settings')}>
+                  Settings
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout}>
