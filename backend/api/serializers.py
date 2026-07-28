@@ -141,7 +141,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'last_landing_score', 'average_landing_score']
+        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'simbrief_id', 'last_landing_score', 'average_landing_score']
 
     def get_last_landing_score(self, obj):
         report = LandingReport.objects.filter(pilot=obj).order_by('-created_at').first()
@@ -160,7 +160,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['email', 'usernameIFC', 'country', 'first_name', 'last_name']
+        fields = ['email', 'usernameIFC', 'country', 'first_name', 'last_name', 'simbrief_id']
         extra_kwargs = {
             'email': {'required': False},
             'usernameIFC': {'required': False},
