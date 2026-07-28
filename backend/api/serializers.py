@@ -175,6 +175,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         instance.email = validated_data.get('email', instance.email)
         instance.usernameIFC = validated_data.get('usernameIFC', instance.usernameIFC)
         instance.country = validated_data.get('country', instance.country)
+        instance.simbrief_id = validated_data.get('simbrief_id', instance.simbrief_id)
         instance.save()
         return instance
 
