@@ -40,6 +40,10 @@ const PirepsFlights = () => {
   const [network, setNetwork] = useState('');
   const [flightDuration, setFlightDuration] = useState(dayjs('2022-04-17T00:00'));
   const [liveryId, setLiveryId] = useState(null);
+  
+  const [fuelUsedKg, setFuelUsedKg] = useState('');
+  const [baggageKg, setBaggageKg] = useState('');
+  const [passengers, setPassengers] = useState('');
 
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
@@ -165,6 +169,11 @@ const PirepsFlights = () => {
         // Store Livery ID for logo lookup
         setLiveryId(match.liveryId);
 
+        // Fill Fuel Used
+        if (match.fuelUsedKg) {
+            setFuelUsedKg(parseFloat(match.fuelUsedKg).toFixed(2));
+        }
+
         if (isAllowed) {
             setSubmissionType('Auto');
             setApiMessage({ type: 'success', text: 'Flight successfully verified in the Infinite Flight database! Data has been auto-filled.' });
@@ -211,6 +220,9 @@ const PirepsFlights = () => {
       submission_type: submissionType,
       livery_id: liveryId,
       flight_type: 'World Tour',
+      fuel_used_kg: fuelUsedKg || null,
+      baggage_kg: baggageKg || null,
+      passengers: passengers || null,
     };
     
     // Validate manual submission if this is part of an award
@@ -398,6 +410,39 @@ const PirepsFlights = () => {
                     <MenuItem value="Expert">Expert Server</MenuItem>
                   </Select>
                 </FormControl>
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Fuel Used (KG)"
+                  type="number"
+                  value={fuelUsedKg}
+                  onChange={(e) => setFuelUsedKg(e.target.value)}
+                  fullWidth
+                  disabled={isLocked && !!fuelUsedKg}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Baggage (KG)"
+                  type="number"
+                  value={baggageKg}
+                  onChange={(e) => setBaggageKg(e.target.value)}
+                  fullWidth
+                  disabled={isLocked && !!baggageKg}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Passengers"
+                  type="number"
+                  value={passengers}
+                  onChange={(e) => setPassengers(e.target.value)}
+                  fullWidth
+                  disabled={isLocked && !!passengers}
+                />
               </Grid>
 
               <Grid item xs={12}>
