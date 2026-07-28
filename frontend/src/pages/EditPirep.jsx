@@ -212,6 +212,39 @@ const EditPirep = () => {
                 </>
               )}
 
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Fuel Used (KG)"
+                  type="number"
+                  name="fuel_used_kg"
+                  value={formData.fuel_used_kg || ''}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Baggage (KG)"
+                  type="number"
+                  name="baggage_kg"
+                  value={formData.baggage_kg || ''}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label="Passengers"
+                  type="number"
+                  name="passengers"
+                  value={formData.passengers || ''}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+
               <Grid item xs={12}>
                 <Button 
                     type="submit" 

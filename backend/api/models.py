@@ -249,6 +249,11 @@ class PirepsFlight (models.Model):
         ('Free Flight Cargo', 'Free Flight Cargo'),
     ]
     flight_type = models.CharField(max_length=50, choices=FLIGHT_TYPE_CHOICES, default='World Tour')
+    
+    # Novos campos opcionais (Semi-automáticos via IF e SimBrief)
+    fuel_used_kg = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    baggage_kg = models.IntegerField(null=True, blank=True)
+    passengers = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.flight_number} - {self.pilot.first_name}"
