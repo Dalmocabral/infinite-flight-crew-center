@@ -491,42 +491,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                 </Grid>
             </Grid>
 
-            {/* New KPI Cards for Fuel, Baggage and Passengers */}
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
-                            <img src={fuelIcon} alt="Fuel" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalFuelTons} T</Typography>
-                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Total Fuel Used</Typography>
-                        </Box>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
-                            <img src={baggageIcon} alt="Baggage" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalBaggageTons} T</Typography>
-                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Total Baggage/Cargo</Typography>
-                        </Box>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
-                            <img src={paxIcon} alt="Passengers" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalPassengers}</Typography>
-                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Passengers Flown</Typography>
-                        </Box>
-                    </Card>
-                </Grid>
-            </Grid>
+
 
             <Grid container spacing={3} sx={{ mb: 4 }}>
                 <Grid item xs={12} md={3}>
@@ -622,6 +587,43 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                                 Searching recent IF logbook...
                             </Typography>
                         )}
+                    </Card>
+                </Grid>
+            </Grid>
+
+            {/* New KPI Cards for Fuel, Baggage and Passengers */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
+                            <img src={fuelIcon} alt="Fuel" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalFuelTons} T</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Total Fuel Used</Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
+                            <img src={baggageIcon} alt="Baggage" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalBaggageTons} T</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Total Baggage/Cargo</Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
+                            <img src={paxIcon} alt="Passengers" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalPassengers}</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Passengers Flown</Typography>
+                        </Box>
                     </Card>
                 </Grid>
             </Grid>
