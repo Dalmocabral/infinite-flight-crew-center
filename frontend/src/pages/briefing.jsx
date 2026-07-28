@@ -332,6 +332,24 @@ const Briefing = () => {
                         <Typography variant="body1">{flightData.alternate_airport || 'N/A'}</Typography>
                     </Box>
                  </Grid>
+                 <Grid item xs={4}>
+                     <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">FUEL USED</Typography>
+                        <Typography variant="body1">{flightData.fuel_used_kg ? `${(flightData.fuel_used_kg / 1000).toFixed(2)} t` : 'N/A'}</Typography>
+                    </Box>
+                 </Grid>
+                 <Grid item xs={4}>
+                     <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">BAGGAGE</Typography>
+                        <Typography variant="body1">{flightData.baggage_kg ? `${(flightData.baggage_kg / 1000).toFixed(2)} t` : 'N/A'}</Typography>
+                    </Box>
+                 </Grid>
+                 <Grid item xs={4}>
+                     <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="caption" color="rgba(255,255,255,0.5)">PASSENGERS</Typography>
+                        <Typography variant="body1">{flightData.passengers || 'N/A'}</Typography>
+                    </Box>
+                 </Grid>
                  {flightData.landing_report?.fuel_weight_kg > 0 && (
                    <Grid item xs={12}>
                      <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'rgba(77,171,245,0.08)', borderRadius: 2, border: '1px solid rgba(77,171,245,0.2)' }}>
