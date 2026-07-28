@@ -618,11 +618,25 @@ class FlightStatsView(APIView):
         # Converte timedelta para horas decimais (exemplo: 2h 30min = 2.5)
         total_hours = total_duration.total_seconds() / 3600 if total_duration else 0
 
+        # Totais adicionais (Combustível, Bagagem e Passageiros)
+        totals = PirepsFlight.objects.aggregate(
+            total_fuel=Sum("fuel_used_kg"),
+            total_baggage=Sum("baggage_kg"),
+            total_passengers=Sum("passengers")
+        )
+
+        total_fuel_tons = (totals["total_fuel"] or 0) / 1000
+        total_baggage_tons = (totals["total_baggage"] or 0) / 1000
+        total_passengers = totals["total_passengers"] or 0
+
         return Response({
             "total_flights": total_flights,
             "total_hours": round(total_hours, 2),
             "total_pilots": total_pilots,
-            "total_airports": total_airports
+            "total_airports": total_airports,
+            "total_fuel_tons": round(total_fuel_tons, 2),
+            "total_baggage_tons": round(total_baggage_tons, 2),
+            "total_passengers": total_passengers
         })
 
 class ValidateTokenView(APIView):

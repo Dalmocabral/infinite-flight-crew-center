@@ -395,6 +395,13 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const avgMinutes = Math.floor((avgDurationSecs % 3600) / 60);
     const avgTimeDisplay = avgHours > 0 ? `${avgHours}h ${avgMinutes}m` : `${avgMinutes}m`;
 
+    const totalFuelKg = approvedFlights.reduce((acc, f) => acc + (parseFloat(f.fuel_used_kg) || 0), 0);
+    const totalBaggageKg = approvedFlights.reduce((acc, f) => acc + (parseFloat(f.baggage_kg) || 0), 0);
+    const totalPassengers = approvedFlights.reduce((acc, f) => acc + (parseInt(f.passengers) || 0), 0);
+
+    const totalFuelTons = (totalFuelKg / 1000).toFixed(2);
+    const totalBaggageTons = (totalBaggageKg / 1000).toFixed(2);
+
     const flightsByDay = flightsLast30Days.reduce((acc, flight) => {
         const dateStr = dayjs(flight.registration_date).format("MMM DD");
         acc[dateStr] = (acc[dateStr] || 0) + 1;
@@ -476,6 +483,43 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                         <StatRow label="Medium-haul" range="1,000–2,500 nm" count={distanceStats.medium} total={distanceStats.total} color="#f1c40f" />
                         <StatRow label="Long-haul" range="2,500–5,000 nm" count={distanceStats.long} total={distanceStats.total} color="#ff9800" />
                         <StatRow label="Ultra-long" range="5,000+ nm" count={distanceStats.ultra} total={distanceStats.total} color="#e74c3c" />
+                    </Card>
+                </Grid>
+            </Grid>
+
+            {/* New KPI Cards for Fuel, Baggage and Passengers */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
+                            <img src="/assets/fuel-icon.png" alt="Fuel" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalFuelTons} T</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Total Fuel Used</Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
+                            <img src="/assets/baggage-icon.png" alt="Baggage" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalBaggageTons} T</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Total Baggage/Cargo</Typography>
+                        </Box>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <Card sx={{ p: 3, display: 'flex', alignItems: 'center', backgroundColor: 'rgba(10, 25, 41, 0.7)', borderRadius: 2, border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Box sx={{ p: 1.5, borderRadius: '50%', backgroundColor: 'rgba(255, 255, 255, 0.05)', mr: 2 }}>
+                            <img src="/assets/pax-icon.png" alt="Passengers" style={{ width: 40, height: 40, filter: 'invert(1) brightness(1.5)', mixBlendMode: 'screen', opacity: 0.8 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>{totalPassengers}</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', textTransform: 'uppercase', letterSpacing: 1 }}>Passengers Flown</Typography>
+                        </Box>
                     </Card>
                 </Grid>
             </Grid>
