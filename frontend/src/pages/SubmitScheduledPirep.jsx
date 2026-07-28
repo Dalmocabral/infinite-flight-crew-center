@@ -165,6 +165,48 @@ const SubmitScheduledPirep = () => {
       setApiMessage({ type: 'warning', text: 'Failed to connect to the Infinite Flight database. Proceeding with Manual submission.' });
     } finally {
       setIsVerifying(false);
+      // After IF verification completes (or fails), check SimBrief
+      try {
+        const userRes = await AxiosInstance.get('users/me/');
+        if (userRes.data?.simbrief_id) {
+            await verifySimBriefData(userRes.data.simbrief_id, from, to);
+        }
+      } catch (err) {}
+    }
+  };
+
+  const verifySimBriefData = async (simbriefId, from, to) => {
+    try {
+      if (!simbriefId) return;
+      const response = await fetch(`https://www.simbrief.com/api/xml.fetcher.php?userid=${simbriefId}&json=1`);
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      const origin = data.origin?.icao_code;
+      const destination = data.destination?.icao_code;
+
+      // Only import if the route matches the PIREP
+      if (origin === from && destination === to) {
+        const pax = data.weights?.pax_count;
+        const cargo = data.weights?.cargo;
+
+        setFormData(prev => ({
+            ...prev,
+            passengers: pax || prev.passengers,
+            baggage_kg: cargo || prev.baggage_kg
+        }));
+        
+        setApiMessage(prev => {
+            // Append simbrief success message to existing message
+            const currentText = prev ? prev.text : '';
+            return {
+                type: prev?.type || 'success',
+                text: `${currentText} (Passenger and Baggage data automatically imported from SimBrief)`
+            };
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching SimBrief data:', error);
     }
   };
 
