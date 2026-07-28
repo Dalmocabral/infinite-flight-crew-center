@@ -1,4 +1,4 @@
-import { Flight, Person, Public, Schedule } from "@mui/icons-material"; // Ícones do Material-UI
+import { Flight, Person, Public, Schedule, LocalGasStation, Luggage, People } from "@mui/icons-material"; // Ícones do Material-UI
 import {
     AppBar,
     Box,
@@ -218,32 +218,53 @@ const Home = () => {
 
               {/* Estatísticas */}
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 4 }}>
-                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
                   <FlightStats
                     label="Total Flights"
                     value={stats.total_flights}
                     icon={<Flight fontSize="large" sx={{ color: '#4dabf5' }} />} 
                   />
                 </Box>
-                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
                   <FlightStats
                     label="Total Hours"
                     value={stats.total_hours}
                     icon={<Schedule fontSize="large" sx={{ color: '#e91e63' }} />} 
                   />
                 </Box>
-                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
                   <FlightStats
                     label="Total Pilots"
                     value={stats.total_pilots}
                     icon={<Person fontSize="large" sx={{ color: '#00e676' }} />} 
                   />
                 </Box>
-                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 45%' } }}>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
                   <FlightStats
                     label="Airports"
                     value={stats.total_airports}
                     icon={<Public fontSize="large" sx={{ color: '#ff9100' }} />} 
+                  />
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
+                  <FlightStats
+                    label="Fuel Used"
+                    value={stats.total_fuel_tons ? `${stats.total_fuel_tons} T` : '0 T'}
+                    icon={<LocalGasStation fontSize="large" sx={{ color: '#f44336' }} />} 
+                  />
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
+                  <FlightStats
+                    label="Baggage"
+                    value={stats.total_baggage_tons ? `${stats.total_baggage_tons} T` : '0 T'}
+                    icon={<Luggage fontSize="large" sx={{ color: '#2196f3' }} />} 
+                  />
+                </Box>
+                <Box sx={{ flex: { xs: '1 1 45%', sm: '1 1 45%', md: '1 1 30%' } }}>
+                  <FlightStats
+                    label="Passengers"
+                    value={stats.total_passengers || '0'}
+                    icon={<People fontSize="large" sx={{ color: '#4caf50' }} />} 
                   />
                 </Box>
               </Box>
