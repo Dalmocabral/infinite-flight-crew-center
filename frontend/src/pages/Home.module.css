@@ -1,4 +1,4 @@
-.home { height: 100vh; width: 100%; overflow: hidden; position: relative; }
+.home { min-height: 100vh; width: 100%; overflow-y: auto; position: relative; }
 .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; position: absolute; width: 100%; z-index: 100; }
 .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; }
 .logo-icon { background-color: white; color: var(--bg-color); padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-size: 18px; }
@@ -6,8 +6,8 @@
 .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; }
 .btn-signup { background-color: var(--accent-green); color: white !important; padding: 8px 16px; border-radius: 4px; font-weight: bold; }
 .status-dot { width: 8px; height: 8px; background-color: #2ecc71; border-radius: 50%; margin-right: 5px; display: inline-block; }
-.hero-section { position: relative; height: 100vh; background: linear-gradient(to bottom, #2c2e3e 0%, #1a1c29 100%); display: flex; align-items: center; padding: 0 5%; }
-.container { display: flex; width: 100%; max-width: 1200px; margin: 0 auto; justify-content: space-between; align-items: center; z-index: 2; }
+.hero-section { position: relative; min-height: 100vh; padding: 100px 5% 50px 5%; background: linear-gradient(to bottom, #2c2e3e 0%, #1a1c29 100%); display: flex; align-items: center; }
+.container { display: flex; width: 100%; max-width: 1200px; margin: 0 auto; justify-content: space-between; align-items: center; z-index: 2; flex-wrap: wrap; }
 .hero-content { flex: 1; }
 .hero-visual { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
 .radar-wrapper { position: relative; width: 450px; height: 450px; }
