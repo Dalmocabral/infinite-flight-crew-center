@@ -210,4 +210,9 @@ class AnnouncementAdmin(admin.ModelAdmin):
 
 @admin.register(LandingReport)
 class LandingReportAdmin(admin.ModelAdmin):
-    list_display = ('pirep', 'pilot', 'status', 'score')
+    list_display = ('pirep', 'get_ifc_name', 'pilot', 'status', 'score')
+    search_fields = ('pilot__usernameIFC', 'pilot__email', 'pirep__flight_icao')
+    
+    def get_ifc_name(self, obj):
+        return obj.pilot.usernameIFC
+    get_ifc_name.short_description = 'IFC Username'
