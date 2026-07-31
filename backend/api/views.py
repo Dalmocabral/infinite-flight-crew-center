@@ -161,6 +161,12 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                             status='COMPLETED'
                                         )
                                         
+                                        # Atualiza o combustível usando os dados do Infinite Flight
+                                        if_fuel = matched_flight.get('fuelUsedKg')
+                                        if if_fuel is not None and (pirep.fuel_used_kg is None or pirep.fuel_used_kg == 0):
+                                            pirep.fuel_used_kg = if_fuel
+                                            pirep.save(update_fields=['fuel_used_kg'])
+                                            
                                         penalty = 0
                                         base_score = 10.0
                                         
