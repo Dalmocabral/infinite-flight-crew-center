@@ -207,3 +207,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 class AnnouncementAdmin(admin.ModelAdmin):
     list_display = ('title', 'date_posted')
     search_fields = ('title', 'content')
+
+@admin.register(LandingReport)
+class LandingReportAdmin(admin.ModelAdmin):
+    list_display = ('pirep', 'pilot', 'status', 'score')
