@@ -233,7 +233,10 @@ const SubmitScheduledPirep = () => {
       observation: formData.observation,
       submission_type: submissionType,
       livery_id: liveryId,
-      status: 'In Review'
+      status: 'In Review',
+      fuel_used_kg: formData.fuel_used_kg || null,
+      baggage_kg: formData.baggage_kg || null,
+      passengers: formData.passengers || null,
     };
   
     try {
