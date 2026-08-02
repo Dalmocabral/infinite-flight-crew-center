@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Container,
@@ -88,6 +89,10 @@ const BookFlight = () => {
           Schedule your flight below. Once scheduled, it will appear in your Dashboard under Scheduled Flights. 
           You can generate a SimBrief flight plan and submit your PIREP when you are ready to fly.
         </Typography>
+
+        <Alert severity="warning" sx={{ mb: 4, borderRadius: '12px' }}>
+          <strong>Attention:</strong> To successfully submit a PIREP for Pax or Cargo flights, this dispatch must be created <strong>prior</strong> to spawning in Infinite Flight. Flights scheduled after the flight session has already commenced will be automatically rejected by the system.
+        </Alert>
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={4}>
