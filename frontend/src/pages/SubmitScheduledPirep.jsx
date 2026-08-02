@@ -45,6 +45,7 @@ const SubmitScheduledPirep = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [liveryId, setLiveryId] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
 
   useEffect(() => {
     AxiosInstance.get('aircrafts/')
@@ -106,6 +107,7 @@ const SubmitScheduledPirep = () => {
         
         if (ifFlightTime.isBefore(bookingTime)) {
             setSubmissionType('Manual');
+            setIsFormDisabled(true);
             setApiMessage({ 
                 type: 'error', 
                 text: 'Unable to Validate PIREP Automatically. We detected that your Infinite Flight session started before this flight was scheduled in the dispatch panel. As a result, the PIREP could not be validated automatically. This can happen if the flight session is opened before the dispatch is created. Please review the Book Flight rules in the Wiki for more information. If you believe this was detected in error, feel free to contact the support team for assistance.' 
@@ -293,8 +295,9 @@ const SubmitScheduledPirep = () => {
           )}
 
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+            <fieldset disabled={isFormDisabled} style={{ border: 'none', padding: 0, margin: 0, width: '100%' }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
                 <TextField
                   label="Flight Route"
                   value={`${formData.departure_airport} ➔ ${formData.arrival_airport}`}
@@ -401,7 +404,8 @@ const SubmitScheduledPirep = () => {
                   SUBMIT FLIGHT REPORT
                 </Button>
               </Grid>
-            </Grid>
+              </Grid>
+            </fieldset>
           </form>
         </Paper>
         </Box>
