@@ -32,7 +32,121 @@ from django.db.models import Case, When, Value, IntegerField
 class PirepsFlightAdmin(admin.ModelAdmin):
     list_display = ('flight_icao', 'flight_number', 'pilot', 'departure_airport', 'arrival_airport', 'status')
     readonly_fields = ('if_live_flights',)
+    actions = ['recover_telemetry']
     
+    @admin.action(description='Recuperar Telemetria da API Infinite Flight')
+    def recover_telemetry(self, request, queryset):
+        import requests
+        import os
+        api_key = os.environ.get('VITE_API_KEY', '36d1c8xdt1zvxn9cqqs9pxr7dty8rhm4')
+        headers = {'Authorization': f'Bearer {api_key}'}
+        
+        success_count = 0
+        error_count = 0
+        
+        for pirep in queryset:
+            if not pirep.pilot or not pirep.pilot.usernameIFC:
+                error_count += 1
+                continue
+                
+            try:
+                # 1. Get user ID
+                url_users = "https://api.infiniteflight.com/public/v2/users"
+                payload = {'discourseNames': [pirep.pilot.usernameIFC]}
+                user_res = requests.post(url_users, json=payload, headers=headers, timeout=10)
+                if user_res.status_code == 200:
+                    user_data = user_res.json()
+                    if user_data.get('errorCode') == 0 and user_data.get('result') and len(user_data['result']) > 0:
+                        if_user_id = user_data['result'][0].get('userId')
+                        if if_user_id:
+                            # 2. Get flights
+                            url_flights = f"https://api.infiniteflight.com/public/v2/users/{if_user_id}/flights"
+                            flights_res = requests.get(url_flights, headers=headers, timeout=10)
+                            if flights_res.status_code == 200:
+                                flights_data = flights_res.json()
+                                if flights_data.get('errorCode') == 0 and flights_data.get('result'):
+                                    flight_list = flights_data['result'].get('data', [])
+                                    
+                                    matched_flight = None
+                                    for f in flight_list:
+                                        if (f.get('originAirport') == pirep.departure_airport or f.get('departureAirport') == pirep.departure_airport) and \
+                                           (f.get('destinationAirport') == pirep.arrival_airport or f.get('arrivalAirport') == pirep.arrival_airport):
+                                            matched_flight = f
+                                            break
+                                            
+                                    if matched_flight:
+                                        landing_stats = matched_flight.get('landingStats', [])
+                                        violations = matched_flight.get('violations', [])
+                                        
+                                        # Update fuel
+                                        if_fuel = matched_flight.get('fuelUsedKg')
+                                        if if_fuel is not None:
+                                            pirep.fuel_used_kg = if_fuel
+                                            pirep.save(update_fields=['fuel_used_kg'])
+                                            
+                                        report, created = LandingReport.objects.get_or_create(
+                                            pirep=pirep,
+                                            defaults={
+                                                'pilot': pirep.pilot,
+                                                'aircraft': pirep.aircraft,
+                                                'if_flight_id': matched_flight.get('id'),
+                                                'if_user_id': if_user_id,
+                                                'status': 'COMPLETED'
+                                            }
+                                        )
+                                        
+                                        # Ensure if it already existed we update its ID
+                                        if not created:
+                                            report.if_flight_id = matched_flight.get('id')
+                                            report.if_user_id = if_user_id
+                                            report.status = 'COMPLETED'
+                                            
+                                        penalty = 0
+                                        base_score = 10.0
+                                        
+                                        if violations:
+                                            report.ias_violations = len(violations)
+                                            penalty += len(violations) * 3.0
+                                            
+                                        if landing_stats:
+                                            best_landing = landing_stats[0]
+                                            vs_ms = best_landing.get('verticalSpeed', 0)
+                                            report.vs_touchdown = int(vs_ms * 196.85)
+                                            report.g_force = best_landing.get('maxGForce', 1.0)
+                                            report.centerline = best_landing.get('centerlineDistance', 0.0)
+                                            report.distance_from_1kft = best_landing.get('distanceFrom1kftMarker', 0.0)
+                                            
+                                            vs_abs = abs(report.vs_touchdown)
+                                            if vs_abs > 200:
+                                                if vs_abs <= 400: penalty += 1.0
+                                                elif vs_abs <= 600: penalty += 3.0
+                                                elif vs_abs <= 1000: penalty += 6.0
+                                                else: penalty += 10.0
+                                                
+                                            if report.g_force > 1.20:
+                                                if report.g_force <= 1.50: penalty += 1.0
+                                                elif report.g_force <= 2.00: penalty += 3.0
+                                                elif report.g_force <= 3.00: penalty += 6.0
+                                                else: penalty += 10.0
+                                                
+                                            c_dev = abs(report.centerline)
+                                            if c_dev > 5.0:
+                                                if c_dev <= 10.0: penalty += 1.0
+                                                elif c_dev <= 15.0: penalty += 3.0
+                                                elif c_dev <= 25.0: penalty += 6.0
+                                                else: penalty += 10.0
+                                                
+                                        report.score = max(0.0, base_score - penalty)
+                                        report.save()
+                                        success_count += 1
+                                        continue
+                error_count += 1
+            except Exception as e:
+                print("Error in recover_telemetry:", e)
+                error_count += 1
+                
+        self.message_user(request, f"{success_count} PIREPs recuperados com sucesso. {error_count} falharam (voo não encontrado ou sem usuário IFC).")
+
     def if_live_flights(self, obj):
         import json
         from django.utils.safestring import mark_safe
