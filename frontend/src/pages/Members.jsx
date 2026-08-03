@@ -42,7 +42,7 @@ const Members = () => {
             for (const session of sessions) {
                 const flights = await ApiService.getFlightData(session.id);
                 flights.forEach(f => {
-                    if (f.username) allUsernames.add(f.username);
+                    if (f.username) allUsernames.add(f.username.toLowerCase());
                 });
             }
             setLiveUsers(allUsernames);
@@ -132,7 +132,7 @@ const Members = () => {
                                 style={{ borderRadius: '50%' }} 
                                 />
                                 
-                            {liveUsers.has(item.usernameIFC) && (
+                            {item.usernameIFC && liveUsers.has(item.usernameIFC.toLowerCase()) && (
                                 <Box sx={{
                                     position: 'absolute',
                                     top: 0,
