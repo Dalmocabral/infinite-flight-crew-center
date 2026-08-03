@@ -78,7 +78,7 @@ class UserViewset(viewsets.ViewSet):
     queryset = User.objects.all()
 
     def list(self, request):
-        queryset = User.objects.all()
+        queryset = User.objects.all().order_by('-is_active_pilot', 'date_joined')
         serializer = self.serializer_class(queryset, many=True)  # Serializa os dados dos usuários
         return Response(serializer.data)
     

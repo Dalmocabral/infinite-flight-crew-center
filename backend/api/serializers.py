@@ -141,7 +141,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'simbrief_id', 'last_landing_score', 'average_landing_score']
+        fields = ['id', 'email', 'first_name', 'last_name', 'country', 'usernameIFC', 'simbrief_id', 'last_landing_score', 'average_landing_score', 'is_active_pilot', 'date_joined']
 
     def get_last_landing_score(self, obj):
         report = LandingReport.objects.filter(pilot=obj).order_by('-created_at').first()

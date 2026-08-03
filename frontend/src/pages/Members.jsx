@@ -11,11 +11,13 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AxiosInstance from '../components/AxiosInstance';
+import ApiService from '../components/ApiService';
 import Gravatar from '../components/Gravatar';
 
 const Members = () => {
   const [myData, setMyData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [liveUsers, setLiveUsers] = useState(new Set());
 
   const GetData = () => {
     AxiosInstance.get('users/')
@@ -31,6 +33,24 @@ const Members = () => {
 
   useEffect(() => {
     GetData();
+    
+    // Fetch live flights to see who is flying
+    const fetchLiveFlights = async () => {
+        try {
+            const sessions = await ApiService.getSessions();
+            const allUsernames = new Set();
+            for (const session of sessions) {
+                const flights = await ApiService.getFlightData(session.id);
+                flights.forEach(f => {
+                    if (f.username) allUsernames.add(f.username);
+                });
+            }
+            setLiveUsers(allUsernames);
+        } catch (error) {
+            console.error('Error fetching live flights:', error);
+        }
+    };
+    fetchLiveFlights();
   }, []);
 
   return (
@@ -95,7 +115,9 @@ const Members = () => {
                         mb: 2
                     }}>
                         <Box sx={{ 
-                            p: 0.5, 
+                            position: 'relative',
+                            width: 80, 
+                            height: 80, 
                             borderRadius: '50%', 
                             border: '2px solid #4dabf5', 
                             boxShadow: '0 0 15px rgba(77, 171, 245, 0.5)',
@@ -109,6 +131,24 @@ const Members = () => {
                                 alt={`Imagem de perfil de ${item.first_name} ${item.last_name}`} 
                                 style={{ borderRadius: '50%' }} 
                                 />
+                                
+                            {liveUsers.has(item.usernameIFC) && (
+                                <Box sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: -10,
+                                    bgcolor: '#00e676',
+                                    color: '#000',
+                                    px: 0.8,
+                                    py: 0.2,
+                                    borderRadius: '4px',
+                                    fontSize: '0.65rem',
+                                    fontWeight: 'bold',
+                                    boxShadow: '0 0 8px #00e676'
+                                }}>
+                                    Flying
+                                </Box>
+                            )}
                         </Box>
                     </Box>
                     <CardContent sx={{ p: 1 }}>
@@ -140,24 +180,15 @@ const Members = () => {
                               </Typography>
                             </Box>
                           ) : (
-                            <Box sx={{ 
-                              display: 'inline-flex', 
-                              alignItems: 'center', 
-                              px: 1.2, 
-                              py: 0.3, 
-                              borderRadius: '8px', 
-                              bgcolor: 'rgba(255,255,255,0.05)', 
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              mb: 1
-                            }}>
-                              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)', fontWeight: 'bold', fontSize: '0.75rem' }}>
-                                N/A
-                              </Typography>
-                            </Box>
+                            <Box sx={{ height: 28, mb: 1 }} /> // Spacer if no rating
                           );
                         })()}
-
-                        <Divider sx={{ my: 2, borderColor: 'rgba(255,255,255,0.1)' }} />
+                        
+                        <Typography variant="caption" display="block" sx={{ color: item.is_active_pilot ? '#00e676' : 'gray', fontWeight: 'bold', mb: 1 }}>
+                            {item.is_active_pilot ? 'Active' : 'Inactive'}
+                        </Typography>
+                        
+                        <Divider sx={{ width: '80%', mx: 'auto', mb: 2, bgcolor: 'rgba(255,255,255,0.1)' }} />
                          <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.6)' }}>Base:</Typography>
                              {item.country ? (
