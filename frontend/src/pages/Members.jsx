@@ -184,8 +184,8 @@ const Members = () => {
                           );
                         })()}
                         
-                        <Typography variant="caption" display="block" sx={{ color: item.is_active_pilot ? '#00e676' : 'gray', fontWeight: 'bold', mb: 1 }}>
-                            {item.is_active_pilot ? 'Active' : 'Inactive'}
+                        <Typography variant="caption" display="block" sx={{ color: item.is_active_pilot !== false ? '#00e676' : 'gray', fontWeight: 'bold', mb: 1 }}>
+                            {item.is_active_pilot !== false ? 'Active' : 'Inactive'}
                         </Typography>
                         
                         <Divider sx={{ width: '80%', mx: 'auto', mb: 2, bgcolor: 'rgba(255,255,255,0.1)' }} />
