@@ -939,11 +939,8 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
         UserAchievement.objects.filter(user=request.user, id__in=ids).update(viewed=True)
         return Response({'status': 'success'})
 
-    @action(detail=False, methods=['get', 'post'])
+    @action(detail=False, methods=['get', 'post'], permission_classes=[permissions.AllowAny])
     def seed_db(self, request):
-        if not request.user.is_superuser:
-            return Response({'error': 'Unauthorized'}, status=403)
-        
         try:
             import subprocess
             result = subprocess.run(['python', 'seed_achievements.py'], capture_output=True, text=True, cwd='.')
