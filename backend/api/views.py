@@ -144,8 +144,24 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                     for f in flight_list:
                                         if (f.get('originAirport') == pirep.departure_airport or f.get('departureAirport') == pirep.departure_airport) and \
                                            (f.get('destinationAirport') == pirep.arrival_airport or f.get('arrivalAirport') == pirep.arrival_airport):
-                                            matched_flight = f
-                                            break
+                                            
+                                            # Verifica se este voo da API já foi usado em outro PIREP
+                                            if_id = f.get('id')
+                                            
+                                            # Verifica redundância da aeronave
+                                            if_aircraft_id = f.get('aircraftId')
+                                            aircraft_match = False
+                                            if if_aircraft_id:
+                                                try:
+                                                    ac = Aircraft.objects.get(if_id=if_aircraft_id)
+                                                    if ac.name == pirep.aircraft:
+                                                        aircraft_match = True
+                                                except Aircraft.DoesNotExist:
+                                                    pass
+                                                    
+                                            if aircraft_match and if_id and not LandingReport.objects.filter(if_flight_id=if_id).exists():
+                                                matched_flight = f
+                                                break
                                             
                                     if matched_flight:
                                         # 4. Criar o LandingReport com as físicas e violações
