@@ -20,6 +20,7 @@ router.register(r'users', UserDetailViewSet, basename='user-detail')  # Registra
 router.register(r'user-metrics', UserMetricsViewSet, basename='user-metrics')
 router.register(r'user-approved-flights', UserApprovedFlightsViewSet, basename='user-approved-flights')
 router.register(r'charts', ChartViewSet, basename='charts')
+router.register(r'achievements', AchievementViewSet, basename='achievements')
 
 
 # Adicione a rota manualmente para o endpoint users/me/

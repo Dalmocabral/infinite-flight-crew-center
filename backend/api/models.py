@@ -42,6 +42,7 @@ class CustomUser(AbstractUser):
     is_active_pilot = models.BooleanField(default=True)
     reactivation_token = models.CharField(max_length=64, null=True, blank=True)
     simbrief_id = models.CharField(max_length=200, blank=True, null=True)
+    if_first_flight_date = models.DateTimeField(null=True, blank=True)
 
     objects = CustomUserManager()
 
@@ -369,3 +370,82 @@ class Chart(models.Model):
     def __str__(self):
         return f"{self.icao} - {self.name}"
 
+class Achievement(models.Model):
+    CATEGORY_CHOICES = [
+        ('PROGRESSION', 'Progression'),
+        ('OPERATIONS', 'Operations'),
+        ('EXPLORATION', 'Exploration'),
+        ('SPECIAL', 'Special')
+    ]
+    DIFFICULTY_CHOICES = [
+        ('BRONZE', 'Bronze'),
+        ('SILVER', 'Silver'),
+        ('GOLD', 'Gold'),
+        ('PLATINUM', 'Platinum')
+    ]
+    METRIC_CHOICES = [
+        ('TOTAL_FLIGHTS', 'Total Flights'),
+        ('TOTAL_HOURS', 'Total Hours'),
+        ('TOTAL_BAGGAGE', 'Total Baggage (kg)'),
+        ('TOTAL_PASSENGERS', 'Total Passengers'),
+        ('TOTAL_AIRPORTS', 'Total Unique Airports'),
+        ('PERFECT_LANDINGS', 'Consecutive Perfect Landings'),
+        ('NIGHT_FLIGHT', 'Night Flight'),
+        ('LONG_HAUL', 'Long Haul Flight (>12h)'),
+        ('HEAVY_AIRCRAFT', 'Heavy Aircraft Flights'),
+        ('AIRBUS_FLIGHTS', 'Airbus Aircraft Flights'),
+        ('BOEING_FLIGHTS', 'Boeing Aircraft Flights'),
+        ('EMBRAER_FLIGHTS', 'Embraer Aircraft Flights'),
+        ('CESSNA_FLIGHTS', 'Cessna Aircraft Flights'),
+        ('PAX_FLIGHTS', 'Pax Flights'),
+        ('CARGO_FLIGHTS', 'Cargo Flights'),
+        ('WT_FLIGHTS', 'World Tour Flights'),
+        ('SIMBRIEF_FLIGHTS', 'Simbrief Usage Flights'),
+        ('SHORT_HAUL', 'Short Haul Flight (<3h)'),
+        ('MEDIUM_HAUL', 'Medium Haul Flight (3-12h)'),
+        ('LONG_HAUL', 'Long Haul Flight (>12h)'),
+        ('PERFECT_LANDINGS', 'Perfect Landings (Score 10.0)'),
+        ('TERRIBLE_LANDINGS', 'Terrible Landings (Score 0.0)'),
+        ('EXPERT_SERVER', 'Expert Server Flights'),
+        ('TRAINING_SERVER', 'Training Server Flights'),
+        ('CASUAL_SERVER', 'Casual Server Flights'),
+        ('IFC_COMMENT', 'IFC Topic Comment'),
+        ('YEARS_SERVICE', 'Years of Service'),
+        ('VA_MEMBER', 'VA/VO Member')
+    ]
+
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='PROGRESSION')
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='BRONZE')
+    metric = models.CharField(max_length=50, choices=METRIC_CHOICES)
+    target_value = models.IntegerField(default=1)
+    icon_url = models.URLField(max_length=500, null=True, blank=True)
+    xp_reward = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.name} ({self.difficulty})"
+
+class UserAchievement(models.Model):
+    user = models.ForeignKey(User, related_name='achievements', on_delete=models.CASCADE)
+    achievement = models.ForeignKey(Achievement, related_name='user_achievements', on_delete=models.CASCADE)
+    unlocked_at = models.DateTimeField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'achievement')
+
+    def __str__(self):
+        return f"{self.user.email} - {self.achievement.name}"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=PirepsFlight)
+def trigger_achievements(sender, instance, created, **kwargs):
+    if instance.status == 'Approved':
+        try:
+            from .views import check_achievements
+            check_achievements(instance.pilot)
+        except Exception as e:
+            print(f"Error checking achievements: {e}")

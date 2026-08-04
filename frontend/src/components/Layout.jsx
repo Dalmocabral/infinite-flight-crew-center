@@ -1,6 +1,7 @@
 import { Box, CssBaseline } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar'; // Ensure this path is correct based on your file structure
+import AchievementPopup from './AchievementPopup';
 
 const Layout = () => {
   return (
@@ -62,6 +63,9 @@ const Layout = () => {
           }
         `}
       </style>
+      
+      {/* Global Achievement Popup */}
+      <AchievementPopup />
     </Box>
   );
 };

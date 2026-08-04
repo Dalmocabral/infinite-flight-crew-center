@@ -1,5 +1,6 @@
 import {
     EmojiEvents as AwardsIcon,
+    EmojiEvents as EmojiEventsIcon,
     Brightness4 as DarkModeIcon,
     Dashboard as DashboardIcon,
     Flight as FlightsIcon,
@@ -53,6 +54,7 @@ const menuItems = [
   { text: 'My Flights', icon: <FlightsIcon />, path: '/app/my-flights' },
   { text: 'My World Tour', icon: <PublicIcon />, path: '/app/my-awards' },
   { text: 'Analytics', icon: <AnalyticsIcon />, path: '/app/analytics' },
+  { text: 'Achievements', icon: <EmojiEventsIcon />, path: '/app/achievements' },
   { text: 'All Flights', icon: <FlightsIcon />, path: '/app/all-flights' },
   { text: 'World Tour', icon: <AwardsIcon />, path: '/app/awards' },
   { text: 'Members', icon: <GroupIcon />, path: '/app/members' },

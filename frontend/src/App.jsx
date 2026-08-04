@@ -17,6 +17,7 @@ import Members from './pages/Members';
 import MyAwards from './pages/MyAwards';
 import MyFlights from './pages/MyFlights';
 import Analytics from './pages/Analytics';
+import Achievements from './pages/Achievements';
 import PasswordResetConfirm from './pages/PassworldResetConfirm';
 import PassworldResetRequest from './pages/PassworldResetRequest';
 import PirepsFlights from './pages/PirepsFlights';
@@ -40,6 +41,7 @@ import MembersWiki from './pages/wiki/MembersWiki';
 import BookFlightWiki from './pages/wiki/BookFlightWiki';
 import RejectedFlightsWiki from './pages/wiki/RejectedFlightsWiki';
 import AnalyticsWiki from './pages/wiki/AnalyticsWiki';
+import AchievementsWiki from './pages/wiki/AchievementsWiki';
 import ReactivateAccount from './pages/ReactivateAccount';
 import InactiveProfile from './pages/InactiveProfile';
 
@@ -73,6 +75,7 @@ function App() {
             <Route path="book-flight" element={<BookFlightWiki />} />
             <Route path="rejected-flights" element={<RejectedFlightsWiki />} />
             <Route path="analytics" element={<AnalyticsWiki />} />
+            <Route path="achievements" element={<AchievementsWiki />} />
             {/* Catch-all for other unimplemented pages */}
             <Route path="*" element={<ComingSoon />} />
         </Route>
@@ -84,6 +87,7 @@ function App() {
             <Route path="awards" element={<Awards />} />
             <Route path="my-flights" element={<MyFlights />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route path="achievements" element={<Achievements />} />
             <Route path="my-awards" element={<MyAwards />} />
             <Route path="all-flights" element={<AllFlights />} />
             <Route path="map" element={<Map />} />

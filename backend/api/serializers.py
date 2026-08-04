@@ -206,3 +206,17 @@ class ChartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Chart
         fields = '__all__'
+
+class AchievementSerializer(serializers.ModelSerializer):
+    current_progress = serializers.IntegerField(read_only=True, required=False)
+    
+    class Meta:
+        model = Achievement
+        fields = '__all__'
+
+class UserAchievementSerializer(serializers.ModelSerializer):
+    achievement = AchievementSerializer(read_only=True)
+    
+    class Meta:
+        model = UserAchievement
+        fields = '__all__'
