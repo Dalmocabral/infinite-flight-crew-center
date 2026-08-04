@@ -943,11 +943,10 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
     def seed_db(self, request):
         try:
             import subprocess
-            result = subprocess.run(['python', 'seed_achievements.py'], capture_output=True, text=True, cwd='.')
+            subprocess.Popen(['python', 'seed_achievements.py'], cwd='.')
             return Response({
                 'status': 'success',
-                'output': result.stdout,
-                'error': result.stderr
+                'message': 'Script rodando em segundo plano. Aguarde 2-3 minutos!'
             })
         except Exception as e:
             return Response({'status': 'error', 'message': str(e)}, status=500)
