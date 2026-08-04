@@ -939,6 +939,22 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
         UserAchievement.objects.filter(user=request.user, id__in=ids).update(viewed=True)
         return Response({'status': 'success'})
 
+    @action(detail=False, methods=['get', 'post'])
+    def seed_db(self, request):
+        if not request.user.is_superuser:
+            return Response({'error': 'Unauthorized'}, status=403)
+        
+        try:
+            import subprocess
+            result = subprocess.run(['python', 'seed_achievements.py'], capture_output=True, text=True, cwd='.')
+            return Response({
+                'status': 'success',
+                'output': result.stdout,
+                'error': result.stderr
+            })
+        except Exception as e:
+            return Response({'status': 'error', 'message': str(e)}, status=500)
+
 def get_if_first_flight_date(user):
     if user.if_first_flight_date:
         return user.if_first_flight_date
