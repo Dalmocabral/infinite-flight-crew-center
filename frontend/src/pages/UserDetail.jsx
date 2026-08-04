@@ -44,6 +44,7 @@ const UserDetail = () => {
   const [awardsPage, setAwardsPage] = useState(1);
   const [flightsPage, setFlightsPage] = useState(1);
   const [logoData, setLogoData] = useState([]);
+  const [liveFlightStatus, setLiveFlightStatus] = useState(null);
   const itemsPerPage = 6;
   const rowsPerPage = 5;
 
@@ -58,14 +59,37 @@ const UserDetail = () => {
         setAwards(awardsResponse.data);
         setUserAwards(userAwardsResponse.data);
       } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-        setError('Erro ao carregar prêmios.');
-      } finally {
+        console.error('Erro ao buscar prêmios do usuário:', error);
       }
     };
-
+    
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    if (!user || !user.usernameIFC) return;
+    
+    const fetchLiveStatus = async () => {
+        try {
+            const sessions = await ApiService.getSessions();
+            for (const session of sessions) {
+                const flights = await ApiService.getFlightData(session.id);
+                const flight = flights.find(f => f.username && f.username.toLowerCase() === user.usernameIFC.toLowerCase());
+                if (flight) {
+                    if (flight.pilotState === 1 || flight.pilotState === 3) {
+                        setLiveFlightStatus('ap+');
+                    } else {
+                        setLiveFlightStatus('flying');
+                    }
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching live flights:', error);
+        }
+    };
+    fetchLiveStatus();
+  }, [user]);
 
   const combinedAwards = userAwards.map((userAward) => {
     const awardData = awards.find((award) => award.id === userAward.award);
@@ -199,21 +223,59 @@ const UserDetail = () => {
     >
       {/* Gravatar no centro */}
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 5 }}>
-        <Box sx={{ 
-            p: 0, 
-            display: 'flex',
-            borderRadius: '50%', 
-            border: '3px solid #4dabf5', 
-            boxShadow: '0 0 25px rgba(77, 171, 245, 0.6)',
-            mb: 2,
-            overflow: 'hidden'
-        }}>
-            <Gravatar
-            email={user.email}
-            size={160}
-            alt={`Imagem de perfil de ${user.first_name} ${user.last_name}`}
-            style={{ display: 'block' }}
-            />
+        <Box sx={{ position: 'relative' }}>
+            <Box sx={{ 
+                p: 0, 
+                display: 'flex',
+                borderRadius: '50%', 
+                border: '3px solid #4dabf5', 
+                boxShadow: '0 0 25px rgba(77, 171, 245, 0.6)',
+                mb: 2,
+                overflow: 'hidden'
+            }}>
+                <Gravatar
+                email={user.email}
+                size={160}
+                alt={`Imagem de perfil de ${user.first_name} ${user.last_name}`}
+                style={{ display: 'block' }}
+                />
+            </Box>
+            
+            {liveFlightStatus && (
+                <Box sx={{
+                    position: 'absolute',
+                    top: 10,
+                    right: -25,
+                    display: 'flex',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    boxShadow: '0 0 8px rgba(0,0,0,0.5)'
+                }}>
+                    <Box sx={{
+                        bgcolor: '#00e676',
+                        color: '#000',
+                        px: 1,
+                        py: 0.3,
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold'
+                    }}>
+                        Flying
+                    </Box>
+                    {liveFlightStatus === 'ap+' && (
+                        <Box sx={{
+                            bgcolor: '#2196f3',
+                            color: '#fff',
+                            px: 1,
+                            py: 0.3,
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            borderLeft: '1px solid rgba(255,255,255,0.2)'
+                        }}>
+                            AP+
+                        </Box>
+                    )}
+                </Box>
+            )}
         </Box>
         <Typography variant="h3" sx={{ fontWeight: 'bold', color: '#fff' }}>{user.first_name} {user.last_name}</Typography>
         <Box display="flex" alignItems="center" gap={1} mt={1}>
@@ -274,6 +336,15 @@ const UserDetail = () => {
                         <Grid item xs={6}>
                             <Typography variant="body2" color="rgba(255,255,255,0.6)">Last 30 Days (Hours)</Typography>
                              <Typography variant="h6" fontWeight="bold">{userMetrics.total_flight_time_last_30_days}h</Typography>
+                        </Grid>
+                        <Grid item xs={12}><Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} /></Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Total Fuel Used</Typography>
+                             <Typography variant="h6" fontWeight="bold">{userMetrics.total_fuel_tons || 0} T</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="rgba(255,255,255,0.6)">Total Baggage</Typography>
+                             <Typography variant="h6" fontWeight="bold">{userMetrics.total_baggage_tons || 0} T</Typography>
                         </Grid>
                    </Grid>
                 ) : (

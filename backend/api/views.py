@@ -505,17 +505,23 @@ class UserMetricsViewSet(ViewSet):
             # --- Aggregation Metrics ---
             metrics_all_time = approved_pireps.aggregate(
                 total_flights=Count('id'),
-                total_duration=Sum('flight_duration')
+                total_duration=Sum('flight_duration'),
+                total_fuel_used=Sum('fuel_used_kg'),
+                total_baggage=Sum('baggage_kg')
             )
 
             metrics_30_days = approved_pireps_last_30_days.aggregate(
                 total_flights=Count('id'),
-                total_duration=Sum('flight_duration')
+                total_duration=Sum('flight_duration'),
+                total_fuel_used=Sum('fuel_used_kg'),
+                total_baggage=Sum('baggage_kg')
             )
 
             # --- Extract Values ---
             total_flights = metrics_all_time['total_flights'] or 0
             total_duration = metrics_all_time['total_duration'] or timedelta(0)
+            total_fuel_used = (metrics_all_time['total_fuel_used'] or 0) / 1000
+            total_baggage = (metrics_all_time['total_baggage'] or 0) / 1000
 
             total_flights_last_30_days = metrics_30_days['total_flights'] or 0
             total_duration_last_30_days = metrics_30_days['total_duration'] or timedelta(0)
@@ -546,6 +552,8 @@ class UserMetricsViewSet(ViewSet):
                 "total_flight_time_last_30_days": total_flight_time_last_30_days_hh_mm,
                 "average_flights_per_day": average_flights_per_day,
                 "average_flight_time_per_day": average_flight_time_per_day,
+                "total_fuel_tons": round(total_fuel_used, 2),
+                "total_baggage_tons": round(total_baggage, 2),
             }
 
             return Response(metrics, status=status.HTTP_200_OK)

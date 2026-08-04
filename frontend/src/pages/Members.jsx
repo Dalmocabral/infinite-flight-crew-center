@@ -17,7 +17,7 @@ import Gravatar from '../components/Gravatar';
 const Members = () => {
   const [myData, setMyData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [liveUsers, setLiveUsers] = useState(new Set());
+  const [liveUsers, setLiveUsers] = useState(new Map());
 
   const GetData = () => {
     AxiosInstance.get('users/')
@@ -38,14 +38,21 @@ const Members = () => {
     const fetchLiveFlights = async () => {
         try {
             const sessions = await ApiService.getSessions();
-            const allUsernames = new Set();
+            const userStates = new Map();
             for (const session of sessions) {
                 const flights = await ApiService.getFlightData(session.id);
                 flights.forEach(f => {
-                    if (f.username) allUsernames.add(f.username.toLowerCase());
+                    if (f.username) {
+                        const usernameLower = f.username.toLowerCase();
+                        const isApPlus = f.pilotState === 1 || f.pilotState === 3;
+                        const current = userStates.get(usernameLower);
+                        userStates.set(usernameLower, {
+                            apPlus: isApPlus || (current ? current.apPlus : false)
+                        });
+                    }
                 });
             }
-            setLiveUsers(allUsernames);
+            setLiveUsers(userStates);
         } catch (error) {
             console.error('Error fetching live flights:', error);
         }
@@ -136,17 +143,35 @@ const Members = () => {
                                 <Box sx={{
                                     position: 'absolute',
                                     top: 0,
-                                    right: -10,
-                                    bgcolor: '#00e676',
-                                    color: '#000',
-                                    px: 0.8,
-                                    py: 0.2,
+                                    right: -55,
+                                    display: 'flex',
                                     borderRadius: '4px',
-                                    fontSize: '0.65rem',
-                                    fontWeight: 'bold',
-                                    boxShadow: '0 0 8px #00e676'
+                                    overflow: 'hidden',
+                                    boxShadow: '0 0 8px rgba(0,0,0,0.5)'
                                 }}>
-                                    Flying
+                                    <Box sx={{
+                                        bgcolor: '#00e676',
+                                        color: '#000',
+                                        px: 0.8,
+                                        py: 0.2,
+                                        fontSize: '0.65rem',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        Flying
+                                    </Box>
+                                    {liveUsers.get(item.usernameIFC.toLowerCase()).apPlus && (
+                                        <Box sx={{
+                                            bgcolor: '#2196f3',
+                                            color: '#fff',
+                                            px: 0.8,
+                                            py: 0.2,
+                                            fontSize: '0.65rem',
+                                            fontWeight: 'bold',
+                                            borderLeft: '1px solid rgba(255,255,255,0.2)'
+                                        }}>
+                                            AP+
+                                        </Box>
+                                    )}
                                 </Box>
                             )}
                         </Box>

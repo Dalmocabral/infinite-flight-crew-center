@@ -191,11 +191,13 @@ const SubmitScheduledPirep = () => {
       if (origin === from && destination === to) {
         const pax = data.weights?.pax_count;
         const cargo = data.weights?.cargo;
+        const fuel = data.fuel?.plan_ramp || data.fuel?.enroute_burn;
 
         setFormData(prev => ({
             ...prev,
             passengers: pax || prev.passengers,
-            baggage_kg: cargo || prev.baggage_kg
+            baggage_kg: cargo || prev.baggage_kg,
+            fuel_used_kg: fuel || prev.fuel_used_kg
         }));
         
         setApiMessage(prev => {

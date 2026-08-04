@@ -217,15 +217,17 @@ const PirepsFlights = () => {
       if (origin === from && destination === to) {
         const pax = data.weights?.pax_count;
         const cargo = data.weights?.cargo;
+        const fuel = data.fuel?.plan_ramp || data.fuel?.enroute_burn;
 
         if (pax) setPassengers(pax);
         if (cargo) setBaggageKg(cargo);
+        if (fuel) setFuelUsedKg(fuel);
         
         setApiMessage(prev => {
             const currentText = prev ? prev.text : '';
             return {
                 type: prev?.type || 'success',
-                text: `${currentText} (Passenger and Baggage data automatically imported from SimBrief)`
+                text: `${currentText} (Passenger, Baggage and Fuel data automatically imported from SimBrief)`
             };
         });
       }
