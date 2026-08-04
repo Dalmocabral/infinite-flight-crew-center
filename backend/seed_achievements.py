@@ -1,14 +1,23 @@
 import os
 import django
 
-# Configure Django settings (adjust if your production settings module is different)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crud.settings')
 django.setup()
 
 from api.models import Achievement
 
+# DANGER: Clear existing to prevent duplicates due to name changes
+print("Clearing old achievements to prevent duplicates...")
+Achievement.objects.all().delete()
+
 achievements_data = [
+    # Milestones básicos
+    {'name': 'First Flight', 'description': 'Complete your first approved flight.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'TOTAL_FLIGHTS', 'target_value': 1, 'xp_reward': 100},
+    {'name': '50 Hours', 'description': 'Log 50 total flight hours.', 'category': 'PROGRESSION', 'difficulty': 'SILVER', 'metric': 'TOTAL_HOURS', 'target_value': 50, 'xp_reward': 1000},
+    
     # Aeronaves
+    {'name': 'Airbus Captain', 'description': 'Complete your first flight in an Airbus.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'AIRBUS_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
+    {'name': 'Boeing Commander', 'description': 'Complete your first flight in a Boeing.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'BOEING_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
     {'name': 'Embraer Captain', 'description': 'Complete your first flight in an Embraer.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'EMBRAER_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
     {'name': 'Cessna Captain', 'description': 'Complete your first flight in a Cessna.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'CESSNA_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
     
@@ -40,26 +49,16 @@ achievements_data = [
     {'name': '10 Year Anniversary', 'description': 'Fly with us for 10 years.', 'category': 'PROGRESSION', 'difficulty': 'GOLD', 'metric': 'YEARS_SERVICE', 'target_value': 10, 'xp_reward': 5000},
     {'name': '15 Year Anniversary', 'description': 'Fly with us for 15 years.', 'category': 'PROGRESSION', 'difficulty': 'PLATINUM', 'metric': 'YEARS_SERVICE', 'target_value': 15, 'xp_reward': 10000},
     {'name': '20 Year Anniversary', 'description': 'Fly with us for 20 years.', 'category': 'PROGRESSION', 'difficulty': 'PLATINUM', 'metric': 'YEARS_SERVICE', 'target_value': 20, 'xp_reward': 20000},
+    {'name': 'Community Voice', 'description': 'Comment on our official Infinite Flight Community topic.', 'category': 'COMMUNITY', 'difficulty': 'BRONZE', 'metric': 'IFC_COMMENT', 'target_value': 1, 'xp_reward': 500},
     
     # VA/VO
     {'name': 'Corporate Drone', 'description': 'Join an official VA/VO on the Infinite Flight Community.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'VA_MEMBER', 'target_value': 1, 'xp_reward': 500}
 ]
 
-created_count = 0
 for ach_data in achievements_data:
-    obj, created = Achievement.objects.get_or_create(
-        name=ach_data['name'], 
-        defaults=ach_data
-    )
-    # se não criou, atualiza o texto para inglês caso estivesse em português
-    if not created:
-        obj.description = ach_data['description']
-        obj.save()
-    else:
-        created_count += 1
-        print(f"Created: {ach_data['name']}")
+    Achievement.objects.create(**ach_data)
 
-print(f"Finished! {created_count} new achievements added to the database.")
+print(f"Finished! {len(achievements_data)} achievements added to the database.")
 
 from django.contrib.auth import get_user_model
 from api.models import UserAchievement
@@ -70,5 +69,5 @@ print("Scanning all users to retroactively grant new achievements...")
 for user in User.objects.all():
     check_achievements(user)
 
-updated = UserAchievement.objects.filter(viewed=True).update(viewed=False)
+updated = UserAchievement.objects.all().update(viewed=False)
 print(f"Done. {updated} achievements marked as unread to show animations.")
