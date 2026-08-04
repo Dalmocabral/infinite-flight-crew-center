@@ -6,53 +6,280 @@ django.setup()
 
 from api.models import Achievement
 
-# DANGER: Clear existing to prevent duplicates due to name changes
 print("Clearing old achievements to prevent duplicates...")
 Achievement.objects.all().delete()
 
 achievements_data = [
-    # Milestones básicos
-    {'name': 'First Flight', 'description': 'Complete your first approved flight.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'TOTAL_FLIGHTS', 'target_value': 1, 'xp_reward': 100},
-    {'name': '50 Hours', 'description': 'Log 50 total flight hours.', 'category': 'PROGRESSION', 'difficulty': 'SILVER', 'metric': 'TOTAL_HOURS', 'target_value': 50, 'xp_reward': 1000},
-    
-    # Aeronaves
-    {'name': 'Airbus Captain', 'description': 'Complete your first flight in an Airbus.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'AIRBUS_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
-    {'name': 'Boeing Commander', 'description': 'Complete your first flight in a Boeing.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'BOEING_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
-    {'name': 'Embraer Captain', 'description': 'Complete your first flight in an Embraer.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'EMBRAER_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
-    {'name': 'Cessna Captain', 'description': 'Complete your first flight in a Cessna.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'CESSNA_FLIGHTS', 'target_value': 1, 'xp_reward': 200},
-    
-    # Tipos de Voo
-    {'name': 'Pax Routine', 'description': 'Complete 5 passenger flights.', 'category': 'PROGRESSION', 'difficulty': 'SILVER', 'metric': 'PAX_FLIGHTS', 'target_value': 5, 'xp_reward': 1000},
-    {'name': 'Elite Freighter', 'description': 'Complete 5 cargo flights.', 'category': 'PROGRESSION', 'difficulty': 'SILVER', 'metric': 'CARGO_FLIGHTS', 'target_value': 5, 'xp_reward': 1000},
-    {'name': 'World Traveler', 'description': 'Participate in a World Tour flight.', 'category': 'EVENT', 'difficulty': 'SILVER', 'metric': 'WT_FLIGHTS', 'target_value': 1, 'xp_reward': 1500},
-    
-    # SimBrief
-    {'name': 'Master Planner', 'description': 'Complete a flight using SimBrief data.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'SIMBRIEF_FLIGHTS', 'target_value': 1, 'xp_reward': 500},
-    
-    # Duração
-    {'name': 'Puddle Jumper', 'description': 'Complete a short-haul flight (<3h).', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'SHORT_HAUL', 'target_value': 1, 'xp_reward': 300},
-    {'name': 'Continent Crosser', 'description': 'Complete a medium-haul flight (3 to 12h).', 'category': 'PROGRESSION', 'difficulty': 'SILVER', 'metric': 'MEDIUM_HAUL', 'target_value': 1, 'xp_reward': 800},
-    {'name': 'Long Haul', 'description': 'Complete an ultra long-haul flight (>12h).', 'category': 'SKILL', 'difficulty': 'GOLD', 'metric': 'LONG_HAUL', 'target_value': 1, 'xp_reward': 2500},
-    
-    # Pousos
-    {'name': 'Landing Master', 'description': 'Achieve 10 consecutive perfect landings (10.0 score).', 'category': 'SKILL', 'difficulty': 'PLATINUM', 'metric': 'PERFECT_LANDINGS', 'target_value': 10, 'xp_reward': 5000},
-    {'name': 'Oof...', 'description': 'Score a terrible landing (0.0). It happens to the best of us.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'TERRIBLE_LANDINGS', 'target_value': 1, 'xp_reward': 50},
-    
-    # Servidores
-    {'name': 'Elite Pilot', 'description': 'Complete your first flight on the Expert Server.', 'category': 'PROGRESSION', 'difficulty': 'GOLD', 'metric': 'EXPERT_SERVER', 'target_value': 1, 'xp_reward': 1000},
-    {'name': 'In Training', 'description': 'Complete your first flight on the Training Server.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'TRAINING_SERVER', 'target_value': 1, 'xp_reward': 100},
-    {'name': 'Sunday Flyer', 'description': 'Complete your first flight on the Casual Server.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'CASUAL_SERVER', 'target_value': 1, 'xp_reward': 100},
-    
-    # Comunidade e Aniversário
-    {'name': '1 Year Anniversary', 'description': 'Fly with us for 1 year.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'YEARS_SERVICE', 'target_value': 1, 'xp_reward': 500},
-    {'name': '5 Year Anniversary', 'description': 'Fly with us for 5 years.', 'category': 'PROGRESSION', 'difficulty': 'SILVER', 'metric': 'YEARS_SERVICE', 'target_value': 5, 'xp_reward': 2500},
-    {'name': '10 Year Anniversary', 'description': 'Fly with us for 10 years.', 'category': 'PROGRESSION', 'difficulty': 'GOLD', 'metric': 'YEARS_SERVICE', 'target_value': 10, 'xp_reward': 5000},
-    {'name': '15 Year Anniversary', 'description': 'Fly with us for 15 years.', 'category': 'PROGRESSION', 'difficulty': 'PLATINUM', 'metric': 'YEARS_SERVICE', 'target_value': 15, 'xp_reward': 10000},
-    {'name': '20 Year Anniversary', 'description': 'Fly with us for 20 years.', 'category': 'PROGRESSION', 'difficulty': 'PLATINUM', 'metric': 'YEARS_SERVICE', 'target_value': 20, 'xp_reward': 20000},
-    {'name': 'Community Voice', 'description': 'Comment on our official Infinite Flight Community topic.', 'category': 'COMMUNITY', 'difficulty': 'BRONZE', 'metric': 'IFC_COMMENT', 'target_value': 1, 'xp_reward': 500},
-    
-    # VA/VO
-    {'name': 'Corporate Drone', 'description': 'Join an official VA/VO on the Infinite Flight Community.', 'category': 'PROGRESSION', 'difficulty': 'BRONZE', 'metric': 'VA_MEMBER', 'target_value': 1, 'xp_reward': 500}
+    {
+        "name": "First Flight",
+        "description": "Complete your first flight.",
+        "category": "PROGRESSION",
+        "difficulty": "BRONZE",
+        "metric": "TOTAL_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 500
+    },
+    {
+        "name": "Sky Veteran",
+        "description": "Complete 50 flights.",
+        "category": "PROGRESSION",
+        "difficulty": "SILVER",
+        "metric": "TOTAL_HOURS",
+        "target_value": 50,
+        "xp_reward": 2500
+    },
+    {
+        "name": "Frequent Flyer",
+        "description": "Visit 10 unique airports.",
+        "category": "EXPLORATION",
+        "difficulty": "SILVER",
+        "metric": "TOTAL_AIRPORTS",
+        "target_value": 10,
+        "xp_reward": 2000
+    },
+    {
+        "name": "Airbus Captain",
+        "description": "Complete a flight with an Airbus aircraft.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "AIRBUS_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 600
+    },
+    {
+        "name": "Boeing Commander",
+        "description": "Complete a flight with a Boeing aircraft.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "BOEING_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 600
+    },
+    {
+        "name": "Embraer Commander",
+        "description": "Complete a flight with an Embraer aircraft.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "EMBRAER_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 500
+    },
+    {
+        "name": "Cessna Commander",
+        "description": "Complete a flight with a Cessna aircraft.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "CESSNA_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 500
+    },
+    {
+        "name": "Pax Routine",
+        "description": "Complete a Free Flight Pax.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "PAX_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 400
+    },
+    {
+        "name": "Elite Freighter",
+        "description": "Complete a Free Flight Cargo.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "CARGO_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 400
+    },
+    {
+        "name": "World Traveler",
+        "description": "Complete a World Tour flight.",
+        "category": "EXPLORATION",
+        "difficulty": "BRONZE",
+        "metric": "WT_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 400
+    },
+    {
+        "name": "Master Planner",
+        "description": "Complete a flight using SimBrief.",
+        "category": "OPERATIONS",
+        "difficulty": "SILVER",
+        "metric": "SIMBRIEF_FLIGHTS",
+        "target_value": 1,
+        "xp_reward": 1000
+    },
+    {
+        "name": "Short Hop",
+        "description": "Complete a short haul flight (<3 hours).",
+        "category": "PROGRESSION",
+        "difficulty": "BRONZE",
+        "metric": "SHORT_HAUL",
+        "target_value": 1,
+        "xp_reward": 500
+    },
+    {
+        "name": "Crossing Continents",
+        "description": "Complete a medium haul flight (3-12 hours).",
+        "category": "PROGRESSION",
+        "difficulty": "SILVER",
+        "metric": "MEDIUM_HAUL",
+        "target_value": 1,
+        "xp_reward": 1500
+    },
+    {
+        "name": "Long Hauler",
+        "description": "Complete a long haul flight (>12 hours).",
+        "category": "PROGRESSION",
+        "difficulty": "GOLD",
+        "metric": "LONG_HAUL",
+        "target_value": 1,
+        "xp_reward": 3000
+    },
+    {
+        "name": "Landing Master",
+        "description": "Perform 10 perfect landings (10.0 score).",
+        "category": "OPERATIONS",
+        "difficulty": "GOLD",
+        "metric": "PERFECT_LANDINGS",
+        "target_value": 10,
+        "xp_reward": 5000
+    },
+    {
+        "name": "Oops...",
+        "description": "Score 0.0 on a landing.",
+        "category": "OPERATIONS",
+        "difficulty": "BRONZE",
+        "metric": "TERRIBLE_LANDINGS",
+        "target_value": 1,
+        "xp_reward": 10
+    },
+    {
+        "name": "50 Hours",
+        "description": "Accumulate 50 flight hours.",
+        "category": "PROGRESSION",
+        "difficulty": "BRONZE",
+        "metric": "TOTAL_HOURS",
+        "target_value": 50,
+        "xp_reward": 2000
+    },
+    {
+        "name": "100 Hours",
+        "description": "Accumulate 100 flight hours.",
+        "category": "PROGRESSION",
+        "difficulty": "SILVER",
+        "metric": "TOTAL_HOURS",
+        "target_value": 100,
+        "xp_reward": 4000
+    },
+    {
+        "name": "500 Hours",
+        "description": "Accumulate 500 flight hours.",
+        "category": "PROGRESSION",
+        "difficulty": "GOLD",
+        "metric": "TOTAL_HOURS",
+        "target_value": 500,
+        "xp_reward": 15000
+    },
+    {
+        "name": "Millennial Veteran",
+        "description": "Accumulate 1000 flight hours.",
+        "category": "PROGRESSION",
+        "difficulty": "PLATINUM",
+        "metric": "TOTAL_HOURS",
+        "target_value": 1000,
+        "xp_reward": 50000
+    },
+    {
+        "name": "Expert Pilot",
+        "description": "Complete a flight on the Expert Server.",
+        "category": "PROGRESSION",
+        "difficulty": "GOLD",
+        "metric": "EXPERT_SERVER",
+        "target_value": 1,
+        "xp_reward": 2000
+    },
+    {
+        "name": "Training Pilot",
+        "description": "Complete a flight on the Training Server.",
+        "category": "PROGRESSION",
+        "difficulty": "SILVER",
+        "metric": "TRAINING_SERVER",
+        "target_value": 1,
+        "xp_reward": 1000
+    },
+    {
+        "name": "Casual Pilot",
+        "description": "Complete a flight on the Casual Server.",
+        "category": "PROGRESSION",
+        "difficulty": "BRONZE",
+        "metric": "CASUAL_SERVER",
+        "target_value": 1,
+        "xp_reward": 500
+    },
+    {
+        "name": "Community Voice",
+        "description": "Comment on the Infinite World Tour topic on the Infinite Flight Community.",
+        "category": "EXPLORATION",
+        "difficulty": "GOLD",
+        "metric": "IFC_COMMENT",
+        "target_value": 1,
+        "xp_reward": 5000
+    },
+    {
+        "name": "1 Year Anniversary",
+        "description": "Fly with us for 1 year.",
+        "category": "PROGRESSION",
+        "difficulty": "BRONZE",
+        "metric": "YEARS_SERVICE",
+        "target_value": 1,
+        "xp_reward": 500
+    },
+    {
+        "name": "5 Year Anniversary",
+        "description": "Fly with us for 5 years.",
+        "category": "PROGRESSION",
+        "difficulty": "SILVER",
+        "metric": "YEARS_SERVICE",
+        "target_value": 5,
+        "xp_reward": 2500
+    },
+    {
+        "name": "10 Year Anniversary",
+        "description": "Fly with us for 10 years.",
+        "category": "PROGRESSION",
+        "difficulty": "GOLD",
+        "metric": "YEARS_SERVICE",
+        "target_value": 10,
+        "xp_reward": 5000
+    },
+    {
+        "name": "15 Year Anniversary",
+        "description": "Fly with us for 15 years.",
+        "category": "PROGRESSION",
+        "difficulty": "PLATINUM",
+        "metric": "YEARS_SERVICE",
+        "target_value": 15,
+        "xp_reward": 10000
+    },
+    {
+        "name": "20 Year Anniversary",
+        "description": "Fly with us for 20 years.",
+        "category": "PROGRESSION",
+        "difficulty": "PLATINUM",
+        "metric": "YEARS_SERVICE",
+        "target_value": 20,
+        "xp_reward": 20000
+    },
+    {
+        "name": "Corporate Drone",
+        "description": "Join an official VA/VO on the Infinite Flight Community.",
+        "category": "PROGRESSION",
+        "difficulty": "BRONZE",
+        "metric": "VA_MEMBER",
+        "target_value": 1,
+        "xp_reward": 500
+    }
 ]
 
 for ach_data in achievements_data:
