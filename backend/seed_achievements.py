@@ -336,7 +336,9 @@ achievements_data = [
     {"name": "Landing Legend", "description": "Reach 10,000 total landings.", "category": "PROGRESSION", "difficulty": "PLATINUM", "metric": "TOTAL_LANDINGS", "target_value": 10000, "xp_reward": 20000},
     {"name": "Dedicated Pilot", "description": "Complete 1,000 total flights on IF.", "category": "PROGRESSION", "difficulty": "SILVER", "metric": "TOTAL_FLIGHTS_IF", "target_value": 1000, "xp_reward": 2500},
     {"name": "Veteran Pilot", "description": "Complete 5,000 total flights on IF.", "category": "PROGRESSION", "difficulty": "GOLD", "metric": "TOTAL_FLIGHTS_IF", "target_value": 5000, "xp_reward": 10000},
-    {"name": "Legendary Pilot", "description": "Complete 10,000 total flights on IF.", "category": "PROGRESSION", "difficulty": "PLATINUM", "metric": "TOTAL_FLIGHTS_IF", "target_value": 10000, "xp_reward": 25000}
+    {"name": "Legendary Pilot", "description": "Complete 10,000 total flights on IF.", "category": "PROGRESSION", "difficulty": "PLATINUM", "metric": "TOTAL_FLIGHTS_IF", "target_value": 10000, "xp_reward": 25000},
+    {"name": "Butter Landing", "description": "Faça um pouso perfeito (nota 10.00).", "category": "OPERATIONS", "difficulty": "GOLD", "metric": "BUTTER_LANDING", "target_value": 1, "xp_reward": 5000},
+    {"name": "Bad Boy", "description": "Recebeu uma nova violação no Infinite Flight. Que feio!", "category": "PROGRESSION", "difficulty": "BRONZE", "metric": "NEW_VIOLATION", "target_value": 1, "xp_reward": 0}
 ]
 
 created_count = 0

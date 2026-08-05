@@ -932,6 +932,8 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
             elif ach.metric == 'TOTAL_XP': prog = request.user.if_xp
             elif ach.metric == 'TOTAL_LANDINGS': prog = request.user.if_landings
             elif ach.metric == 'TOTAL_FLIGHTS_IF': prog = request.user.if_flights
+            elif ach.metric == 'BUTTER_LANDING': prog = perfect_landings
+            elif ach.metric == 'NEW_VIOLATION': prog = 1 if getattr(request.user, 'has_new_violation_flag', False) else 0
             
             ach_data['current_progress'] = prog
             data.append(ach_data)
@@ -1091,6 +1093,8 @@ def check_achievements(user):
                     res = user_data['result'][0]
                     updated_if_cache = False
                     
+                    is_initial_sync = (user.if_xp == 0)
+                    
                     atc = res.get('atcOperations', 0)
                     if atc != user.if_atc_ops: user.if_atc_ops = atc; updated_if_cache = True
                     
@@ -1106,8 +1110,15 @@ def check_achievements(user):
                     flights = res.get('flightCount', 0)
                     if flights != user.if_flights: user.if_flights = flights; updated_if_cache = True
                     
+                    violations = res.get('violations', 0)
+                    if not is_initial_sync and violations > user.if_violations:
+                        # Will be picked up below
+                        user.has_new_violation_flag = True
+                    if violations != user.if_violations: 
+                        user.if_violations = violations; updated_if_cache = True
+                    
                     if updated_if_cache:
-                        user.save(update_fields=['if_atc_ops', 'if_grade', 'if_xp', 'if_landings', 'if_flights'])
+                        user.save(update_fields=['if_atc_ops', 'if_grade', 'if_xp', 'if_landings', 'if_flights', 'if_violations'])
         except Exception as e:
             print(f"Error fetching IF API stats: {e}")
             
@@ -1152,6 +1163,9 @@ def check_achievements(user):
         elif ach.metric == 'LONG_HAUL':
             from datetime import timedelta
             if approved_pireps.filter(flight_duration__gt=timedelta(hours=12)).count() >= ach.target_value: unlocked = True
+        elif ach.metric == 'BUTTER_LANDING':
+            from .models import LandingReport
+            if LandingReport.objects.filter(pilot=user, pirep__status='Approved', score=10.0).count() >= ach.target_value: unlocked = True
         elif ach.metric == 'PERFECT_LANDINGS':
             from .models import LandingReport
             if LandingReport.objects.filter(pilot=user, pirep__status='Approved', score=10.0).count() >= ach.target_value: unlocked = True
@@ -1219,6 +1233,8 @@ def check_achievements(user):
             if user.if_landings >= ach.target_value: unlocked = True
         elif ach.metric == 'TOTAL_FLIGHTS_IF':
             if user.if_flights >= ach.target_value: unlocked = True
+        elif ach.metric == 'NEW_VIOLATION':
+            if getattr(user, 'has_new_violation_flag', False): unlocked = True
             
         if unlocked:
             UserAchievement.objects.create(user=user, achievement=ach)

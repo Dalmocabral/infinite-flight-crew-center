@@ -49,6 +49,7 @@ class CustomUser(AbstractUser):
     if_xp = models.IntegerField(default=0)
     if_landings = models.IntegerField(default=0)
     if_flights = models.IntegerField(default=0)
+    if_violations = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 
@@ -425,7 +426,9 @@ class Achievement(models.Model):
         ('GRADE_LEVEL', 'Grade Level (IF)'),
         ('TOTAL_XP', 'Total XP (IF)'),
         ('TOTAL_LANDINGS', 'Total Landings (IF)'),
-        ('TOTAL_FLIGHTS_IF', 'Total Flights (IF)')
+        ('TOTAL_FLIGHTS_IF', 'Total Flights (IF)'),
+        ('BUTTER_LANDING', 'Butter Landing (Score 10.0)'),
+        ('NEW_VIOLATION', 'New Violation Received (IF)')
     ]
 
     name = models.CharField(max_length=255)
