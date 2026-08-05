@@ -109,7 +109,7 @@ const UserDetail = () => {
   });
 
   const combinedAchievements = userAchievements.map((userAch) => {
-    const achData = allAchievements.find((ach) => ach.id === userAch.achievement);
+    const achData = userAch.achievement;
     return {
       id: userAch.id,
       name: achData ? achData.name : 'Unknown',
