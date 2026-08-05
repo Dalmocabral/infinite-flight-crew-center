@@ -39,6 +39,8 @@ const UserDetail = () => {
   const [loading, setLoading] = useState(true);
   const [userAwards, setUserAwards] = useState([]);
   const [awards, setAwards] = useState([]);
+  const [userAchievements, setUserAchievements] = useState([]);
+  const [allAchievements, setAllAchievements] = useState([]);
   const [approvedFlights, setApprovedFlights] = useState([]);
   const [error, setError] = useState(null);
   const [awardsPage, setAwardsPage] = useState(1);
@@ -51,15 +53,19 @@ const UserDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [awardsResponse, userAwardsResponse] = await Promise.all([
+        const [awardsResponse, userAwardsResponse, achievementsResponse, userAchResponse] = await Promise.all([
           AxiosInstance.get('/awards/'),
           AxiosInstance.get(`/user-awards/?user=${id}`),
+          AxiosInstance.get('/achievements/'),
+          AxiosInstance.get(`/achievements/user_achievements/?user=${id}`),
         ]);
 
         setAwards(awardsResponse.data);
         setUserAwards(userAwardsResponse.data);
+        setAllAchievements(achievementsResponse.data);
+        setUserAchievements(userAchResponse.data);
       } catch (error) {
-        console.error('Erro ao buscar prêmios do usuário:', error);
+        console.error('Erro ao buscar prêmios ou conquistas do usuário:', error);
       }
     };
     
@@ -99,6 +105,16 @@ const UserDetail = () => {
       image: awardData ? awardData.link_image : '',
       progress: userAward.progress,
       end_date: userAward.end_date,
+    };
+  });
+
+  const combinedAchievements = userAchievements.map((userAch) => {
+    const achData = allAchievements.find((ach) => ach.id === userAch.achievement);
+    return {
+      id: userAch.id,
+      name: achData ? achData.name : 'Unknown',
+      image: achData ? achData.icon_url : '',
+      difficulty: achData ? achData.difficulty : 'BRONZE'
     };
   });
 
@@ -471,6 +487,75 @@ const UserDetail = () => {
             ) : (
               <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
                 No active tours or awards yet.
+              </Typography>
+            )}
+          </Grid>
+        </Box>
+      </Box>
+
+      {/* Seção de Conquistas (Achievements) */}
+      <Box sx={{ mt: 6 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#fff', textAlign: 'center', mb: 4 }}>
+          ACHIEVEMENTS UNLOCKED
+        </Typography>
+        <Box
+          sx={{
+            maxHeight: '400px',
+            overflowY: 'auto',
+            p: 2,
+            backgroundColor: 'rgba(255,255,255,0.02)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }}
+        >
+          <Grid container spacing={3} justifyContent="center">
+            {combinedAchievements.length > 0 ? (
+              combinedAchievements.map((ach) => {
+                let diffColor = 'gray';
+                if (ach.difficulty === 'BRONZE') diffColor = '#cd7f32';
+                if (ach.difficulty === 'SILVER') diffColor = '#c0c0c0';
+                if (ach.difficulty === 'GOLD') diffColor = '#ffd700';
+                if (ach.difficulty === 'PLATINUM') diffColor = '#e5e4e2';
+                
+                return (
+                  <Grid item xs={6} sm={4} md={2} key={ach.id} sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ textAlign: 'center', p: 2, borderRadius: '12px', bgcolor: 'rgba(0,0,0,0.2)', width: '100%' }}>
+                      <Box
+                        sx={{
+                          width: '80px',
+                          height: '80px',
+                          borderRadius: '50%',
+                           overflow: 'hidden',
+                           border: `2px solid ${diffColor}`,
+                           boxShadow: `0 0 10px ${diffColor}`,
+                           mx: 'auto',
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           bgcolor: 'rgba(0,0,0,0.5)'
+                        }}
+                      >
+                        {ach.image ? (
+                          <CardMedia
+                            component="img"
+                            image={ach.image}
+                            alt={ach.name}
+                            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <Typography variant="h4">🏆</Typography>
+                        )}
+                      </Box>
+                      <Typography variant="body2" sx={{ mt: 2, fontWeight: 'bold', color: diffColor }}>
+                        {ach.name}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                );
+              })
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                No achievements unlocked yet.
               </Typography>
             )}
           </Grid>

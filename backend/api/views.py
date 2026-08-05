@@ -942,7 +942,11 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
     def user_achievements(self, request):
         from .models import UserAchievement
         from .serializers import UserAchievementSerializer
-        user_achievements = UserAchievement.objects.filter(user=request.user)
+        user_id = request.query_params.get('user')
+        if user_id:
+            user_achievements = UserAchievement.objects.filter(user_id=user_id)
+        else:
+            user_achievements = UserAchievement.objects.filter(user=request.user)
         serializer = UserAchievementSerializer(user_achievements, many=True)
         return Response(serializer.data)
 
