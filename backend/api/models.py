@@ -43,6 +43,12 @@ class CustomUser(AbstractUser):
     reactivation_token = models.CharField(max_length=64, null=True, blank=True)
     simbrief_id = models.CharField(max_length=200, blank=True, null=True)
     if_first_flight_date = models.DateTimeField(null=True, blank=True)
+    
+    if_atc_ops = models.IntegerField(default=0)
+    if_grade = models.IntegerField(default=0)
+    if_xp = models.IntegerField(default=0)
+    if_landings = models.IntegerField(default=0)
+    if_flights = models.IntegerField(default=0)
 
     objects = CustomUserManager()
 
@@ -411,7 +417,15 @@ class Achievement(models.Model):
         ('CASUAL_SERVER', 'Casual Server Flights'),
         ('IFC_COMMENT', 'IFC Topic Comment'),
         ('YEARS_SERVICE', 'Years of Service'),
-        ('VA_MEMBER', 'VA/VO Member')
+        ('VA_MEMBER', 'VA/VO Member'),
+        ('B747_FLIGHTS', 'B747 Aircraft Flights'),
+        ('TOUR_COMPLETED', 'World Tour 100% Completed'),
+        ('CONTINENTS_VISITED', 'Continents Visited'),
+        ('ATC_OPS', 'ATC Operations (IF)'),
+        ('GRADE_LEVEL', 'Grade Level (IF)'),
+        ('TOTAL_XP', 'Total XP (IF)'),
+        ('TOTAL_LANDINGS', 'Total Landings (IF)'),
+        ('TOTAL_FLIGHTS_IF', 'Total Flights (IF)')
     ]
 
     name = models.CharField(max_length=255)

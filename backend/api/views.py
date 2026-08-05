@@ -859,6 +859,7 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
         cargo_flights = approved_pireps.filter(flight_type='Free Flight Cargo').count()
         wt_flights = approved_pireps.filter(flight_type='World Tour').count()
         simbrief_flights = approved_pireps.filter(passengers__isnull=False, baggage_kg__isnull=False).count()
+        b747_flights = approved_pireps.filter(aircraft__icontains='747').count()
         
         from datetime import timedelta
         short_haul = approved_pireps.filter(flight_duration__lt=timedelta(hours=3)).count()
@@ -883,6 +884,18 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
                 from django.utils import timezone
                 years_service = (timezone.now() - first_flight.registration_date).days // 365
                 
+        # Continentes
+        continents = set()
+        for icao in departures.union(arrivals):
+            cont = get_continent_from_icao(icao)
+            if cont and cont != 'Unknown':
+                continents.add(cont)
+        total_continents = len(continents)
+        
+        # Tours
+        from .models import UserAward
+        tours_completed = UserAward.objects.filter(user=request.user, progress__gte=100).count()
+                
         data = []
         for ach in queryset:
             ach_data = self.get_serializer(ach).data
@@ -896,6 +909,7 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
             elif ach.metric == 'BOEING_FLIGHTS': prog = boeing_flights
             elif ach.metric == 'EMBRAER_FLIGHTS': prog = embraer_flights
             elif ach.metric == 'CESSNA_FLIGHTS': prog = cessna_flights
+            elif ach.metric == 'B747_FLIGHTS': prog = b747_flights
             elif ach.metric == 'PAX_FLIGHTS': prog = pax_flights
             elif ach.metric == 'CARGO_FLIGHTS': prog = cargo_flights
             elif ach.metric == 'WT_FLIGHTS': prog = wt_flights
@@ -910,6 +924,14 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
             elif ach.metric == 'CASUAL_SERVER': prog = casual_server
             elif ach.metric == 'YEARS_SERVICE': prog = years_service
             elif ach.metric == 'VA_MEMBER': prog = 0
+            elif ach.metric == 'IFC_COMMENT': prog = 0
+            elif ach.metric == 'CONTINENTS_VISITED': prog = total_continents
+            elif ach.metric == 'TOUR_COMPLETED': prog = tours_completed
+            elif ach.metric == 'ATC_OPS': prog = request.user.if_atc_ops
+            elif ach.metric == 'GRADE_LEVEL': prog = request.user.if_grade
+            elif ach.metric == 'TOTAL_XP': prog = request.user.if_xp
+            elif ach.metric == 'TOTAL_LANDINGS': prog = request.user.if_landings
+            elif ach.metric == 'TOTAL_FLIGHTS_IF': prog = request.user.if_flights
             
             ach_data['current_progress'] = prog
             data.append(ach_data)
@@ -996,6 +1018,24 @@ def get_if_first_flight_date(user):
         
     return None
 
+def get_continent_from_icao(icao):
+    if not icao or len(icao) < 1: return None
+    first = icao[0].upper()
+    first_two = icao[:2].upper()
+    
+    if first == 'S': return 'South America'
+    if first in ['E', 'L']: return 'Europe'
+    if first in ['D', 'F', 'G', 'H']: return 'Africa'
+    if first in ['C', 'K', 'M', 'T']: return 'North America'
+    if first in ['O', 'R', 'U', 'V', 'Z']: return 'Asia'
+    if first in ['Y', 'A', 'N']: return 'Oceania'
+    if first == 'P': 
+        if first_two in ['PH', 'PA', 'PG']: return 'North America'
+        return 'Oceania'
+    if first == 'B': return 'Europe'
+    if first == 'W': return 'Asia'
+    return 'Unknown'
+
 def check_achievements(user):
     from django.db.models import Sum, Count
     from .models import PirepsFlight, Achievement, UserAchievement
@@ -1020,6 +1060,53 @@ def check_achievements(user):
     all_achievements = Achievement.objects.all()
     user_achievements = UserAchievement.objects.filter(user=user).values_list('achievement_id', flat=True)
     
+    # Continentes
+    continents = set()
+    for icao in departures.union(arrivals):
+        cont = get_continent_from_icao(icao)
+        if cont and cont != 'Unknown':
+            continents.add(cont)
+    total_continents = len(continents)
+    
+    # Tours Completados
+    from .models import UserAward
+    tours_completed = UserAward.objects.filter(user=user, progress__gte=100).count()
+    
+    # Busca cache IF API
+    if user.usernameIFC:
+        import os, requests
+        api_key = os.environ.get('VITE_API_KEY', '36d1c8xdt1zvxn9cqqs9pxr7dty8rhm4')
+        headers = {'Authorization': f'Bearer {api_key}'}
+        try:
+            user_res = requests.post("https://api.infiniteflight.com/public/v2/users", 
+                                     json={'discourseNames': [user.usernameIFC]}, 
+                                     headers=headers, timeout=10)
+            if user_res.status_code == 200:
+                user_data = user_res.json()
+                if user_data.get('errorCode') == 0 and user_data.get('result'):
+                    res = user_data['result'][0]
+                    updated_if_cache = False
+                    
+                    atc = res.get('atcOperations', 0)
+                    if atc != user.if_atc_ops: user.if_atc_ops = atc; updated_if_cache = True
+                    
+                    grade = res.get('grade', 0)
+                    if grade != user.if_grade: user.if_grade = grade; updated_if_cache = True
+                    
+                    xp = res.get('xp', 0)
+                    if xp != user.if_xp: user.if_xp = xp; updated_if_cache = True
+                    
+                    landings = res.get('landingCount', 0)
+                    if landings != user.if_landings: user.if_landings = landings; updated_if_cache = True
+                    
+                    flights = res.get('flightCount', 0)
+                    if flights != user.if_flights: user.if_flights = flights; updated_if_cache = True
+                    
+                    if updated_if_cache:
+                        user.save(update_fields=['if_atc_ops', 'if_grade', 'if_xp', 'if_landings', 'if_flights'])
+        except Exception as e:
+            print(f"Error fetching IF API stats: {e}")
+            
     for ach in all_achievements:
         if ach.id in user_achievements:
             continue
@@ -1112,6 +1199,22 @@ def check_achievements(user):
                                 unlocked = True
                 except Exception as e:
                     print(f"Error checking VA status: {e}")
+        elif ach.metric == 'B747_FLIGHTS':
+            if approved_pireps.filter(aircraft__icontains='747').count() >= ach.target_value: unlocked = True
+        elif ach.metric == 'CONTINENTS_VISITED':
+            if total_continents >= ach.target_value: unlocked = True
+        elif ach.metric == 'TOUR_COMPLETED':
+            if tours_completed >= ach.target_value: unlocked = True
+        elif ach.metric == 'ATC_OPS':
+            if user.if_atc_ops >= ach.target_value: unlocked = True
+        elif ach.metric == 'GRADE_LEVEL':
+            if user.if_grade >= ach.target_value: unlocked = True
+        elif ach.metric == 'TOTAL_XP':
+            if user.if_xp >= ach.target_value: unlocked = True
+        elif ach.metric == 'TOTAL_LANDINGS':
+            if user.if_landings >= ach.target_value: unlocked = True
+        elif ach.metric == 'TOTAL_FLIGHTS_IF':
+            if user.if_flights >= ach.target_value: unlocked = True
             
         if unlocked:
             UserAchievement.objects.create(user=user, achievement=ach)
