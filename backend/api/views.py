@@ -148,14 +148,13 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                             # Verifica se este voo da API já foi usado em outro PIREP
                                             if_id = f.get('id')
                                             
-                                            # Verifica redundância da aeronave
                                             if_aircraft_id = f.get('aircraftId')
-                                            aircraft_match = False
-                                            if if_aircraft_id:
+                                            aircraft_match = True
+                                            if if_aircraft_id and if_aircraft_id != '00000000-0000-0000-0000-000000000000':
                                                 try:
                                                     ac = Aircraft.objects.get(if_id=if_aircraft_id)
-                                                    if ac.name == pirep.aircraft:
-                                                        aircraft_match = True
+                                                    if ac.name != pirep.aircraft:
+                                                        aircraft_match = False
                                                 except Aircraft.DoesNotExist:
                                                     pass
                                                     
