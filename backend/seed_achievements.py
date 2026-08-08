@@ -1,12 +1,20 @@
 import os
 import django
+from django.db.models import Count
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'crud.settings')
+# Configurar o ambiente Django (se rodar standalone)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "crud.settings")
 django.setup()
 
-from api.models import Achievement
+from api.models import Achievement, UserAchievement
 
 print("Starting achievement seed script...")
+
+# -----------------------------------------------------
+# TEMPORARY BUG FIX: Delete incorrectly awarded Bad Boy achievements
+# -----------------------------------------------------
+print("Resetting Bad Boy achievements...")
+UserAchievement.objects.filter(achievement__metric='NEW_VIOLATION').delete()
 
 achievements_data = [
     {
