@@ -339,7 +339,7 @@ achievements_data = [
     {"name": "Legendary Pilot", "description": "Complete 10,000 total flights on IF.", "category": "PROGRESSION", "difficulty": "PLATINUM", "metric": "TOTAL_FLIGHTS_IF", "target_value": 10000, "xp_reward": 25000},
     {"name": "Butter Landing", "description": "Make a perfect landing (score 10.00).", "category": "OPERATIONS", "difficulty": "GOLD", "metric": "BUTTER_LANDING", "target_value": 1, "xp_reward": 5000},
     {"name": "Bad Boy", "description": "Received a new violation in Infinite Flight. Shame on you!", "category": "PROGRESSION", "difficulty": "BRONZE", "metric": "NEW_VIOLATION", "target_value": 1, "xp_reward": 0},
-    {"name": "No Cheiro", "description": "Pousou com menos de 7% do combustível planejado restante. Na estica!", "category": "OPERATIONS", "difficulty": "PLATINUM", "metric": "ON_FUMES", "target_value": 1, "xp_reward": 7500}
+    {"name": "On Fumes", "description": "Landed with less than 7% of the planned SimBrief fuel remaining. That was close!", "category": "OPERATIONS", "difficulty": "PLATINUM", "metric": "ON_FUMES", "target_value": 1, "xp_reward": 7500}
 ]
 
 created_count = 0
