@@ -178,7 +178,7 @@ class PirepsFlightViewset(viewsets.ModelViewSet):
                                         
                                         # Atualiza o combustível usando os dados do Infinite Flight
                                         if_fuel = matched_flight.get('fuelUsedKg')
-                                        if if_fuel is not None and (pirep.fuel_used_kg is None or pirep.fuel_used_kg == 0):
+                                        if if_fuel is not None:
                                             pirep.fuel_used_kg = if_fuel
                                             pirep.save(update_fields=['fuel_used_kg'])
                                             
@@ -933,6 +933,14 @@ class AchievementViewSet(viewsets.ReadOnlyModelViewSet):
             elif ach.metric == 'TOTAL_FLIGHTS_IF': prog = request.user.if_flights
             elif ach.metric == 'BUTTER_LANDING': prog = perfect_landings
             elif ach.metric == 'NEW_VIOLATION': prog = 1 if getattr(request.user, 'has_new_violation_flag', False) else 0
+            elif ach.metric == 'ON_FUMES':
+                prog = 0
+                for p in approved_pireps:
+                    if p.planned_fuel_kg and p.fuel_used_kg:
+                        remaining = float(p.planned_fuel_kg) - float(p.fuel_used_kg)
+                        if remaining <= float(p.planned_fuel_kg) * 0.07:
+                            prog = 1
+                            break
             
             ach_data['current_progress'] = prog
             data.append(ach_data)
@@ -1111,8 +1119,12 @@ def check_achievements(user):
                     
                     violations = res.get('violations', 0)
                     if not is_initial_sync and violations > user.if_violations:
-                        # Will be picked up below
-                        user.has_new_violation_flag = True
+                        # Evitar que todo mundo ganhe a conquista no primeiro sync após a migração
+                        if user.if_violations == 0:
+                            pass
+                        else:
+                            user.has_new_violation_flag = True
+                            
                     if violations != user.if_violations: 
                         user.if_violations = violations; updated_if_cache = True
                     
@@ -1165,6 +1177,13 @@ def check_achievements(user):
         elif ach.metric == 'BUTTER_LANDING':
             from .models import LandingReport
             if LandingReport.objects.filter(pilot=user, pirep__status='Approved', score=10.0).count() >= ach.target_value: unlocked = True
+        elif ach.metric == 'ON_FUMES':
+            for p in approved_pireps:
+                if p.planned_fuel_kg and p.fuel_used_kg:
+                    remaining = float(p.planned_fuel_kg) - float(p.fuel_used_kg)
+                    if remaining <= float(p.planned_fuel_kg) * 0.07:
+                        unlocked = True
+                        break
         elif ach.metric == 'PERFECT_LANDINGS':
             from .models import LandingReport
             if LandingReport.objects.filter(pilot=user, pirep__status='Approved', score=10.0).count() >= ach.target_value: unlocked = True

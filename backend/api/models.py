@@ -260,6 +260,7 @@ class PirepsFlight (models.Model):
     
     # Novos campos opcionais (Semi-automáticos via IF e SimBrief)
     fuel_used_kg = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    planned_fuel_kg = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     baggage_kg = models.IntegerField(null=True, blank=True)
     passengers = models.IntegerField(null=True, blank=True)
 
@@ -428,7 +429,8 @@ class Achievement(models.Model):
         ('TOTAL_LANDINGS', 'Total Landings (IF)'),
         ('TOTAL_FLIGHTS_IF', 'Total Flights (IF)'),
         ('BUTTER_LANDING', 'Butter Landing (Score 10.0)'),
-        ('NEW_VIOLATION', 'New Violation Received (IF)')
+        ('NEW_VIOLATION', 'New Violation Received (IF)'),
+        ('ON_FUMES', 'Landed on Fumes (Fuel < 7%)')
     ]
 
     name = models.CharField(max_length=255)

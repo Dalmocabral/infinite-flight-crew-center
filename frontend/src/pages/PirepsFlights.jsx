@@ -42,6 +42,7 @@ const PirepsFlights = () => {
   const [liveryId, setLiveryId] = useState(null);
   
   const [fuelUsedKg, setFuelUsedKg] = useState('');
+  const [plannedFuelKg, setPlannedFuelKg] = useState('');
   const [baggageKg, setBaggageKg] = useState('');
   const [passengers, setPassengers] = useState('');
 
@@ -217,11 +218,11 @@ const PirepsFlights = () => {
       if (origin === from && destination === to) {
         const pax = data.weights?.pax_count;
         const cargo = data.weights?.cargo;
-        const fuel = data.fuel?.plan_ramp || data.fuel?.enroute_burn;
+        const plannedFuel = data.fuel?.plan_ramp;
 
         if (pax) setPassengers(pax);
         if (cargo) setBaggageKg(cargo);
-        if (fuel) setFuelUsedKg(fuel);
+        if (plannedFuel) setPlannedFuelKg(plannedFuel);
         
         setApiMessage(prev => {
             const currentText = prev ? prev.text : '';
@@ -260,6 +261,7 @@ const PirepsFlights = () => {
       livery_id: liveryId,
       flight_type: 'World Tour',
       fuel_used_kg: fuelUsedKg || null,
+      planned_fuel_kg: plannedFuelKg || null,
       baggage_kg: baggageKg || null,
       passengers: passengers || null,
     };

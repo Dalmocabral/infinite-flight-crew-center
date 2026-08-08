@@ -191,13 +191,13 @@ const SubmitScheduledPirep = () => {
       if (origin === from && destination === to) {
         const pax = data.weights?.pax_count;
         const cargo = data.weights?.cargo;
-        const fuel = data.fuel?.plan_ramp || data.fuel?.enroute_burn;
+        const plannedFuel = data.fuel?.plan_ramp;
 
         setFormData(prev => ({
             ...prev,
             passengers: pax || prev.passengers,
             baggage_kg: cargo || prev.baggage_kg,
-            fuel_used_kg: fuel || prev.fuel_used_kg
+            planned_fuel_kg: plannedFuel || prev.planned_fuel_kg
         }));
         
         setApiMessage(prev => {
@@ -205,7 +205,7 @@ const SubmitScheduledPirep = () => {
             const currentText = prev ? prev.text : '';
             return {
                 type: prev?.type || 'success',
-                text: `${currentText} (Passenger and Baggage data automatically imported from SimBrief)`
+                text: `${currentText} (Passenger, Baggage and Fuel data automatically imported from SimBrief)`
             };
         });
       }
@@ -239,6 +239,7 @@ const SubmitScheduledPirep = () => {
       livery_id: liveryId,
       status: 'In Review',
       fuel_used_kg: formData.fuel_used_kg || null,
+      planned_fuel_kg: formData.planned_fuel_kg || null,
       baggage_kg: formData.baggage_kg || null,
       passengers: formData.passengers || null,
     };
