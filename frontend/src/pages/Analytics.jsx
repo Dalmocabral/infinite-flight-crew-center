@@ -29,6 +29,11 @@ import IconButton from '@mui/material/IconButton';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import LuggageIcon from '@mui/icons-material/Luggage';
 import PeopleIcon from '@mui/icons-material/People';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import HeadsetMicIcon from '@mui/icons-material/HeadsetMic';
 
 // Register Chart.js components
 ChartJS.register(
@@ -414,6 +419,62 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const totalBaggageKg = approvedFlights.reduce((acc, f) => acc + (parseFloat(f.baggage_kg) || 0), 0);
     const totalPassengers = approvedFlights.reduce((acc, f) => acc + (parseInt(f.passengers) || 0), 0);
 
+    // Compute Personal Records (from approvedFlights)
+    let longestFlight = null;
+    let longestDuration = 0;
+    const routeCounts = {};
+    let favoriteRoute = { route: 'N/A', count: 0 };
+    const aircraftCounts = {};
+    let topAircraft = { name: 'N/A', count: 0 };
+    const dayCounts = {};
+    let busiestDay = { date: 'N/A', count: 0 };
+
+    approvedFlights.forEach(f => {
+        let durationSecs = 0;
+        if (f.flight_duration && typeof f.flight_duration === 'string') {
+            const parts = f.flight_duration.split(':');
+            if (parts.length >= 2) {
+                durationSecs = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + (parts.length === 3 ? parseInt(parts[2]) : 0);
+            }
+        }
+        if (durationSecs > longestDuration) {
+            longestDuration = durationSecs;
+            longestFlight = f;
+        }
+
+        if (f.departure_airport && f.arrival_airport) {
+            const route = `${f.departure_airport} ➔ ${f.arrival_airport}`;
+            routeCounts[route] = (routeCounts[route] || 0) + 1;
+            if (routeCounts[route] > favoriteRoute.count) {
+                favoriteRoute = { route, count: routeCounts[route] };
+            }
+        }
+
+        if (f.aircraft) {
+            aircraftCounts[f.aircraft] = (aircraftCounts[f.aircraft] || 0) + 1;
+            if (aircraftCounts[f.aircraft] > topAircraft.count) {
+                topAircraft = { name: f.aircraft, count: aircraftCounts[f.aircraft] };
+            }
+        }
+
+        if (f.registration_date) {
+            const dateOnly = f.registration_date.split('T')[0];
+            dayCounts[dateOnly] = (dayCounts[dateOnly] || 0) + 1;
+            if (dayCounts[dateOnly] > busiestDay.count) {
+                busiestDay = { date: dateOnly, count: dayCounts[dateOnly] };
+            }
+        }
+    });
+
+    let longestFlightText = "0h 0m";
+    let longestFlightSub = "N/A";
+    if (longestFlight) {
+        const h = Math.floor(longestDuration / 3600);
+        const m = Math.floor((longestDuration % 3600) / 60);
+        longestFlightText = `${h}h ${m}m`;
+        longestFlightSub = `${longestFlight.departure_airport} ➔ ${longestFlight.arrival_airport} · ${longestFlight.aircraft}`;
+    }
+
     const totalFuelTons = (totalFuelKg / 1000).toFixed(2);
     const totalBaggageTons = (totalBaggageKg / 1000).toFixed(2);
 
@@ -638,6 +699,62 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                     </Card>
                 </Grid>
             </Grid>
+
+            {/* Personal Records */}
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" sx={{ color: '#b0bec5', mb: 2, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: 1 }}>
+                    REGISTROS PESSOAIS <span style={{ color: 'rgba(255,255,255,0.3)' }}>· últimos {Math.min(approvedFlights.length, 100)}</span>
+                </Typography>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #0277bd', borderRadius: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#4fc3f7', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                                <AccessTimeIcon sx={{ fontSize: 16, mr: 1 }} /> VOO MAIS LONGO
+                            </Typography>
+                            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{longestFlightText}</Typography>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{longestFlightSub}</Typography>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #00695c', borderRadius: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#1de9b6', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                                <FlightTakeoffIcon sx={{ fontSize: 16, mr: 1 }} /> ROTA FAVORITA
+                            </Typography>
+                            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{favoriteRoute.route}</Typography>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{favoriteRoute.count} voos realizados</Typography>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #f57f17', borderRadius: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#ffeb3b', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                                <StarBorderIcon sx={{ fontSize: 16, mr: 1 }} /> AERONAVE DE PONTA
+                            </Typography>
+                            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{topAircraft.name}</Typography>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{topAircraft.count} voos</Typography>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={userData?.if_atc_ops > 0 ? 3 : 6}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #e65100', borderRadius: 2 }}>
+                            <Typography variant="caption" sx={{ color: '#ff9800', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                                <CalendarTodayIcon sx={{ fontSize: 16, mr: 1 }} /> DIA MAIS MOVIMENTADO
+                            </Typography>
+                            <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{busiestDay.count} voos</Typography>
+                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{busiestDay.date}</Typography>
+                        </Card>
+                    </Grid>
+                    {userData?.if_atc_ops > 0 && (
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #9c27b0', borderRadius: 2 }}>
+                                <Typography variant="caption" sx={{ color: '#e040fb', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                                    <HeadsetMicIcon sx={{ fontSize: 16, mr: 1 }} /> REGISTRO DE ATC
+                                </Typography>
+                                <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{userData.if_atc_ops}</Typography>
+                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>Operações controladas</Typography>
+                            </Card>
+                        </Grid>
+                    )}
+                </Grid>
+            </Box>
         </Box>
     );
 };
