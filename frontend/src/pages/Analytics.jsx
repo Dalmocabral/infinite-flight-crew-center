@@ -704,54 +704,53 @@ const Analytics = ({ targetUserId, hideTitle }) => {
 
             {/* Personal Records */}
             <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ color: '#b0bec5', mb: 2, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: 1 }}>
-                    REGISTROS PESSOAIS <span style={{ color: 'rgba(255,255,255,0.3)' }}>· últimos {Math.min(approvedFlights.length, 100)}</span>
+                <Typography variant="h6" sx={{ color: '#8e9eab', mb: 2, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 'bold' }}>
+                    REGISTROS PESSOAIS <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 'normal' }}>· últimos {Math.min(approvedFlights.length, 100)}</span>
                 </Typography>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #0277bd', borderRadius: 2 }}>
-                            <Typography variant="caption" sx={{ color: '#4fc3f7', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.4)', border: '1px solid rgba(2, 119, 189, 0.5)', borderRadius: 3, boxShadow: 'none' }}>
+                            <Typography variant="caption" sx={{ color: '#4fc3f7', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                                 <AccessTimeIcon sx={{ fontSize: 16, mr: 1 }} /> VOO MAIS LONGO
                             </Typography>
                             <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{longestFlightText}</Typography>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{longestFlightSub}</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', fontSize: '0.8rem' }}>{longestFlightSub}</Typography>
                         </Card>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #00695c', borderRadius: 2 }}>
-                            <Typography variant="caption" sx={{ color: '#1de9b6', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.4)', border: '1px solid rgba(0, 150, 136, 0.5)', borderRadius: 3, boxShadow: 'none' }}>
+                            <Typography variant="caption" sx={{ color: '#1de9b6', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                                 <FlightTakeoffIcon sx={{ fontSize: 16, mr: 1 }} /> ROTA FAVORITA
                             </Typography>
                             <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{favoriteRoute.route}</Typography>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{favoriteRoute.count} voos realizados</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', fontSize: '0.8rem' }}>{favoriteRoute.count} voos realizados</Typography>
                         </Card>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #f57f17', borderRadius: 2 }}>
-                            <Typography variant="caption" sx={{ color: '#ffeb3b', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
-                                <StarBorderIcon sx={{ fontSize: 16, mr: 1 }} /> AERONAVE DE PONTA
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.4)', border: '1px solid rgba(255, 193, 7, 0.5)', borderRadius: 3, boxShadow: 'none' }}>
+                            <Typography variant="caption" sx={{ color: '#ffca28', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                <StarBorderIcon sx={{ fontSize: 18, mr: 1, mb: '2px' }} /> AERONAVES DE PONTA
                             </Typography>
                             <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{topAircraft.name}</Typography>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{topAircraft.count} voos</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', fontSize: '0.8rem' }}>{topAircraft.count} voos</Typography>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={userData?.if_atc_ops > 0 ? 3 : 6}>
-                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #e65100', borderRadius: 2 }}>
-                            <Typography variant="caption" sx={{ color: '#ff9800', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
-                                <CalendarTodayIcon sx={{ fontSize: 16, mr: 1 }} /> DIA MAIS MOVIMENTADO
+                    <Grid item xs={12} sm={6}>
+                        <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.4)', border: '1px solid rgba(255, 152, 0, 0.5)', borderRadius: 3, boxShadow: 'none' }}>
+                            <Typography variant="caption" sx={{ color: '#ffb74d', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                <CalendarTodayIcon sx={{ fontSize: 15, mr: 1 }} /> DIA MAIS MOVIMENTADO
                             </Typography>
                             <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{busiestDay.count} voos</Typography>
-                            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>{busiestDay.date}</Typography>
+                            <Typography variant="body2" sx={{ color: '#8e9eab', fontSize: '0.8rem' }}>{busiestDay.date}</Typography>
                         </Card>
                     </Grid>
+                    
                     {userData?.if_atc_ops > 0 && (
-                        <Grid item xs={12} sm={6} md={3}>
-                            <Card sx={{ p: 2.5, backgroundColor: 'rgba(10, 25, 41, 0.7)', border: '1px solid #9c27b0', borderRadius: 2 }}>
-                                <Typography variant="caption" sx={{ color: '#e040fb', display: 'flex', alignItems: 'center', fontWeight: 'bold', mb: 1 }}>
-                                    <HeadsetMicIcon sx={{ fontSize: 16, mr: 1 }} /> REGISTRO DE ATC
-                                </Typography>
-                                <Typography variant="h5" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5 }}>{userData.if_atc_ops}</Typography>
-                                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.5)' }}>Operações controladas</Typography>
+                        <Grid item xs={12}>
+                            <Card sx={{ p: 2.5, mt: 1, backgroundColor: 'rgba(10, 25, 41, 0.4)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 3, boxShadow: 'none' }}>
+                                <HeadsetMicIcon sx={{ fontSize: 22, color: '#29b6f6', mb: 1 }} />
+                                <Typography variant="h6" sx={{ color: 'white', fontWeight: 'bold', mb: 0.5, fontSize: '1.1rem' }}>Registro ATC</Typography>
+                                <Typography variant="body2" sx={{ color: '#8e9eab', fontSize: '0.85rem' }}>{userData.if_atc_ops} operações</Typography>
                             </Card>
                         </Grid>
                     )}
