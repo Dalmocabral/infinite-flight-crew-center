@@ -429,7 +429,9 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const dayCounts = {};
     let busiestDay = { date: 'N/A', count: 0 };
 
-    approvedFlights.forEach(f => {
+    const last100Flights = approvedFlights.slice(0, 100);
+
+    last100Flights.forEach(f => {
         let durationSecs = 0;
         if (f.flight_duration && typeof f.flight_duration === 'string') {
             const parts = f.flight_duration.split(':');
