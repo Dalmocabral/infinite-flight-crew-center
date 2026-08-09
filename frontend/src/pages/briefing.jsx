@@ -179,14 +179,25 @@ const Briefing = () => {
             }
 
             if (depAirport && arrAirport) {
-            const latLngs = [
-                [depAirport.lat, depAirport.lon],
-                [arrAirport.lat, arrAirport.lon],
-            ];
-            L.polyline(latLngs, { color: '#f50057', weight: 3, dashArray: '5, 10' }).addTo(map.current);
+                let depLon = depAirport.lon;
+                let arrLon = arrAirport.lon;
 
-            const bounds = L.latLngBounds(latLngs);
-            map.current.fitBounds(bounds, { padding: [50, 50] });
+                // Fix for crossing the International Date Line (Antimeridian)
+                if (arrLon - depLon > 180) {
+                    arrLon -= 360;
+                } else if (depLon - arrLon > 180) {
+                    arrLon += 360;
+                }
+
+                const latLngs = [
+                    [depAirport.lat, depLon],
+                    [arrAirport.lat, arrLon],
+                ];
+                L.polyline(latLngs, { color: '#f50057', weight: 3, dashArray: '5, 10' }).addTo(map.current);
+
+                const bounds = L.latLngBounds(latLngs);
+                map.current.fitBounds(bounds, { padding: [50, 50] });
+            }
 
              // Marcador de toque se disponível
              const lr = flightData.landing_report;

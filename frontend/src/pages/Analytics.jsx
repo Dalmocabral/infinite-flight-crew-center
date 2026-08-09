@@ -317,9 +317,20 @@ const Analytics = ({ targetUserId, hideTitle }) => {
                     } else {
                         try {
                             const greatCircleLine = greatCircle(point([dep.lon, dep.lat]), point([arr.lon, arr.lat]));
-                            latLngs = greatCircleLine.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                            let previousLon = greatCircleLine.geometry.coordinates[0][0];
+                            latLngs = greatCircleLine.geometry.coordinates.map(coord => {
+                                let lon = coord[0];
+                                if (lon - previousLon > 180) lon -= 360;
+                                else if (previousLon - lon > 180) lon += 360;
+                                previousLon = lon;
+                                return [coord[1], lon];
+                            });
                         } catch (e) {
-                            latLngs = [[dep.lat, dep.lon], [arr.lat, arr.lon]];
+                            let depLon = dep.lon;
+                            let arrLon = arr.lon;
+                            if (arrLon - depLon > 180) arrLon -= 360;
+                            else if (depLon - arrLon > 180) arrLon += 360;
+                            latLngs = [[dep.lat, depLon], [arr.lat, arrLon]];
                         }
                     }
 
