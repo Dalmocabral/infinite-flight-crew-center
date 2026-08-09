@@ -419,7 +419,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const totalBaggageKg = approvedFlights.reduce((acc, f) => acc + (parseFloat(f.baggage_kg) || 0), 0);
     const totalPassengers = approvedFlights.reduce((acc, f) => acc + (parseInt(f.passengers) || 0), 0);
 
-    // Compute Personal Records (from approvedFlights)
+    // Compute Personal Records (from userIfFlights if available, otherwise approvedFlights)
     let longestFlight = null;
     let longestDuration = 0;
     const routeCounts = {};
@@ -429,23 +429,51 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const dayCounts = {};
     let busiestDay = { date: 'N/A', count: 0 };
 
-    const last100Flights = approvedFlights.slice(0, 100);
-
-    last100Flights.forEach(f => {
-        let durationSecs = 0;
-        if (f.flight_duration && typeof f.flight_duration === 'string') {
-            const parts = f.flight_duration.split(':');
-            if (parts.length >= 2) {
-                durationSecs = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + (parts.length === 3 ? parseInt(parts[2]) : 0);
+    const personalRecordsFlights = userIfFlights.length > 0 
+        ? userIfFlights.map(f => {
+            let acName = "Unknown";
+            if (f.aircraftId && ifLiveries && ifLiveries.length > 0) {
+                const match = ifLiveries.find(item => item.aircraftID === f.aircraftId || item.id === f.aircraftId);
+                if (match && match.aircraftName) acName = match.aircraftName;
             }
-        }
-        if (durationSecs > longestDuration) {
-            longestDuration = durationSecs;
+            return {
+                durationSecs: (f.flightTime || 0) * 60,
+                dep: f.originAirport || "N/A",
+                arr: f.destinationAirport || "N/A",
+                aircraft: acName !== "Unknown" ? acName : (f.aircraftId || "Generic"),
+                date: f.created ? f.created.split('T')[0] : "N/A"
+            };
+        }).sort((a, b) => new Date(b.date) - new Date(a.date))
+        : approvedFlights.map(f => {
+            let durationSecs = 0;
+            if (f.flight_duration && typeof f.flight_duration === 'string') {
+                const parts = f.flight_duration.split(':');
+                if (parts.length >= 2) {
+                    durationSecs = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60) + (parts.length === 3 ? parseInt(parts[2]) : 0);
+                }
+            } else if (typeof f.flight_duration === 'number') {
+                durationSecs = f.flight_duration;
+            }
+            return {
+                durationSecs,
+                dep: f.departure_airport || "N/A",
+                arr: f.arrival_airport || "N/A",
+                aircraft: f.aircraft || "Unknown",
+                date: f.registration_date ? f.registration_date.split('T')[0] : "N/A"
+            };
+        });
+
+    const last100Personal = personalRecordsFlights.slice(0, 100);
+    const recordsCount = personalRecordsFlights.length;
+
+    last100Personal.forEach(f => {
+        if (f.durationSecs > longestDuration) {
+            longestDuration = f.durationSecs;
             longestFlight = f;
         }
 
-        if (f.departure_airport && f.arrival_airport) {
-            const route = `${f.departure_airport} ➔ ${f.arrival_airport}`;
+        if (f.dep !== "N/A" && f.arr !== "N/A") {
+            const route = `${f.dep} ➔ ${f.arr}`;
             routeCounts[route] = (routeCounts[route] || 0) + 1;
             if (routeCounts[route] > favoriteRoute.count) {
                 favoriteRoute = { route, count: routeCounts[route] };
@@ -459,11 +487,10 @@ const Analytics = ({ targetUserId, hideTitle }) => {
             }
         }
 
-        if (f.registration_date) {
-            const dateOnly = f.registration_date.split('T')[0];
-            dayCounts[dateOnly] = (dayCounts[dateOnly] || 0) + 1;
-            if (dayCounts[dateOnly] > busiestDay.count) {
-                busiestDay = { date: dateOnly, count: dayCounts[dateOnly] };
+        if (f.date !== "N/A") {
+            dayCounts[f.date] = (dayCounts[f.date] || 0) + 1;
+            if (dayCounts[f.date] > busiestDay.count) {
+                busiestDay = { date: f.date, count: dayCounts[f.date] };
             }
         }
     });
@@ -474,7 +501,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
         const h = Math.floor(longestDuration / 3600);
         const m = Math.floor((longestDuration % 3600) / 60);
         longestFlightText = `${h}h ${m}m`;
-        longestFlightSub = `${longestFlight.departure_airport} ➔ ${longestFlight.arrival_airport} · ${longestFlight.aircraft}`;
+        longestFlightSub = `${longestFlight.dep} ➔ ${longestFlight.arr} · ${longestFlight.aircraft}`;
     }
 
     const totalFuelTons = (totalFuelKg / 1000).toFixed(2);
@@ -705,7 +732,7 @@ const Analytics = ({ targetUserId, hideTitle }) => {
             {/* Personal Records */}
             <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ color: '#8e9eab', mb: 2, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: 1, fontWeight: 'bold' }}>
-                    REGISTROS PESSOAIS <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 'normal' }}>· últimos {Math.min(approvedFlights.length, 100)}</span>
+                    REGISTROS PESSOAIS <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 'normal' }}>· últimos {Math.min(recordsCount, 100)}</span>
                 </Typography>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
