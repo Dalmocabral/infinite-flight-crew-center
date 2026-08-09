@@ -432,15 +432,20 @@ const Analytics = ({ targetUserId, hideTitle }) => {
     const personalRecordsFlights = userIfFlights.length > 0 
         ? userIfFlights.map(f => {
             let acName = "Unknown";
-            if (f.aircraftId && ifLiveries && ifLiveries.length > 0) {
-                const match = ifLiveries.find(item => item.aircraftID === f.aircraftId || item.id === f.aircraftId);
+            if (ifLiveries && ifLiveries.length > 0) {
+                // Try matching liveryId first, then aircraftId
+                const match = ifLiveries.find(item => item.id === f.liveryId || item.aircraftID === f.aircraftId || item.id === f.aircraftId);
                 if (match && match.aircraftName) acName = match.aircraftName;
             }
+            if (acName === "Unknown" && f.aircraftName) {
+                acName = f.aircraftName;
+            }
+
             return {
-                durationSecs: (f.flightTime || 0) * 60,
-                dep: f.originAirport || "N/A",
-                arr: f.destinationAirport || "N/A",
-                aircraft: acName !== "Unknown" ? acName : (f.aircraftId || "Generic"),
+                durationSecs: (f.totalTime || f.flightTime || 0) * 60,
+                dep: f.originAirport || f.departureAirport || "N/A",
+                arr: f.destinationAirport || f.arrivalAirport || "N/A",
+                aircraft: acName !== "Unknown" ? acName : (f.aircraftId !== "00000000-0000-0000-0000-000000000000" ? f.aircraftId : "Generic"),
                 date: f.created ? f.created.split('T')[0] : "N/A"
             };
         }).sort((a, b) => new Date(b.date) - new Date(a.date))
