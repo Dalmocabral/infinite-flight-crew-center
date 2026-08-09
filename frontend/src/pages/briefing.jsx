@@ -197,8 +197,6 @@ const Briefing = () => {
 
                 const bounds = L.latLngBounds(latLngs);
                 map.current.fitBounds(bounds, { padding: [50, 50] });
-            }
-
              // Marcador de toque se disponível
              const lr = flightData.landing_report;
              if (lr && lr.landing_lat && lr.landing_lon && (Math.abs(lr.landing_lat) > 0.001 || Math.abs(lr.landing_lon) > 0.001)) {
