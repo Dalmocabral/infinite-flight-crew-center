@@ -9,10 +9,10 @@ import {
     IconButton,
     InputLabel,
     MenuItem,
-    Paper,
     Select,
     TextField,
-    Typography
+    Typography,
+    CircularProgress
 } from "@mui/material";
 import { LocalizationProvider, TimeField } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -404,7 +404,11 @@ const SubmitScheduledPirep = () => {
                     disabled={isVerifying}
                     sx={{ mt: 2, height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
                 >
-                  SUBMIT FLIGHT REPORT
+                  {isVerifying ? (
+                    <><CircularProgress size={24} color="inherit" sx={{ mr: 2 }} /> VERIFICANDO DADOS (IF / SIMBRIEF)...</>
+                  ) : (
+                    'SUBMIT FLIGHT REPORT'
+                  )}
                 </Button>
               </Grid>
               </Grid>

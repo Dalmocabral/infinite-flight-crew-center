@@ -12,10 +12,10 @@ import {
     Grid,
     InputLabel,
     MenuItem,
-    Paper,
     Select,
     TextField,
-    Typography
+    Typography,
+    CircularProgress
 } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -493,10 +493,15 @@ const PirepsFlights = () => {
                         variant="contained" 
                         fullWidth 
                         size="large"
-                        startIcon={<SendIcon />}
+                        startIcon={!isVerifying && <SendIcon />}
+                        disabled={isVerifying}
                         sx={{ mt: 2, height: '56px', fontSize: '1.1rem', fontWeight: 'bold' }}
                     >
-                    SUBMIT PIREP
+                    {isVerifying ? (
+                      <><CircularProgress size={24} color="inherit" sx={{ mr: 2 }} /> VERIFICANDO DADOS (IF / SIMBRIEF)...</>
+                    ) : (
+                      'SUBMIT PIREP'
+                    )}
                     </Button>
                 </motion.div>
               </Grid>
