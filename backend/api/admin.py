@@ -32,6 +32,7 @@ from django.db.models import Case, When, Value, IntegerField
 class PirepsFlightAdmin(admin.ModelAdmin):
     list_display = ('flight_icao', 'flight_number', 'pilot', 'departure_airport', 'arrival_airport', 'status')
     readonly_fields = ('if_live_flights',)
+    list_select_related = ('pilot',)
     actions = ['recover_telemetry']
     
     @admin.action(description='Recuperar Telemetria da API Infinite Flight')
@@ -286,7 +287,7 @@ class PirepsFlightAdmin(admin.ModelAdmin):
         # Custom ordering: In Review (1), Approved (2), Rejected (3) or any other logic.
         # However, user asked "sendo que status em análise sempre vem aparecendo primeiro"
         # 'In Review' comes first.
-        return qs.annotate(
+        return qs.defer('telemetry_log').annotate(
             status_order=Case(
                 When(status='In Review', then=Value(1)),
                 When(status='Em análise', then=Value(1)), # In case of legacy data
