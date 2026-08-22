@@ -283,20 +283,8 @@ class PirepsFlightAdmin(admin.ModelAdmin):
     if_live_flights.short_description = 'Últimos 10 Voos no Infinite Flight (API Real)'
     
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        # Custom ordering: In Review (1), Approved (2), Rejected (3) or any other logic.
-        # However, user asked "sendo que status em análise sempre vem aparecendo primeiro"
-        # 'In Review' comes first.
-        return qs.defer('telemetry_log').annotate(
-            status_order=Case(
-                When(status='In Review', then=Value(1)),
-                When(status='Em análise', then=Value(1)), # In case of legacy data
-                When(status='Approved', then=Value(2)),
-                When(status='Rejected', then=Value(3)),
-                default=Value(4),
-                output_field=IntegerField(),
-            )
-        ).order_by('status_order', '-registration_date')
+        return super().get_queryset(request).defer('telemetry_log')
+
 
 @admin.register(Award)
 class AwardAdmin(admin.ModelAdmin):
