@@ -37,7 +37,10 @@ class PirepsFlightAdmin(admin.ModelAdmin):
     
     def changelist_view(self, request, extra_context=None):
         try:
-            return super().changelist_view(request, extra_context)
+            response = super().changelist_view(request, extra_context)
+            if hasattr(response, 'render'):
+                response.render()
+            return response
         except Exception as e:
             import traceback
             from django.http import HttpResponseServerError
