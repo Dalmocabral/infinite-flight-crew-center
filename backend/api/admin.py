@@ -35,17 +35,7 @@ class PirepsFlightAdmin(admin.ModelAdmin):
     list_select_related = ('pilot',)
     actions = ['recover_telemetry']
     
-    def changelist_view(self, request, extra_context=None):
-        try:
-            response = super().changelist_view(request, extra_context)
-            if hasattr(response, 'render'):
-                response.render()
-            return response
-        except Exception as e:
-            import traceback
-            from django.http import HttpResponseServerError
-            tb = traceback.format_exc()
-            return HttpResponseServerError(f"<h1>Error in Admin</h1><pre>{tb}</pre>")
+
     
     @admin.action(description='Recuperar Telemetria da API Infinite Flight')
     def recover_telemetry(self, request, queryset):
