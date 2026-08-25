@@ -60,6 +60,6 @@ class ApiConfig(AppConfig):
 
                 return mark_safe(html_str)
                 
-            jazzmin.jazzmin_paginator_number = patched_paginator_number
+            jazzmin.register.simple_tag(name='jazzmin_paginator_number')(patched_paginator_number)
         except Exception:
             pass
