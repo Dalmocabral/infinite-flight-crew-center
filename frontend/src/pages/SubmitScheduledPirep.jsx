@@ -145,11 +145,19 @@ const SubmitScheduledPirep = () => {
         if (match.server && match.server.includes('Training')) matchedServer = 'Training';
         if (match.server && match.server.includes('Expert')) matchedServer = 'Expert';
 
+        let parsedFuelKg = match.fuelUsedKg ? parseFloat(match.fuelUsedKg) : null;
+        if (parsedFuelKg !== null && parsedFuelKg < 1000 && formData.planned_fuel_kg) {
+            const planned = parseFloat(formData.planned_fuel_kg);
+            if (planned > 1000 && (parsedFuelKg * 1000) > (planned * 0.2) && (parsedFuelKg * 1000) < (planned * 2.0)) {
+                parsedFuelKg = parsedFuelKg * 1000;
+            }
+        }
+
         setFormData(prev => ({
             ...prev,
             flight_duration: dayjs().hour(hours).minute(minutes),
             network: matchedServer,
-            fuel_used_kg: match.fuelUsedKg ? parseFloat(match.fuelUsedKg).toFixed(2) : null
+            fuel_used_kg: parsedFuelKg ? parsedFuelKg.toFixed(2) : null
         }));
 
         setLiveryId(match.liveryId);

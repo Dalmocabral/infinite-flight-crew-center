@@ -1180,8 +1180,14 @@ def check_achievements(user):
         elif ach.metric == 'ON_FUMES':
             for p in approved_pireps:
                 if p.planned_fuel_kg and p.fuel_used_kg:
-                    remaining = float(p.planned_fuel_kg) - float(p.fuel_used_kg)
-                    if remaining <= float(p.planned_fuel_kg) * 0.07:
+                    planned = float(p.planned_fuel_kg)
+                    used = float(p.fuel_used_kg)
+                    
+                    if used < 1000 and planned > 1000 and (used * 1000) > (planned * 0.2) and (used * 1000) < (planned * 2.0):
+                        used = used * 1000
+
+                    remaining = planned - used
+                    if remaining <= planned * 0.07:
                         unlocked = True
                         break
         elif ach.metric == 'PERFECT_LANDINGS':
